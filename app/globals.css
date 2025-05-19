@@ -28,15 +28,31 @@ body {
 
 @layer base {
   .padding {
-    @apply px-10;
+    @apply px-10 py-20;
+  }
+
+  .card-style {
+    @apply p-2 shadow-md;
+  }
+
+  .section-style {
+    @apply padding  h-screen w-full;
   }
 
   .page-style {
-    @apply padding h-screen w-full;
+    @apply padding  h-screen w-full;
   }
 
   .navbar {
     @apply py-2 shadow-md padding flex justify-between items-center  min-h-[60px] w-full fixed;
     background-color: var(--background);
+  }
+
+  .bg-default-black {
+    @apply bg-[#171717];
+  }
+
+  .footer {
+    @apply padding bg-default-black py-5;
   }
 }

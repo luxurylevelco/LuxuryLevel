@@ -1,3 +1,3 @@
 export default function Maps() {
-  return <div className="page-style "></div>;
+  return <div className="section-style "></div>;
 }

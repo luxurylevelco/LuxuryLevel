@@ -1,3 +1,7 @@
+"use client";
+
+import { JSX, useState } from "react";
+
 import Image from "next/image";
 import Link from "next/link";
 
@@ -26,33 +30,101 @@ type menuMapProps = {
   title: string;
   link: string;
   hasDropdown: boolean;
+  element: JSX.Element;
 };
 
 function Menu() {
   const menuMap: menuMapProps[] = [
-    { title: "HOME", link: "/home", hasDropdown: false },
-    { title: "OUR BRANDS", link: "/brands", hasDropdown: true },
-    { title: "WATCHES", link: "/watches", hasDropdown: true },
-    { title: "JEWELRY", link: "/jewelry", hasDropdown: true },
-    { title: "BAGS", link: "/bags", hasDropdown: true },
+    {
+      title: "HOME",
+      link: "/",
+      hasDropdown: false,
+      element: <div>test</div>,
+    },
+    {
+      title: "OUR BRANDS",
+      link: "/brands",
+      hasDropdown: true,
+      element: <div>test</div>,
+    },
+    {
+      title: "WATCHES",
+      link: "/watches",
+      hasDropdown: true,
+      element: <div>test</div>,
+    },
+    {
+      title: "JEWELRY",
+      link: "/jewelry",
+      hasDropdown: true,
+      element: <div>test</div>,
+    },
+    {
+      title: "BAGS",
+      link: "/bags",
+      hasDropdown: true,
+      element: <div>test</div>,
+    },
   ];
+
+  function Item(item: menuMapProps) {
+    const [isOpen, setisOpen] = useState<boolean>(false);
+    return (
+      <div
+        className="relative "
+        onMouseEnter={() => setisOpen(true)}
+        onMouseLeave={() => setisOpen(false)}
+      >
+        {/* Trigger Link */}
+        <Link href={item.link} className="flex gap-2 items-center">
+          {item.title}
+          {item.hasDropdown && (
+            <Image
+              src="/svgs/arrow-down.svg"
+              alt="arrow"
+              width={10}
+              height={10}
+              className={`${
+                isOpen ? "-rotate-180" : "rotate-0"
+              } transition-all duration-300`}
+            />
+          )}
+        </Link>
+
+        {/* Dropdown */}
+        {item.hasDropdown && (
+          <div
+            className={`absolute top-4 left-1/2 -translate-x-1/2 mt-2 w-max z-50
+              transition-all duration-300 ease-out
+              ${
+                isOpen
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 -translate-y-2 pointer-events-none"
+              }
+            `}
+          >
+            {/* Arrow */}
+            <div className="flex justify-center w-full h-[20px]"></div>
+
+            {/* Dropdown content */}
+            <div
+              className="card-style"
+              style={{ backgroundColor: "var(--background)" }}
+            >
+              {item.element}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div
       className={`${robotoCondensed.className} flex gap-4 font-semibold absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2`}
     >
       {menuMap.map((item) => (
-        <Link key={item.link} href={item.link} className="flex gap-2">
-          {item.title}
-          {item.hasDropdown && (
-            <Image
-              src={"/svgs/arrow-down.svg"}
-              alt={"search icon"}
-              width={10}
-              height={10}
-            />
-          )}
-        </Link>
+        <Item key={item.link} {...item} />
       ))}
     </div>
   );
