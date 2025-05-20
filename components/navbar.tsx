@@ -256,7 +256,7 @@ function DesktopSearch() {
 
       {/* Animated Search Input */}
       <div
-        className={`absolute right-8 top-1/2 -translate-y-1/2  transition-all duration-300 ease-in-out transform ${
+        className={`absolute right-8 top-1/2 w-[250px] -translate-y-1/2  transition-all duration-300 ease-in-out transform ${
           isClicked
             ? "-translate-x-0 opacity-100"
             : "translate-x-10 opacity-0 pointer-events-none"
