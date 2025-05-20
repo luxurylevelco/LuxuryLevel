@@ -44,7 +44,7 @@ body {
   }
 
   .navbar {
-    @apply py-2 shadow-md padding flex justify-between items-center  min-h-[60px] w-full fixed;
+    @apply shadow-md padding py-2  flex justify-between items-center  h-[60px] w-full top-0 left-0 z-50 fixed;
     background-color: var(--background);
   }
 
