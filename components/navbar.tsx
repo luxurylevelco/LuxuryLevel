@@ -4,8 +4,10 @@ import { JSX, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
+import SearchComp from "@/components/search";
 
 import { Roboto_Condensed } from "next/font/google";
+import { useRouter } from "next/navigation";
 
 const robotoCondensed = Roboto_Condensed({
   subsets: ["latin"],
@@ -20,7 +22,7 @@ function Logo() {
         alt={"search icon"}
         className="object-contain "
         width={50}
-        height={1000}
+        height={50}
       />
     </div>
   );
@@ -33,13 +35,118 @@ type menuMapProps = {
   element?: JSX.Element;
 };
 
-function Menu() {
+function MenuItem({
+  title,
+  link,
+  hasDropdown,
+  element,
+  isOpen,
+  onToggle,
+  toggleMobileNav,
+}: menuMapProps & {
+  isOpen: boolean;
+  onToggle: () => void;
+  toggleMobileNav?: () => void;
+}) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const { push } = useRouter();
+
+  const mobileItemRedirect = () => {
+    if (toggleMobileNav) {
+      toggleMobileNav();
+    }
+    push(link);
+  };
+
+  return (
+    <div className="w-full lg:w-auto lg:relative">
+      {/* Desktop */}
+      <div
+        className="hidden lg:block"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <Link href={link} className="flex gap-2 items-center">
+          {title}
+          {hasDropdown && (
+            <Image
+              src="/svgs/arrow-down.svg"
+              alt="arrow"
+              width={10}
+              height={10}
+              className={`transition-transform duration-300 ${
+                isHovered ? "-rotate-180" : "rotate-0"
+              }`}
+            />
+          )}
+        </Link>
+
+        {hasDropdown && (
+          <div
+            className={`absolute top-4 left-1/2 -translate-x-1/2 mt-2 w-max z-50 transition-all duration-300 ease-out ${
+              isHovered
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 -translate-y-2 pointer-events-none"
+            }`}
+          >
+            <div className="flex justify-center w-full h-[20px]">
+              <Image
+                src="/svgs/arrow-up-filled.svg"
+                alt="arrow up"
+                width={20}
+                height={20}
+              />
+            </div>
+            <div
+              className="card-style"
+              style={{ backgroundColor: "var(--background)" }}
+            >
+              {element}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Mobile */}
+      <div className="lg:hidden w-full">
+        <div className="flex justify-between w-full items-center py-2">
+          <button onClick={mobileItemRedirect}>{title}</button>
+          {hasDropdown && (
+            <button>
+              <Image
+                onClick={onToggle}
+                src="/svgs/arrow-down.svg"
+                alt="arrow"
+                width={10}
+                height={10}
+                className={`transition-transform duration-300 ${
+                  isOpen ? "-rotate-180" : "rotate-0"
+                }`}
+              />
+            </button>
+          )}
+        </div>
+
+        {hasDropdown && (
+          <div
+            className={`overflow-hidden transition-all duration-300 ${
+              isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="pl-4 py-2 font-normal">{element}</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Menu({ toggleMobileNav }: { toggleMobileNav?: () => void }) {
+  const [activeItem, setActiveItem] = useState<string | null>(null);
+
   const menuMap: menuMapProps[] = [
-    {
-      title: "HOME",
-      link: "/",
-      hasDropdown: false,
-    },
+    { title: "HOME", link: "/", hasDropdown: false },
     {
       title: "OUR BRANDS",
       link: "/brands",
@@ -66,95 +173,112 @@ function Menu() {
     },
   ];
 
-  function Item(item: menuMapProps) {
-    const [isOpen, setisOpen] = useState<boolean>(false);
-    return (
-      <div
-        className="relative "
-        onMouseEnter={() => setisOpen(true)}
-        onMouseLeave={() => setisOpen(false)}
-      >
-        {/* Trigger Link */}
-        <Link href={item.link} className="flex gap-2 items-center">
-          {item.title}
-          {item.hasDropdown && (
-            <Image
-              src="/svgs/arrow-down.svg"
-              alt="arrow"
-              width={10}
-              height={10}
-              className={`${
-                isOpen ? "-rotate-180" : "rotate-0"
-              } transition-all duration-300`}
-            />
-          )}
-        </Link>
-
-        {/* Dropdown */}
-        {item.hasDropdown && (
-          <div
-            className={`absolute top-4 left-1/2 -translate-x-1/2 mt-2 w-max z-50
-              transition-all duration-300 ease-out
-              ${
-                isOpen
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 -translate-y-2 pointer-events-none"
-              }
-            `}
-          >
-            {/* Arrow */}
-            <div className="flex justify-center w-full h-[20px]">
-              <Image
-                src={"/svgs/arrow-up-filled.svg"}
-                alt={"arrow up field icon for dropdown menu"}
-                width={20}
-                height={20}
-              />
-            </div>
-
-            {/* Dropdown content */}
-            <div
-              className="card-style"
-              style={{ backgroundColor: "var(--background)" }}
-            >
-              {item.element}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div
-      className={`${robotoCondensed.className} flex gap-4 font-semibold absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2`}
+      className={`flex ${robotoCondensed.className} gap-4 font-semibold lg:absolute lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 flex-col lg:flex-row `}
     >
       {menuMap.map((item) => (
-        <Item key={item.link} {...item} />
+        <MenuItem
+          key={item.link}
+          {...item}
+          isOpen={activeItem === item.link}
+          onToggle={() =>
+            setActiveItem((prev) => (prev === item.link ? null : item.link))
+          }
+          toggleMobileNav={toggleMobileNav}
+        />
       ))}
     </div>
   );
 }
 
-function Search() {
+function MobileMenuButton() {
+  const [isMobileNavOpen, setisMobileNavOpen] = useState<boolean>(false);
+  const toggleMobileNav = () => {
+    setisMobileNavOpen(!isMobileNavOpen);
+  };
   return (
-    <button>
-      <Image
-        src={"/svgs/search-icon.svg"}
-        alt={"search icon"}
-        width={16}
-        height={16}
+    <>
+      <button className="flex lg:hidden" onClick={toggleMobileNav}>
+        <Image
+          src={"/svgs/hamburger-menu.svg"}
+          alt={"hamburger-menu icon"}
+          width={24}
+          height={24}
+        />
+      </button>
+
+      <div
+        className={`overlay ${isMobileNavOpen ? "flex" : "-translate-x-full"}`}
       />
-    </button>
+
+      <div
+        className={`fixed top-0 left-0 h-screen w-[75%] space-y-6 bg-white z-50 shadow-lg transform transition-transform duration-300 p-6
+    ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}
+  `}
+      >
+        <SearchComp className={""} toggleMobileNav={toggleMobileNav} />
+        <Menu toggleMobileNav={toggleMobileNav} />
+        <button
+          className={`flex lg:hidden absolute top-2 -right-12 rounded-full default-white-bg p-2 shadow-md ${
+            isMobileNavOpen ? "flex" : "hidden"
+          }`}
+          onClick={toggleMobileNav}
+        >
+          <Image
+            src={"/svgs/x-icon.svg"}
+            alt={"hamburger-menu icon"}
+            width={16}
+            height={16}
+          />
+        </button>
+      </div>
+    </>
+  );
+}
+
+function DesktopSearch() {
+  const [isClicked, setIsClicked] = useState<boolean>(false);
+
+  const toggleClick = () => setIsClicked(!isClicked);
+
+  return (
+    <div className="relative flex items-center gap-2">
+      {/* Search Button */}
+      <button onClick={toggleClick}>
+        <Image
+          src={isClicked ? "/svgs/x-icon.svg" : "/svgs/search-icon.svg"}
+          alt="search icon"
+          width={16}
+          height={16}
+        />
+      </button>
+
+      {/* Animated Search Input */}
+      <div
+        className={`absolute right-8 top-1/2 -translate-y-1/2  transition-all duration-300 ease-in-out transform ${
+          isClicked
+            ? "-translate-x-0 opacity-100"
+            : "translate-x-10 opacity-0 pointer-events-none"
+        }`}
+      >
+        <SearchComp className="w-[250px]" />
+      </div>
+    </div>
   );
 }
 
 export default function Navbar() {
   return (
-    <div className="navbar page-padding fixed top-0 left-0 z-50">
+    <div className="navbar ">
       <Logo />
-      <Menu />
-      <Search />
+      <MobileMenuButton />
+      <div className="hidden lg:flex">
+        <Menu />
+      </div>
+      <div className="hidden lg:flex">
+        <DesktopSearch />
+      </div>
     </div>
   );
 }

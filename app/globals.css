@@ -43,13 +43,24 @@ body {
     @apply padding  h-screen w-full;
   }
 
-  .navbar {
-    @apply shadow-md padding py-2  flex justify-between items-center  h-[60px] w-full top-0 left-0 z-50 fixed;
+  .default-white-bg {
     background-color: var(--background);
+  }
+
+  .navbar {
+    @apply shadow-md padding py-2 default-white-bg  flex justify-between items-center  h-[60px] w-full top-0 left-0 z-50 fixed;
+  }
+
+  .mobile-nav {
+    @apply fixed  top-0 left-0 h-screen  default-white-bg w-full z-50 transform transition-transform duration-300;
   }
 
   .bg-default-black {
     @apply bg-[#171717];
+  }
+
+  .overlay {
+    @apply fixed  top-0 left-0 h-screen  bg-default-black w-full z-40 transform transition-transform duration-300;
   }
 
   .footer {
