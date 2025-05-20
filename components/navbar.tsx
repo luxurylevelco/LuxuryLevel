@@ -1,14 +1,16 @@
 "use client";
 
 import { JSX, useState } from "react";
-
 import Image from "next/image";
 import Link from "next/link";
 import SearchComp from "@/components/search";
 
 import { Roboto_Condensed } from "next/font/google";
 import { useRouter } from "next/navigation";
-
+import OurBrandsMenu from "@/components/dropdown-menus/brands-menu";
+import WatchesMenu from "@/components/dropdown-menus/watches-menu";
+import JewelryCategoriesMenu from "@/components/dropdown-menus/jewelry-menu";
+import BagsMenu from "@/components/dropdown-menus/bags-menu";
 const robotoCondensed = Roboto_Condensed({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -131,7 +133,9 @@ function MenuItem({
         {hasDropdown && (
           <div
             className={`overflow-hidden transition-all duration-300 ${
-              isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+              isOpen
+                ? "max-h-96 opacity-100 overflow-y-auto"
+                : "max-h-0 opacity-0"
             }`}
           >
             <div className="pl-4 py-2 font-normal">{element}</div>
@@ -151,25 +155,25 @@ function Menu({ toggleMobileNav }: { toggleMobileNav?: () => void }) {
       title: "OUR BRANDS",
       link: "/brands",
       hasDropdown: true,
-      element: <div>test</div>,
+      element: <OurBrandsMenu />,
     },
     {
       title: "WATCHES",
       link: "/watches",
       hasDropdown: true,
-      element: <div>test</div>,
+      element: <WatchesMenu />,
     },
     {
       title: "JEWELRY",
       link: "/jewelry",
       hasDropdown: true,
-      element: <div>test</div>,
+      element: <JewelryCategoriesMenu />,
     },
     {
       title: "BAGS",
       link: "/bags",
       hasDropdown: true,
-      element: <div>test</div>,
+      element: <BagsMenu />,
     },
   ];
 
