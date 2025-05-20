@@ -30,7 +30,7 @@ type menuMapProps = {
   title: string;
   link: string;
   hasDropdown: boolean;
-  element: JSX.Element;
+  element?: JSX.Element;
 };
 
 function Menu() {
@@ -39,7 +39,6 @@ function Menu() {
       title: "HOME",
       link: "/",
       hasDropdown: false,
-      element: <div>test</div>,
     },
     {
       title: "OUR BRANDS",
@@ -104,7 +103,14 @@ function Menu() {
             `}
           >
             {/* Arrow */}
-            <div className="flex justify-center w-full h-[20px]"></div>
+            <div className="flex justify-center w-full h-[20px]">
+              <Image
+                src={"/svgs/arrow-up-filled.svg"}
+                alt={"arrow up field icon for dropdown menu"}
+                width={20}
+                height={20}
+              />
+            </div>
 
             {/* Dropdown content */}
             <div
