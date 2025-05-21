@@ -37,3 +37,14 @@ export interface PaginatedProductsResponse {
     total: number;
   };
 }
+
+export interface PageInfo {
+  current: number;
+  total: number;
+}
+
+export interface BrandResponse {
+  brandDetails: Brand;
+  products: Product[];
+  page: PageInfo;
+}

@@ -134,7 +134,7 @@ function MenuItem({
           <div
             className={`overflow-hidden transition-all duration-300 ${
               isOpen
-                ? "max-h-96 opacity-100 overflow-y-auto"
+                ? "max-h-64 opacity-100 overflow-y-auto"
                 : "max-h-0 opacity-0"
             }`}
           >
@@ -155,25 +155,25 @@ function Menu({ toggleMobileNav }: { toggleMobileNav?: () => void }) {
       title: "OUR BRANDS",
       link: "/brands",
       hasDropdown: true,
-      element: <OurBrandsMenu />,
+      element: <OurBrandsMenu toggleMobileNav={toggleMobileNav} />,
     },
     {
       title: "WATCHES",
       link: "/watches",
       hasDropdown: true,
-      element: <WatchesMenu />,
+      element: <WatchesMenu toggleMobileNav={toggleMobileNav} />,
     },
     {
       title: "JEWELRY",
       link: "/jewelry",
       hasDropdown: true,
-      element: <JewelryCategoriesMenu />,
+      element: <JewelryCategoriesMenu toggleMobileNav={toggleMobileNav} />,
     },
     {
       title: "BAGS",
       link: "/bags",
       hasDropdown: true,
-      element: <BagsMenu />,
+      element: <BagsMenu toggleMobileNav={toggleMobileNav} />,
     },
   ];
 
