@@ -7,6 +7,7 @@ export interface ProductCardProps {
   productName: string;
   price: string;
   href: string;
+  className?: string;
 }
 
 export default function ProductCard({
@@ -15,10 +16,13 @@ export default function ProductCard({
   productName,
   price,
   href,
+  className,
 }: ProductCardProps) {
   return (
     <Link href={href} className='block'>
-      <div className='h-[350px] w-full border border-gray-200 overflow-hidden group transition duration-300 flex flex-col p-4'>
+      <div
+        className={`h-[350px] w-full border border-gray-200 overflow-hidden group transition duration-300 flex flex-col p-4 ${className}`}
+      >
         {/* Image container */}
         <div className='relative h-2/3 w-full'>
           {/* Stacked images */}

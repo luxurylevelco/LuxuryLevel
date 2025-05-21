@@ -11,13 +11,13 @@ export default function About() {
         </div>
         <div className='flex flex-col gap-5 text-center'>
           <p>
-            Luxury Souq was founded by an Emirati Entrepreneur in the United
+            Luxury Level was founded by an Emirati Entrepreneur in the United
             Arab Emirates, under the patronage of His Highness Sheikh Mohammed
-            Bin Rashid Establishment (Dubai SME). The concept of Luxury Souq
+            Bin Rashid Establishment (Dubai SME). The concept of Luxury Level
             came to life in 2013.
           </p>
           <p>
-            LUXURY SOUQ is privately owned by the luxury watches connoisseur
+            LUXURY LEVEL is privately owned by the luxury watches connoisseur
             Khaled Mohamed Ebrahimi. He is the second generation of family
             business trading in luxury watches. His passion for luxury watches
             encouraged him to continue his studies in Switzerland.
