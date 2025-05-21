@@ -6,10 +6,14 @@ import Maps from '@/components/homepage/maps';
 import PatekBrand from '@/components/homepage/patek-brand';
 import RolexBrand from '@/components/homepage/rolex-brand';
 import SalesInfo from '@/components/homepage/sales-info';
+import TrustedSeller from '@/components/homepage/trusted-seller';
+import VipDiscount from '@/components/homepage/vip-discount';
+import Disclaimer from '@/components/homepage/disclaimer';
+import Footer from '@/components/homepage/footer';
 
 export default async function Page() {
   return (
-    <div className="section-style relative bg-[url('/homepage-assets/homebg.webp')] bg-cover bg-center bg-no-repeat">
+    <>
       <Hero />
       <SalesInfo />
       <FeaturedBrands />
@@ -17,7 +21,9 @@ export default async function Page() {
       <About />
       <RolexBrand />
       <PatekBrand />
-      <Maps />
-    </div>
+      <TrustedSeller />
+      <VipDiscount />
+      <Disclaimer />
+    </>
   );
 }
