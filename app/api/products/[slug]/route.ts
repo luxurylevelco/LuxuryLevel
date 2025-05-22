@@ -72,22 +72,60 @@ export async function GET(
   // Step 2: Get all category IDs (including children, grandchildren, etc.)
   const categoryIds = await getAllCategoryIds(category.id);
 
-  // Step 3: Fetch brand and its child brands if filterBrand is provided
   let brandIds: string[] = [];
   let subBrands: Brand[] = [];
+
   if (filterBrand) {
-    const { data: brands, error: brandError } = await supabase
+    // Get the brand that matches the filterBrand
+    const { data: mainBrand, error: mainBrandError } = await supabase
       .from("brand")
       .select("*")
-      .or(`id.eq.${filterBrand},parent_id.eq.${filterBrand}`)
-      .order("parent_id", { ascending: true });
+      .eq("id", filterBrand)
+      .single();
 
-    if (brandError) {
-      return NextResponse.json({ error: brandError.message }, { status: 500 });
+    if (mainBrandError || !mainBrand) {
+      return NextResponse.json(
+        { error: mainBrandError?.message || "Brand not found" },
+        { status: 404 }
+      );
     }
 
-    brandIds = brands.map((brand) => brand.id);
-    subBrands = brands.slice(1);
+    // Get all brands that are children of this brand
+    const { data: childBrands, error: childBrandError } = await supabase
+      .from("brand")
+      .select("*")
+      .eq("parent_id", filterBrand);
+
+    if (childBrandError) {
+      return NextResponse.json(
+        { error: childBrandError.message },
+        { status: 500 }
+      );
+    }
+
+    // Add brandIds (main brand + children)
+    brandIds = [mainBrand.id, ...(childBrands?.map((b) => b.id) ?? [])];
+
+    // If this brand has a parent, it's a child itself — fetch its siblings
+    if (mainBrand.parent_id) {
+      const { data: siblingBrands, error: siblingError } = await supabase
+        .from("brand")
+        .select("*")
+        .eq("parent_id", mainBrand.parent_id);
+
+      if (siblingError) {
+        return NextResponse.json(
+          { error: siblingError.message },
+          { status: 500 }
+        );
+      }
+
+      subBrands = siblingBrands;
+    } else {
+      console.log("Main brand has doesnt have parent id!");
+      // If it's a parent, return its children as subBrands
+      subBrands = childBrands ?? [];
+    }
   }
 
   // Step 4: Prepare base query for filters

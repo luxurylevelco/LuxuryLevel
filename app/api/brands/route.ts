@@ -6,6 +6,7 @@ export async function GET() {
   const { data: brands, error } = await supabase
     .from("brand")
     .select("*")
+    .is("parent_id", null)
     .order("id", { ascending: true });
 
   if (error) {

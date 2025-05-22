@@ -21,6 +21,8 @@ export interface Brand {
   name: string;
   description: string | null;
   logo_url: string | null;
+  parent_id: string;
+  featured: boolean;
 }
 
 export interface Category {
@@ -31,6 +33,7 @@ export interface Category {
 }
 
 export interface PaginatedProductsResponse {
+  subBrands: Brand[];
   products: Product[];
   page: {
     current: number;
@@ -53,4 +56,9 @@ export interface ProductResponse {
   colors: string[];
   products: Product[];
   page: PageInfo;
+}
+
+export interface ProductInformationResponse {
+  brandInfo: Brand;
+  productInfo: Product;
 }
