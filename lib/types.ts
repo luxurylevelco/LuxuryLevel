@@ -48,3 +48,9 @@ export interface BrandResponse {
   products: Product[];
   page: PageInfo;
 }
+
+export interface ProductResponse {
+  colors: string[];
+  products: Product[];
+  page: PageInfo;
+}

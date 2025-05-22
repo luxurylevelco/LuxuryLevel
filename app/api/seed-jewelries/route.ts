@@ -6,58 +6,58 @@ import { uniqueByKey } from "@/lib/utils";
 
 export async function POST() {
   try {
-    // 1. Insert categories (only "jewelry categories")
-    const uniqueJewelryCategories = uniqueByKey(data, "JEWELRY_CATEGORY").map(
-      (categories) => categories.JEWELRY_CATEGORY
-    );
+    // // 1. Insert categories (only "jewelry categories")
+    // const uniqueJewelryCategories = uniqueByKey(data, "JEWELRY_CATEGORY").map(
+    //   (categories) => categories.JEWELRY_CATEGORY
+    // );
 
-    const { data: parentCategoryData } = await supabase
-      .from("category")
-      .select("id")
-      .eq("name", "jewelry")
-      .single();
+    // const { data: parentCategoryData } = await supabase
+    //   .from("category")
+    //   .select("id")
+    //   .eq("name", "jewelry")
+    //   .single();
 
-    const jewelryCategoriesMap = uniqueJewelryCategories.map((uniqueCat) => {
-      return {
-        name: uniqueCat,
-        description: "",
-        parent_id: parentCategoryData?.id,
-      };
-    });
+    // const jewelryCategoriesMap = uniqueJewelryCategories.map((uniqueCat) => {
+    //   return {
+    //     name: uniqueCat,
+    //     description: "",
+    //     parent_id: parentCategoryData?.id,
+    //   };
+    // });
 
-    const { error: categoryError } = await supabase
-      .from("category")
-      .upsert(jewelryCategoriesMap, { onConflict: "name" });
+    // const { error: categoryError } = await supabase
+    //   .from("category")
+    //   .upsert(jewelryCategoriesMap, { onConflict: "name" });
 
-    if (categoryError) {
-      console.error("Error inserting jewelry  categories:", categoryError);
-      return NextResponse.json(
-        { error: "Failed to seed categories", details: categoryError.message },
-        { status: 500 }
-      );
-    }
+    // if (categoryError) {
+    //   console.error("Error inserting jewelry  categories:", categoryError);
+    //   return NextResponse.json(
+    //     { error: "Failed to seed categories", details: categoryError.message },
+    //     { status: 500 }
+    //   );
+    // }
 
-    // 2. Insert unique brands (batch insert)
-    const brandSet = new Set(data.map((item) => item.BRAND));
-    const brands = Array.from(brandSet).map((brand) => {
-      const brandObj = data.find((i) => i.BRAND === brand);
-      return {
-        name: brand,
-        logo_url: brandObj?.BRAND_IMAGE ?? null,
-        description: null,
-      };
-    });
-    const { error: brandError } = await supabase
-      .from("brand")
-      .upsert(brands, { onConflict: "name" });
+    // // 2. Insert unique brands (batch insert)
+    // const brandSet = new Set(data.map((item) => item.BRAND));
+    // const brands = Array.from(brandSet).map((brand) => {
+    //   const brandObj = data.find((i) => i.BRAND === brand);
+    //   return {
+    //     name: brand,
+    //     logo_url: brandObj?.BRAND_IMAGE ?? null,
+    //     description: null,
+    //   };
+    // });
+    // const { error: brandError } = await supabase
+    //   .from("brand")
+    //   .upsert(brands, { onConflict: "name" });
 
-    if (brandError) {
-      console.error("Error inserting brands:", brandError);
-      return NextResponse.json(
-        { error: "Failed to seed brands", details: brandError.message },
-        { status: 500 }
-      );
-    }
+    // if (brandError) {
+    //   console.error("Error inserting brands:", brandError);
+    //   return NextResponse.json(
+    //     { error: "Failed to seed brands", details: brandError.message },
+    //     { status: 500 }
+    //   );
+    // }
 
     // 3. Fetch brand and category IDs
     const { data: brandsData, error: brandsFetchError } = await supabase
@@ -100,8 +100,7 @@ export async function POST() {
           return null;
         }
 
-        // Clean PRICE
-        const price = parseFloat(item.PRICE.replace(/,/g, ""));
+        const price = typeof item.PRICE === "number" ? item.PRICE : 0; // or null, depending on your needs
         // Map STOCK to integer: "In Stock" -> 1, else -> 0
         const stock = item.STOCK === "In Stock" ? 1 : 0;
 

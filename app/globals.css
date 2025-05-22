@@ -32,7 +32,7 @@ body {
   }
 
   .card-style {
-    @apply p-2 shadow-md;
+    @apply p-2 shadow-md bg-white;
   }
 
   .section-style {
@@ -44,7 +44,7 @@ body {
   }
 
   .default-white-bg {
-    background-color: var(--background);
+    background-color: #ffffff;
   }
 
   .navbar {
@@ -65,5 +65,9 @@ body {
 
   .footer {
     @apply padding bg-default-black py-5;
+  }
+
+  .link-box {
+    @apply h-[35px] w-[35px];
   }
 }

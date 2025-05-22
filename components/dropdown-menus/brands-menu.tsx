@@ -34,16 +34,18 @@ export default function OurBrandsMenu({
     fetchBrands();
   }, []);
 
-  const redirect = (id: Brand["id"]) => {
+  const redirect = (brand: Brand) => {
     if (toggleMobileNav) {
       toggleMobileNav();
     }
-    router.push(`/brands/${id}`);
+    //set banner title through local storage
+    localStorage.setItem("banner-title", brand.name);
+    router.push(`/brands/${brand.id}`);
   };
 
   return (
     <div
-      className={`grid  grid-cols-1 lg:grid-cols-4 xl:grid-cols-6 gap-4 ${poppins.className} p-4 `}
+      className={`grid  grid-cols-1 lg:grid-cols-4 xl:grid-cols-6 gap-4 ${poppins.className} p-4 bg-white `}
     >
       {brands.map((brand) => {
         if (!brand.name) return null;
@@ -51,7 +53,7 @@ export default function OurBrandsMenu({
         return (
           <button
             key={brand.id}
-            onClick={() => redirect(brand.id)}
+            onClick={() => redirect(brand)}
             className={`font-normal pr-2 lg:text-[12px] xl:text-[14px] text-start 
                border-r-[1px] border-gray-300`}
           >

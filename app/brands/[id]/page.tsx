@@ -1,32 +1,64 @@
 import Banner from "@/components/banner";
 import CardsSection from "@/components/cards-section";
-import { BrandResponse } from "@/lib/types";
-import { notFound } from "next/navigation";
 
 export default async function Page({
   params,
+  searchParams,
 }: {
-  params: Promise<{ id: string | null }>;
+  params: Promise<{
+    id: string | null;
+  }>;
+  searchParams: Promise<{
+    page: string | null;
+    color: string | null;
+    gender: string | null;
+    name: string | null;
+    sub_category: string | null;
+    sub_brand: string | null;
+  }>;
 }) {
-  const { id } = await params;
+  // assume this is inside an async fn, e.g. a React useEffect or getServerSideProps
+  const { id: brand } = await params;
 
-  const data = await fetch(`${process.env.API_URL}/api/brands/${id}`, {
-    method: "GET",
+  // assume this is inside an async fn, e.g. a React useEffect or getServerSideProps
+  const { page, color, gender, name, sub_category, sub_brand } =
+    await searchParams;
+
+  const _params = new URLSearchParams({
+    noOfItems: "18",
   });
 
-  const _data: BrandResponse = await data.json();
+  if (page) _params.set("page", page);
+  if (color) _params.set("color", color);
+  if (brand) _params.set("brand", sub_brand || brand);
+  if (gender) _params.set("gender", gender);
+  if (name) _params.set("name", name);
+  if (sub_category) _params.set("sub_category", sub_category);
 
-  if (!id) {
-    notFound();
-  }
+  const queryString = _params.toString();
 
-  console.log(_data);
+  const [resbags, resBrandInfo] = await Promise.all([
+    fetch(`${process.env.API_URL}/api/products?${queryString}`),
+    fetch(`${process.env.API_URL}/api/brands/${brand}/information`),
+  ]);
+
+  const [brandProductList, brandInfo] = await Promise.all([
+    resbags.json(),
+    resBrandInfo.json(),
+  ]);
 
   return (
     <>
-      <Banner title={_data.brandDetails.name} classnameForBgSrc={""} />
-      <div className="section-style"></div>
-      <CardsSection products={_data.products} />
+      <Banner title={brandInfo.name} classnameForBgSrc={""} />
+      <CardsSection
+        products={brandProductList.products || []}
+        pageInfo={brandProductList.page ?? null}
+        brandsList={null}
+        colorsList={brandProductList.colors ?? null}
+        subCategoryList={null}
+        subBrandsList={brandProductList.subBrands}
+        pathname={`brands/${brand}`}
+      />
     </>
   );
 }

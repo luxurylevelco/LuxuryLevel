@@ -22,7 +22,7 @@ export default function JewelryCategoriesMenu({
 
   useEffect(() => {
     const fetchBrands = async () => {
-      const res = await fetch(`/api/categories/jewelry`, {
+      const res = await fetch(`/api/categories/jewelry/sub-categories`, {
         method: "GET",
       });
       const categories = await res.json();
@@ -33,24 +33,25 @@ export default function JewelryCategoriesMenu({
     fetchBrands();
   }, []);
 
-  const redirect = (id: Category["id"]) => {
+  const redirect = (category: Category) => {
     if (toggleMobileNav) {
       toggleMobileNav();
     }
-    router.push(`/jewelry?category=${id}`);
+
+    router.push(`/jewelry?sub_category=${category.name}`);
   };
 
   return (
     <div
-      className={`grid  grid-cols-1 lg:grid-cols-4 gap-4 ${poppins.className} p-4 `}
+      className={`grid  grid-cols-1 lg:grid-cols-4 gap-4 ${poppins.className} p-4 bg-white`}
     >
-      {categories.map((category, index) => {
+      {categories.map((category) => {
         if (!category.name) return null;
 
         return (
           <button
             key={category.id}
-            onClick={() => redirect(category.id)}
+            onClick={() => redirect(category)}
             className={`font-normal pr-4  text-start 
               border-r-[1px] border-gray-300 lg:text-[12px] xl:text-[14px] `}
           >

@@ -21,12 +21,13 @@ export default function WatchesMenu({
     if (toggleMobileNav) {
       toggleMobileNav();
     }
+
     router.push(`/watches?gender=${gender}`);
   };
 
   return (
     <div
-      className={`grid grid-cols-1 lg:grid-cols-3 gap-4 ${poppins.className} p-4 `}
+      className={`grid grid-cols-1 lg:grid-cols-3 gap-4 ${poppins.className} p-4 bg-white`}
     >
       {items.map((gender) => {
         return (

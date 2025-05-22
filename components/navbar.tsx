@@ -100,12 +100,7 @@ function MenuItem({
                 height={20}
               />
             </div>
-            <div
-              className="card-style"
-              style={{ backgroundColor: "var(--background)" }}
-            >
-              {element}
-            </div>
+            <div className="card-style">{element}</div>
           </div>
         )}
       </div>
@@ -221,7 +216,13 @@ function MobileMenuButton() {
     ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}
   `}
       >
-        <SearchComp className={""} toggleMobileNav={toggleMobileNav} />
+        <SearchComp
+          className={""}
+          toggleMobileNav={toggleMobileNav}
+          searchParamKey="name"
+          placeholder="Search All Products..."
+          pathname="all-products"
+        />
         <Menu toggleMobileNav={toggleMobileNav} />
         <button
           className={`flex lg:hidden absolute top-2 -right-12 rounded-full default-white-bg p-2 shadow-md ${
@@ -266,7 +267,12 @@ function DesktopSearch() {
             : "translate-x-10 opacity-0 pointer-events-none"
         }`}
       >
-        <SearchComp className="w-[250px]" />
+        <SearchComp
+          className="w-[250px]"
+          pathname="all-products"
+          searchParamKey="name"
+          placeholder="Search All Products..."
+        />
       </div>
     </div>
   );
