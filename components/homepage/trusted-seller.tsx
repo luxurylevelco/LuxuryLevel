@@ -9,26 +9,28 @@ export default function TrustedSeller() {
         <div>
           <p className='font-semibold text-white text-7xl'>TRUSTED SELLER</p>
           <p className='text-white text-xl pt-10'>
-            <span className='text-4xl'>B</span>uying a luxury watch is all about
-            trust, and choosing the right seller is very important. A good
-            seller helps and guides buyers to make the best choice.
+            <span className='text-4xl'>I</span>n the world of luxury timepieces,
+            trust is not claimed — it is earned. At Luxury Level General Trading
+            Co., we have built our reputation not just by selling watches, but
+            by curating lasting relationships with collectors, enthusiasts, and
+            first-time buyers alike.
           </p>
           <p className='text-white text-xl pt-5'>
-            Trust is built over time with years of hard work, honesty, and great
-            service. We have sold hundreds of luxury watches on Chrono24 Dubai
-            and earned a strong reputation as a reliable and authentic seller.
+            Since 2014, we have proudly stood as a verified and respected seller
+            on Chrono24, completing hundreds of successful transactions with
+            clients around the globe. Our longstanding presence on one of the
+            world’s most reputable luxury watch platforms is a testament to our
+            integrity, authenticity, and client-first approach.
           </p>
           <p className='text-white text-xl pt-5'>
-            A trusted seller should have a real store where customers can visit
-            and view a wide range of luxury watches. It’s also important to have
-            a team of skilled professionals who offer expert advice and
-            excellent service to help buyers make the right decision.
+            What sets us apart is more than just our inventory — it’s the
+            experience we offer. Every detail of our service is designed to
+            inspire confidence. Whether you're acquiring a rare collector’s
+            piece or a timeless icon, we ensure every transaction is seamless,
+            transparent, and secure.
           </p>
           <p className='text-white text-xl pt-5'>
-            We are proud to be a trusted partner of Chrono24 since 2014, with
-            hundreds of successful checkouts. Our strong presence and commitment
-            to providing the best service ensure that customers can buy with
-            complete trust and confidence.
+            Luxury begins with trust — and that’s exactly what we deliver.
           </p>
         </div>
       </div>
