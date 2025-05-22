@@ -100,16 +100,8 @@ function MenuItem({
                 height={20}
               />
             </div>
-<<<<<<< Updated upstream
-            <div className="card-style">{element}</div>
-=======
-            <div
-              className='card-style'
-              style={{ backgroundColor: 'var(--background)' }}
-            >
-              {element}
-            </div>
->>>>>>> Stashed changes
+
+            <div className='card-style'>{element}</div>
           </div>
         )}
       </div>
@@ -225,17 +217,14 @@ function MobileMenuButton() {
     ${isMobileNavOpen ? 'translate-x-0' : '-translate-x-full'}
   `}
       >
-<<<<<<< Updated upstream
         <SearchComp
-          className={""}
+          className={''}
           toggleMobileNav={toggleMobileNav}
-          searchParamKey="name"
-          placeholder="Search All Products..."
-          pathname="all-products"
+          searchParamKey='name'
+          placeholder='Search All Products...'
+          pathname='all-products'
         />
-=======
-        <SearchComp className={''} toggleMobileNav={toggleMobileNav} />
->>>>>>> Stashed changes
+
         <Menu toggleMobileNav={toggleMobileNav} />
         <button
           className={`flex lg:hidden absolute top-2 -right-12 rounded-full default-white-bg p-2 shadow-md ${
@@ -280,16 +269,12 @@ function DesktopSearch() {
             : 'translate-x-10 opacity-0 pointer-events-none'
         }`}
       >
-<<<<<<< Updated upstream
         <SearchComp
-          className="w-[250px]"
-          pathname="all-products"
-          searchParamKey="name"
-          placeholder="Search All Products..."
+          className='w-[250px]'
+          pathname='all-products'
+          searchParamKey='name'
+          placeholder='Search All Products...'
         />
-=======
-        <SearchComp className='w-[250px]' />
->>>>>>> Stashed changes
       </div>
     </div>
   );
