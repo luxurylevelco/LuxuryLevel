@@ -1,9 +1,11 @@
 "use client";
 
-import Search from "@/components/search";
 import { Brand, Category, ProductResponse } from "@/lib/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
+
+import dynamic from "next/dynamic";
+const Search = dynamic(() => import("@/components/search"), { ssr: false });
 
 export default function ProductFilters({
   availableColors,
@@ -21,40 +23,59 @@ export default function ProductFilters({
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const toSentenceCase = (str: string) =>
-    str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  // Memoize toSentenceCase
+  const toSentenceCase = useMemo(
+    () => (str: string) =>
+      str.charAt(0).toUpperCase() + str.slice(1).toLowerCase(),
+    []
+  );
 
-  // Format available colors to sentence case
-  const formattedColors = availableColors?.map(toSentenceCase) || [];
+  // Memoize formatted data
+  const formattedColors = useMemo(
+    () => availableColors?.map(toSentenceCase) || [],
+    [availableColors, toSentenceCase]
+  );
 
-  // Format Sub Categories with sentence case
-  const formattedSubCats =
-    subCategoryList?.map((item) => ({
-      ...item,
-      name: toSentenceCase(item.name),
-    })) || [];
+  const formattedSubCats = useMemo(
+    () =>
+      subCategoryList?.map((item) => ({
+        ...item,
+        name: toSentenceCase(item.name),
+      })) || [],
+    [subCategoryList, toSentenceCase]
+  );
 
-  // Format Brands with sentence case for display consistency
-  const formattedBrands =
-    brandsList?.map((brand) => ({
-      ...brand,
-      name: toSentenceCase(brand.name),
-    })) || [];
+  const formattedBrands = useMemo(
+    () =>
+      brandsList?.map((brand) => ({
+        ...brand,
+        name: toSentenceCase(brand.name),
+      })) || [],
+    [brandsList, toSentenceCase]
+  );
 
-  const formattedSubBrands =
-    subBrandsList?.map((brand) => ({
-      ...brand,
-      name: toSentenceCase(brand.name),
-    })) || [];
+  const formattedSubBrands = useMemo(
+    () =>
+      subBrandsList?.map((brand) => ({
+        ...brand,
+        name: toSentenceCase(brand.name),
+      })) || [],
+    [subBrandsList, toSentenceCase]
+  );
 
-  // Get selected filter values from URL params
-  const selectedBrandName = searchParams.get("brand") || "";
-  const selectedSubCatName = searchParams.get("sub_category") || "";
-  const selectedSubBrandName = searchParams.get("sub_brand") || "";
-  const selectedColor = searchParams.get("color") || "";
-  const selectedGender = searchParams.get("gender") || "";
+  // Memoize filter values
+  const filters = useMemo(
+    () => ({
+      brand: searchParams.get("brand") || "",
+      subCategory: searchParams.get("sub_category") || "",
+      subBrand: searchParams.get("sub_brand") || "",
+      color: searchParams.get("color") || "",
+      gender: searchParams.get("gender") || "",
+    }),
+    [searchParams]
+  );
 
-  // Update param helper: store names in URL (not IDs)
+  // Update param helper
   const updateParam = useCallback(
     (key: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -64,32 +85,73 @@ export default function ProductFilters({
         params.delete(key);
       }
       params.delete("page");
-      router.push(`?${params.toString()}`);
+      router.push(`${pathname}?${params.toString()}`);
     },
-    [router, searchParams]
+    [router, pathname, searchParams]
   );
 
+  // Clear all filters
   const clearAllFilters = useCallback(() => {
-    router.push(pathname); // use pathname to retain current path
+    router.push(pathname);
   }, [router, pathname]);
+
+  // Check if any filters are applied
+  const hasFilters = Object.values(filters).some((value) => value !== "");
+
+  // Reusable FilterSelect component with generics
+  const FilterSelect = <T extends string | Brand | Category>({
+    options,
+    paramKey,
+    placeholder,
+    value,
+  }: {
+    options: T[];
+    paramKey: string;
+    placeholder: string;
+    value: string;
+  }) => (
+    <div className="relative w-full">
+      <select
+        className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
+        value={value}
+        onChange={(e) => updateParam(paramKey, e.target.value)}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => {
+          const id = typeof option === "string" ? option : option.id;
+          const name = typeof option === "string" ? option : option.name;
+          return (
+            <option key={id || name} value={id || name}>
+              {name}
+            </option>
+          );
+        })}
+      </select>
+      {value && (
+        <button
+          type="button"
+          onClick={() => updateParam(paramKey, "")}
+          className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
+        >
+          ✕
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <div className="lg:w-[500px] xl:w-full space-y-4">
-      <div className="flex items-center justify-between">
-        {(selectedColor ||
-          selectedGender ||
-          selectedBrandName ||
-          selectedSubCatName) && (
+      {hasFilters && (
+        <div className="flex items-center justify-between">
           <button
             onClick={clearAllFilters}
             className="text-sm text-blue-600 hover:text-blue-800 font-medium"
           >
             Clear All Filters
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Search Input */}
       <Search
         searchParamKey="name"
         placeholder="Search watch name/title..."
@@ -97,136 +159,48 @@ export default function ProductFilters({
         pathname={pathname}
       />
 
-      {/* Brand Filter */}
       {!!formattedBrands.length && (
-        <div className="relative w-full">
-          <select
-            className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
-            value={selectedBrandName}
-            onChange={(e) => updateParam("brand", e.target.value)}
-          >
-            <option value="">Select Brand</option>
-            {formattedBrands.map((brand) => (
-              <option key={brand.id} value={brand.id}>
-                {brand.name}
-              </option>
-            ))}
-          </select>
-          {selectedBrandName && (
-            <button
-              type="button"
-              onClick={() => updateParam("brand", "")}
-              className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-            >
-              ✕
-            </button>
-          )}
-        </div>
+        <FilterSelect
+          options={formattedBrands}
+          paramKey="brand"
+          placeholder="Select Brand"
+          value={filters.brand}
+        />
       )}
 
-      {/* Sub Brand Filter if there is any */}
       {!!formattedSubBrands.length && (
-        <div className="relative w-full">
-          <select
-            className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
-            value={selectedSubBrandName}
-            onChange={(e) => updateParam("sub_brand", e.target.value)}
-          >
-            <option value="">Select Sub Brand</option>
-            {formattedSubBrands.map((brand) => (
-              <option key={brand.id} value={brand.id}>
-                {brand.name}
-              </option>
-            ))}
-          </select>
-          {selectedSubBrandName && (
-            <button
-              type="button"
-              onClick={() => updateParam("sub_brand", "")}
-              className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-            >
-              ✕
-            </button>
-          )}
-        </div>
+        <FilterSelect
+          options={formattedSubBrands}
+          paramKey="sub_brand"
+          placeholder="Select Sub Brand"
+          value={filters.subBrand}
+        />
       )}
 
-      {/* Sub Category Filter */}
       {!!formattedSubCats.length && (
-        <div className="relative w-full">
-          <select
-            className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
-            value={toSentenceCase(selectedSubCatName)}
-            onChange={(e) => updateParam("sub_category", e.target.value)}
-          >
-            <option value="">Select Sub Category</option>
-            {formattedSubCats.map((cat) => (
-              <option key={cat.id} value={cat.name}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-          {selectedSubCatName && (
-            <button
-              type="button"
-              onClick={() => updateParam("sub_category", "")}
-              className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-            >
-              ✕
-            </button>
-          )}
-        </div>
+        <FilterSelect
+          options={formattedSubCats}
+          paramKey="sub_category"
+          placeholder="Select Sub Category"
+          value={filters.subCategory}
+        />
       )}
 
-      {/* Color Filter */}
-      <div className="relative w-full">
-        <select
-          className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
-          value={selectedColor}
-          onChange={(e) => updateParam("color", e.target.value)}
-        >
-          <option value="">Select Color</option>
-          {formattedColors.map((color) => (
-            <option key={color} value={color}>
-              {color}
-            </option>
-          ))}
-        </select>
-        {selectedColor && (
-          <button
-            type="button"
-            onClick={() => updateParam("color", "")}
-            className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-          >
-            ✕
-          </button>
-        )}
-      </div>
+      {!!formattedColors.length && (
+        <FilterSelect
+          options={formattedColors}
+          paramKey="color"
+          placeholder="Select Color"
+          value={filters.color}
+        />
+      )}
 
-      {/* Gender Filter */}
-      <div className="relative w-full">
-        <select
-          className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
-          value={selectedGender}
-          onChange={(e) => updateParam("gender", e.target.value)}
-        >
-          <option value="">Select Gender</option>
-          {["Male", "Female", "Unisex"].map((gender) => (
-            <option key={gender} value={gender}>
-              {gender}
-            </option>
-          ))}
-        </select>
-        {selectedGender && (
-          <button
-            type="button"
-            onClick={() => updateParam("gender", "")}
-            className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-          >
-            ✕
-          </button>
-        )}
-      </div>
+      <FilterSelect
+        options={["Male", "Female", "Unisex"] as const}
+        paramKey="gender"
+        placeholder="Select Gender"
+        value={filters.gender}
+      />
     </div>
   );
 }
