@@ -1,5 +1,5 @@
 import Link from "next/link";
-import BrandCard, { BrandCardProps } from "../brand-card";
+import BrandCard, { BrandCardProps } from "../featured-brand-card";
 
 export const brandCardData: BrandCardProps[] = [
   {

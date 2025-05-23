@@ -1,7 +1,7 @@
 "use client";
 
 import { Poppins } from "next/font/google";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 // Load Poppins font with a CSS variable
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -9,28 +9,36 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
 });
 
-export default function WatchesMenu() {
+export default function WatchesMenu({
+  toggleMobileNav,
+}: {
+  toggleMobileNav?: () => void;
+}) {
   const items = ["Male", "Female", "Unisex"];
+  const router = useRouter();
 
-  const columns = 3;
+  const redirect = (gender: string) => {
+    if (toggleMobileNav) {
+      toggleMobileNav();
+    }
+
+    router.push(`/watches?gender=${gender}`);
+  };
 
   return (
     <div
-      className={`grid grid-cols-1 lg:grid-cols-3 gap-4 ${poppins.className} p-4 `}
+      className={`grid grid-cols-1 lg:grid-cols-3 gap-4 ${poppins.className} p-4 bg-white`}
     >
-      {items.map((item, index) => {
-        const isLastColumn = (index + 1) % columns === 0;
-
+      {items.map((gender) => {
         return (
-          <Link
-            key={item}
-            href={`/watches?gender=${item}`}
-            className={`font-normal pr-4 text-[14px] ${
-              !isLastColumn ? "border-r-[1px] border-gray-300" : ""
-            }`}
+          <button
+            key={gender}
+            onClick={() => redirect(gender)}
+            className={`font-normal pr-4  text-start 
+              border-r-[1px] border-gray-300 lg:text-[12px] xl:text-[14px] `}
           >
-            {item.toUpperCase()}
-          </Link>
+            {gender.toUpperCase()}
+          </button>
         );
       })}
     </div>

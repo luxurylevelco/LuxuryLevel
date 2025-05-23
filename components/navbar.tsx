@@ -1,6 +1,6 @@
 "use client";
 
-import { JSX, useState } from "react";
+import { JSX, Suspense, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import SearchComp from "@/components/search";
@@ -11,6 +11,7 @@ import OurBrandsMenu from "@/components/dropdown-menus/brands-menu";
 import WatchesMenu from "@/components/dropdown-menus/watches-menu";
 import JewelryCategoriesMenu from "@/components/dropdown-menus/jewelry-menu";
 import BagsMenu from "@/components/dropdown-menus/bags-menu";
+import { Brand, Category } from "@/lib/types";
 const robotoCondensed = Roboto_Condensed({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -100,12 +101,8 @@ function MenuItem({
                 height={20}
               />
             </div>
-            <div
-              className="card-style"
-              style={{ backgroundColor: "var(--background)" }}
-            >
-              {element}
-            </div>
+
+            <div className="card-style">{element}</div>
           </div>
         )}
       </div>
@@ -134,7 +131,7 @@ function MenuItem({
           <div
             className={`overflow-hidden transition-all duration-300 ${
               isOpen
-                ? "max-h-96 opacity-100 overflow-y-auto"
+                ? "max-h-64 opacity-100 overflow-y-auto"
                 : "max-h-0 opacity-0"
             }`}
           >
@@ -146,7 +143,17 @@ function MenuItem({
   );
 }
 
-function Menu({ toggleMobileNav }: { toggleMobileNav?: () => void }) {
+function Menu({
+  toggleMobileNav,
+  brandsMenu,
+  jewelryMenu,
+  bagsMenu,
+}: {
+  toggleMobileNav?: () => void;
+  brandsMenu: Brand[];
+  jewelryMenu: Category[];
+  bagsMenu: Brand[];
+}) {
   const [activeItem, setActiveItem] = useState<string | null>(null);
 
   const menuMap: menuMapProps[] = [
@@ -155,25 +162,32 @@ function Menu({ toggleMobileNav }: { toggleMobileNav?: () => void }) {
       title: "OUR BRANDS",
       link: "/brands",
       hasDropdown: true,
-      element: <OurBrandsMenu />,
+      element: (
+        <OurBrandsMenu toggleMobileNav={toggleMobileNav} brands={brandsMenu} />
+      ),
     },
     {
       title: "WATCHES",
       link: "/watches",
       hasDropdown: true,
-      element: <WatchesMenu />,
+      element: <WatchesMenu toggleMobileNav={toggleMobileNav} />,
     },
     {
       title: "JEWELRY",
       link: "/jewelry",
       hasDropdown: true,
-      element: <JewelryCategoriesMenu />,
+      element: (
+        <JewelryCategoriesMenu
+          toggleMobileNav={toggleMobileNav}
+          categories={jewelryMenu}
+        />
+      ),
     },
     {
       title: "BAGS",
       link: "/bags",
       hasDropdown: true,
-      element: <BagsMenu />,
+      element: <BagsMenu toggleMobileNav={toggleMobileNav} brands={bagsMenu} />,
     },
   ];
 
@@ -196,7 +210,11 @@ function Menu({ toggleMobileNav }: { toggleMobileNav?: () => void }) {
   );
 }
 
-function MobileMenuButton() {
+function MobileMenuButton(props: {
+  brandsMenu: Brand[];
+  jewelryMenu: Category[];
+  bagsMenu: Brand[];
+}) {
   const [isMobileNavOpen, setisMobileNavOpen] = useState<boolean>(false);
   const toggleMobileNav = () => {
     setisMobileNavOpen(!isMobileNavOpen);
@@ -221,8 +239,17 @@ function MobileMenuButton() {
     ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}
   `}
       >
-        <SearchComp className={""} toggleMobileNav={toggleMobileNav} />
-        <Menu toggleMobileNav={toggleMobileNav} />
+        <Suspense>
+          <SearchComp
+            className={""}
+            toggleMobileNav={toggleMobileNav}
+            searchParamKey="name"
+            placeholder="Search All Products..."
+            pathname="products"
+          />
+        </Suspense>
+
+        <Menu toggleMobileNav={toggleMobileNav} {...props} />
         <button
           className={`flex lg:hidden absolute top-2 -right-12 rounded-full default-white-bg p-2 shadow-md ${
             isMobileNavOpen ? "flex" : "hidden"
@@ -266,23 +293,34 @@ function DesktopSearch() {
             : "translate-x-10 opacity-0 pointer-events-none"
         }`}
       >
-        <SearchComp className="w-[250px]" />
+        <SearchComp
+          className="w-[250px]"
+          pathname="products"
+          searchParamKey="name"
+          placeholder="Search All Products..."
+        />
       </div>
     </div>
   );
 }
 
-export default function Navbar() {
+export default function Navbar(props: {
+  brandsMenu: Brand[];
+  jewelryMenu: Category[];
+  bagsMenu: Brand[];
+}) {
   return (
     <div className="navbar ">
       <Logo />
-      <MobileMenuButton />
+      <MobileMenuButton {...props} />
       <div className="hidden lg:flex">
-        <Menu />
+        <Menu {...props} />
       </div>
-      <div className="hidden lg:flex">
-        <DesktopSearch />
-      </div>
+      <Suspense>
+        <div className="hidden lg:flex">
+          <DesktopSearch />
+        </div>
+      </Suspense>
     </div>
   );
 }

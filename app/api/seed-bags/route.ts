@@ -8,30 +8,31 @@ import { data } from "@/lib/constants/bag-products";
 
 export async function POST() {
   try {
-    // 1. Insert unique brands (batch insert)
-    const brands = {
-      name: "HERMES",
-      logo_url:
-        "https://luxurysouq.com/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2023/07/HERMES-watches.png.webp",
-      description: null,
-    };
+    // // 1. Insert unique brands (batch insert)
+    // const brands = {
+    //   name: "HERMES",
+    //   logo_url:
+    //     "https://luxurysouq.com/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2023/07/HERMES-watches.png.webp",
+    //   description: null,
+    // };
 
-    const { error: brandError } = await supabase
-      .from("brand")
-      .upsert(brands, { onConflict: "name" });
+    // const { error: brandError } = await supabase
+    //   .from("brand")
+    //   .upsert(brands, { onConflict: "name" });
 
-    if (brandError) {
-      console.error("Error inserting brands:", brandError);
-      return NextResponse.json(
-        { error: "Failed to seed brands", details: brandError.message },
-        { status: 500 }
-      );
-    }
+    // if (brandError) {
+    //   console.error("Error inserting brands:", brandError);
+    //   return NextResponse.json(
+    //     { error: "Failed to seed brands", details: brandError.message },
+    //     { status: 500 }
+    //   );
+    // }
 
-    // 3. Fetch brand and category IDs
+    // 3. Fetch brand ids and category ID
     const { data: brandsData, error: brandsFetchError } = await supabase
       .from("brand")
       .select("id, name");
+
     const { data: categoryData, error: categoryFetchError } = await supabase
       .from("category")
       .select("id, name")
@@ -48,7 +49,7 @@ export async function POST() {
           error: "Failed to fetch IDs",
           details:
             (brandsFetchError || categoryFetchError)?.message ||
-            "Category 'watches' not found",
+            "Category not found",
         },
         { status: 500 }
       );
@@ -57,7 +58,7 @@ export async function POST() {
     const brandMap = new Map(brandsData?.map((b) => [b.name, b.id]));
     const watchesCategoryId = categoryData.id;
 
-    // 4. Insert products (batch insert, all as "watches")
+    // 4. Insert products (batch insert, all as "bags")
     const products = data
       .map((item) => {
         const brandId = brandMap.get(item.BRAND);

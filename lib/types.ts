@@ -14,6 +14,7 @@ export interface Product {
   image_3: string | null;
   created_at: string;
   updated_at: string;
+  brand_name?: string;
 }
 
 export interface Brand {
@@ -21,6 +22,8 @@ export interface Brand {
   name: string;
   description: string | null;
   logo_url: string | null;
+  parent_id: string;
+  featured: boolean;
 }
 
 export interface Category {
@@ -31,9 +34,33 @@ export interface Category {
 }
 
 export interface PaginatedProductsResponse {
+  subBrands: Brand[];
   products: Product[];
   page: {
     current: number;
     total: number;
   };
+}
+
+export interface PageInfo {
+  current: number;
+  total: number;
+}
+
+export interface BrandResponse {
+  brandDetails: Brand;
+  products: Product[];
+  page: PageInfo;
+}
+
+export interface ProductResponse {
+  colors: string[];
+  products: Product[];
+  page: PageInfo;
+}
+
+export interface ProductInformationResponse {
+  brandInfo: Brand;
+  productInfo: Product;
+  relatedProducts: Product[];
 }

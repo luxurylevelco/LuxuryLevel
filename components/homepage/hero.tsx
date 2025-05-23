@@ -2,8 +2,8 @@ import Image from 'next/image';
 
 export default function Hero() {
   return (
-    <div className="section-style relative bg-[url('/homepage-assets/homebg.webp')] bg-cover bg-center bg-no-repeat p-20">
-      <div className='absolute bottom-28   left-24 flex flex-col w-[280px] h-fit'>
+    <div className="section-style relative bg-[url('/homepage-assets/herobg.webp')] bg-cover bg-center bg-no-repeat p-20 bg-black">
+      <div className='absolute bottom-28 left-24 flex flex-col w-[280px] h-fit'>
         <Image
           src='/homepage-assets/whatsapp-logo.webp'
           alt='Whatsapp'

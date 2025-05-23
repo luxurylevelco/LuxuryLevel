@@ -2,8 +2,7 @@
 
 import { Category } from "@/lib/types";
 import { Poppins } from "next/font/google";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 // Load Poppins font with a CSS variable
 const poppins = Poppins({
@@ -12,44 +11,39 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
 });
 
-export default function JewelryCategoriesMenu() {
-  const [categories, setCategories] = useState<Category[]>([]);
+export default function JewelryCategoriesMenu({
+  toggleMobileNav,
+  categories,
+}: {
+  toggleMobileNav?: () => void;
+  categories: Category[];
+}) {
+  const router = useRouter();
 
-  useEffect(() => {
-    const fetchBrands = async () => {
-      const res = await fetch(`/api/categories/jewelry`, {
-        method: "GET",
-        cache: "force-cache",
-      });
-      const categories = await res.json();
+  const redirect = (category: Category) => {
+    if (toggleMobileNav) {
+      toggleMobileNav();
+    }
 
-      setCategories(categories);
-    };
-
-    fetchBrands();
-  }, []);
-
-  const columns = 4;
+    router.push(`/jewelry?sub_category=${category.name}`);
+  };
 
   return (
     <div
-      className={`grid  grid-cols-1 lg:grid-cols-4 gap-4 ${poppins.className} p-4 `}
+      className={`grid  grid-cols-1 lg:grid-cols-4 gap-4 ${poppins.className} p-4 bg-white`}
     >
-      {categories.map((category, index) => {
-        const isLastColumn = (index + 1) % columns === 0;
-
+      {categories.map((category) => {
         if (!category.name) return null;
 
         return (
-          <Link
+          <button
             key={category.id}
-            href={`/jewelry?category=${category.id}`}
-            className={`font-normal pr-4 text-[14px] ${
-              !isLastColumn ? "border-r-[1px] border-gray-300" : ""
-            }`}
+            onClick={() => redirect(category)}
+            className={`font-normal pr-4  text-start 
+              border-r-[1px] border-gray-300 lg:text-[12px] xl:text-[14px] `}
           >
             {category.name}
-          </Link>
+          </button>
         );
       })}
     </div>

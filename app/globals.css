@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -32,7 +36,7 @@ body {
   }
 
   .card-style {
-    @apply p-2 shadow-md;
+    @apply p-2 shadow-md bg-white;
   }
 
   .section-style {
@@ -44,7 +48,7 @@ body {
   }
 
   .default-white-bg {
-    background-color: var(--background);
+    background-color: #ffffff;
   }
 
   .navbar {
@@ -65,5 +69,13 @@ body {
 
   .footer {
     @apply padding bg-default-black py-5;
+  }
+
+  .link-box {
+    @apply h-[35px] w-[35px];
+  }
+
+  .button {
+    @apply px-4 py-2 rounded-lg flex justify-center items-center gap-4 transition-all duration-300;
   }
 }

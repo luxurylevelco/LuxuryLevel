@@ -5,45 +5,45 @@ import { data } from "@/lib/constants/watch-products";
 
 export async function POST() {
   try {
-    // 1. Insert categories (only "watches")
-    const categories = [
-      { name: "watches", description: "" },
-      { name: "jewelry", description: "" },
-      { name: "bags", description: "" },
-    ];
-    const { error: categoryError } = await supabase
-      .from("category")
-      .upsert(categories, { onConflict: "name" });
+    // // 1. Insert categories (only "watches")
+    // const categories = [
+    //   { name: "watches", description: "" },
+    //   { name: "jewelry", description: "" },
+    //   { name: "bags", description: "" },
+    // ];
+    // const { error: categoryError } = await supabase
+    //   .from("category")
+    //   .upsert(categories, { onConflict: "name" });
 
-    if (categoryError) {
-      console.error("Error inserting categories:", categoryError);
-      return NextResponse.json(
-        { error: "Failed to seed categories", details: categoryError.message },
-        { status: 500 }
-      );
-    }
+    // if (categoryError) {
+    //   console.error("Error inserting categories:", categoryError);
+    //   return NextResponse.json(
+    //     { error: "Failed to seed categories", details: categoryError.message },
+    //     { status: 500 }
+    //   );
+    // }
 
     // 2. Insert unique brands (batch insert)
-    const brandSet = new Set(data.map((item) => item.BRAND));
-    const brands = Array.from(brandSet).map((brand) => {
-      const brandObj = data.find((i) => i.BRAND === brand);
-      return {
-        name: brand,
-        logo_url: brandObj?.BRAND_IMAGE ?? null,
-        description: null,
-      };
-    });
-    const { error: brandError } = await supabase
-      .from("brand")
-      .upsert(brands, { onConflict: "name" });
+    // const brandSet = new Set(data.map((item) => item.BRAND));
+    // const brands = Array.from(brandSet).map((brand) => {
+    //   const brandObj = data.find((i) => i.BRAND === brand);
+    //   return {
+    //     name: brand,
+    //     logo_url: brandObj?.BRAND_IMAGE ?? null,
+    //     description: null,
+    //   };
+    // });
+    // const { error: brandError } = await supabase
+    //   .from("brand")
+    //   .upsert(brands, { onConflict: "name" });
 
-    if (brandError) {
-      console.error("Error inserting brands:", brandError);
-      return NextResponse.json(
-        { error: "Failed to seed brands", details: brandError.message },
-        { status: 500 }
-      );
-    }
+    // if (brandError) {
+    //   console.error("Error inserting brands:", brandError);
+    //   return NextResponse.json(
+    //     { error: "Failed to seed brands", details: brandError.message },
+    //     { status: 500 }
+    //   );
+    // }
 
     // 3. Fetch brand and category IDs
     const { data: brandsData, error: brandsFetchError } = await supabase
@@ -86,7 +86,7 @@ export async function POST() {
         }
 
         // Clean PRICE
-        const price = parseFloat(item.PRICE.replace(/,/g, ""));
+        const price = parseFloat(String(item.PRICE).replace(/,/g, ""));
         // Map STOCK to integer: "In Stock" -> 1, else -> 0
         const stock = item.STOCK === "In Stock" ? 1 : 0;
 
