@@ -1,0 +1,51 @@
+import CardsSection from "@/components/cards-section";
+
+export default async function CardsSectionWrapper({
+  queryString,
+  sub_category,
+  tableName,
+  pathname,
+}: {
+  queryString: string;
+  sub_category: string | null;
+  tableName: string;
+  pathname: string;
+}) {
+  const [dataRes, brandListRes, subCategoriesRes] = await Promise.all([
+    fetch(
+      `${process.env.API_URL}/api/products/${
+        sub_category || tableName
+      }?${queryString}`,
+      {
+        next: { revalidate: 60 },
+      }
+    ),
+    fetch(
+      `${process.env.API_URL}/api/categories/${tableName}/available-brands`,
+      {
+        next: { revalidate: 60 },
+      }
+    ),
+    fetch(`${process.env.API_URL}/api/categories/${tableName}/sub-categories`, {
+      next: { revalidate: 60 },
+    }),
+  ]);
+
+  const [data, brandList, catList] = await Promise.all([
+    dataRes.json(),
+    brandListRes.json(),
+    subCategoriesRes.json(),
+  ]);
+
+  return (
+    <CardsSection
+      products={data.products || []}
+      subBrandsList={data.subBrand || []}
+      pageInfo={data.page ?? null}
+      brandsList={brandList}
+      colorsList={data.colors ?? null}
+      subCategoryList={catList}
+      pathname={pathname}
+    />
+  );
+}

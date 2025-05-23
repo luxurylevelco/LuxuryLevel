@@ -1,5 +1,7 @@
 import Banner from "@/components/banner";
-import CardsSection from "@/components/cards-section";
+import CardsSectionWrapper from "@/components/cards-section-wrappers/spec-wrapper";
+import CardsSectionLoading from "@/components/cards-section-wrappers/loading";
+import { Suspense } from "react";
 
 export default async function Page({
   searchParams,
@@ -31,36 +33,17 @@ export default async function Page({
 
   const queryString = params.toString();
 
-  const [resJewelry, resJewelryBrands, resJewelryCategories] =
-    await Promise.all([
-      fetch(
-        `${process.env.API_URL}/api/products/${
-          sub_category || "jewelry"
-        }?${queryString}`
-      ),
-      fetch(`${process.env.API_URL}/api/categories/jewelry/available-brands`),
-      fetch(`${process.env.API_URL}/api/categories/jewelry/sub-categories`),
-    ]);
-
-  const [jewelriesData, jewelriesBrandsList, jewelryCatsList] =
-    await Promise.all([
-      resJewelry.json(),
-      resJewelryBrands.json(),
-      resJewelryCategories.json(),
-    ]);
-
   return (
     <>
       <Banner title={"JEWELRIES"} classnameForBgSrc={""} />
-      <CardsSection
-        products={jewelriesData.products || []}
-        pageInfo={jewelriesData.page ?? null}
-        brandsList={jewelriesBrandsList}
-        colorsList={jewelriesData.colors ?? null}
-        pathname="jewelry"
-        subBrandsList={jewelriesData.sub_brand}
-        subCategoryList={jewelryCatsList}
-      />
+      <Suspense fallback={<CardsSectionLoading />}>
+        <CardsSectionWrapper
+          queryString={queryString}
+          sub_category={sub_category}
+          tableName="jewelry"
+          pathname="jewelry"
+        />
+      </Suspense>
     </>
   );
 }

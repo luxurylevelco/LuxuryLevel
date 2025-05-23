@@ -1,30 +1,18 @@
-import ProductInfo from "@/components/product-specification/product-page";
-import { ProductInformationResponse } from "@/lib/types";
-import { notFound } from "next/navigation";
+import CardsSectionLoading from "@/components/cards-section-wrappers/loading";
+import ProductPageWrapper from "@/components/product-specification/product-page-wrapper";
+
+import { Suspense } from "react";
 
 export default async function Page({
   params,
 }: {
-  params: Promise<{ id: string | null }>;
+  params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
 
-  if (!id) {
-    notFound();
-  }
-
-  const resData = await fetch(
-    `${process.env.API_URL}/api/products/${id}/information`,
-    {
-      method: "GET",
-    }
-  );
-
-  const data: ProductInformationResponse = await resData.json();
-
   return (
-    <>
-      <ProductInfo {...data} />
-    </>
+    <Suspense fallback={<CardsSectionLoading />}>
+      <ProductPageWrapper id={id} />
+    </Suspense>
   );
 }

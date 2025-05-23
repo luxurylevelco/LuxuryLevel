@@ -1,5 +1,6 @@
-import Banner from "@/components/banner";
-import CardsSection from "@/components/cards-section";
+import CardsSectionWrapper from "@/components/cards-section-wrappers/brands-products";
+import CardsSectionLoading from "@/components/cards-section-wrappers/loading";
+import { Suspense } from "react";
 
 export default async function Page({
   params,
@@ -37,28 +38,11 @@ export default async function Page({
 
   const queryString = _params.toString();
 
-  const [resbags, resBrandInfo] = await Promise.all([
-    fetch(`${process.env.API_URL}/api/products?${queryString}`),
-    fetch(`${process.env.API_URL}/api/brands/${brand}/information`),
-  ]);
-
-  const [brandProductList, brandInfo] = await Promise.all([
-    resbags.json(),
-    resBrandInfo.json(),
-  ]);
-
   return (
     <>
-      <Banner title={brandInfo.name} classnameForBgSrc={""} />
-      <CardsSection
-        products={brandProductList.products || []}
-        pageInfo={brandProductList.page ?? null}
-        brandsList={null}
-        colorsList={brandProductList.colors ?? null}
-        subCategoryList={null}
-        subBrandsList={brandProductList.subBrands}
-        pathname={`brands/${brand}`}
-      />
+      <Suspense fallback={<CardsSectionLoading />}>
+        <CardsSectionWrapper queryString={queryString} brand={brand} />
+      </Suspense>
     </>
   );
 }

@@ -8,6 +8,7 @@ export default async function Page() {
   try {
     const resBrands = await fetch(`${process.env.API_URL}/api/brands`, {
       method: "GET",
+      next: { revalidate: 60 },
     });
     if (!resBrands.ok)
       throw new Error(`Failed to fetch brands: ${resBrands.status}`);
