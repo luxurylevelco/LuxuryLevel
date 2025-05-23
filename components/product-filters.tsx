@@ -3,8 +3,9 @@
 import { Brand, Category, ProductResponse } from "@/lib/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
-
 import dynamic from "next/dynamic";
+
+// Lazy load Search component
 const Search = dynamic(() => import("@/components/search"), { ssr: false });
 
 export default function ProductFilters({
@@ -75,7 +76,7 @@ export default function ProductFilters({
     [searchParams]
   );
 
-  // Update param helper
+  // Update param helper with correct pathname
   const updateParam = useCallback(
     (key: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -95,63 +96,24 @@ export default function ProductFilters({
     router.push(pathname);
   }, [router, pathname]);
 
-  // Check if any filters are applied
-  const hasFilters = Object.values(filters).some((value) => value !== "");
-
-  // Reusable FilterSelect component with generics
-  const FilterSelect = <T extends string | Brand | Category>({
-    options,
-    paramKey,
-    placeholder,
-    value,
-  }: {
-    options: T[];
-    paramKey: string;
-    placeholder: string;
-    value: string;
-  }) => (
-    <div className="relative w-full">
-      <select
-        className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
-        value={value}
-        onChange={(e) => updateParam(paramKey, e.target.value)}
-      >
-        <option value="">{placeholder}</option>
-        {options.map((option) => {
-          const id = typeof option === "string" ? option : option.id;
-          const name = typeof option === "string" ? option : option.name;
-          return (
-            <option key={id || name} value={id || name}>
-              {name}
-            </option>
-          );
-        })}
-      </select>
-      {value && (
-        <button
-          type="button"
-          onClick={() => updateParam(paramKey, "")}
-          className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-        >
-          ✕
-        </button>
-      )}
-    </div>
-  );
-
   return (
     <div className="lg:w-[500px] xl:w-full space-y-4">
-      {hasFilters && (
-        <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
+        {(filters.color ||
+          filters.gender ||
+          filters.brand ||
+          filters.subCategory ||
+          filters.subBrand) && (
           <button
             onClick={clearAllFilters}
             className="text-sm text-blue-600 hover:text-blue-800 font-medium"
           >
             Clear All Filters
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
+      {/* Search Input */}
       <Search
         searchParamKey="name"
         placeholder="Search watch name/title..."
@@ -159,48 +121,136 @@ export default function ProductFilters({
         pathname={pathname}
       />
 
+      {/* Brand Filter */}
       {!!formattedBrands.length && (
-        <FilterSelect
-          options={formattedBrands}
-          paramKey="brand"
-          placeholder="Select Brand"
-          value={filters.brand}
-        />
+        <div className="relative w-full">
+          <select
+            className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
+            value={filters.brand}
+            onChange={(e) => updateParam("brand", e.target.value)}
+          >
+            <option value="">Select Brand</option>
+            {formattedBrands.map((brand) => (
+              <option key={brand.id} value={brand.id}>
+                {brand.name}
+              </option>
+            ))}
+          </select>
+          {filters.brand && (
+            <button
+              type="button"
+              onClick={() => updateParam("brand", "")}
+              className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       )}
 
+      {/* Sub Brand Filter if there is any */}
       {!!formattedSubBrands.length && (
-        <FilterSelect
-          options={formattedSubBrands}
-          paramKey="sub_brand"
-          placeholder="Select Sub Brand"
-          value={filters.subBrand}
-        />
+        <div className="relative w-full">
+          <select
+            className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
+            value={filters.subBrand}
+            onChange={(e) => updateParam("sub_brand", e.target.value)}
+          >
+            <option value="">Select Sub Brand</option>
+            {formattedSubBrands.map((brand) => (
+              <option key={brand.id} value={brand.id}>
+                {brand.name}
+              </option>
+            ))}
+          </select>
+          {filters.subBrand && (
+            <button
+              type="button"
+              onClick={() => updateParam("sub_brand", "")}
+              className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       )}
 
+      {/* Sub Category Filter */}
       {!!formattedSubCats.length && (
-        <FilterSelect
-          options={formattedSubCats}
-          paramKey="sub_category"
-          placeholder="Select Sub Category"
-          value={filters.subCategory}
-        />
+        <div className="relative w-full">
+          <select
+            className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
+            value={toSentenceCase(filters.subCategory)}
+            onChange={(e) => updateParam("sub_category", e.target.value)}
+          >
+            <option value="">Select Sub Category</option>
+            {formattedSubCats.map((cat) => (
+              <option key={cat.id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+          {filters.subCategory && (
+            <button
+              type="button"
+              onClick={() => updateParam("sub_category", "")}
+              className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       )}
 
-      {!!formattedColors.length && (
-        <FilterSelect
-          options={formattedColors}
-          paramKey="color"
-          placeholder="Select Color"
+      {/* Color Filter */}
+      <div className="relative w-full">
+        <select
+          className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
           value={filters.color}
-        />
-      )}
+          onChange={(e) => updateParam("color", e.target.value)}
+        >
+          <option value="">Select Color</option>
+          {formattedColors.map((color) => (
+            <option key={color} value={color}>
+              {color}
+            </option>
+          ))}
+        </select>
+        {filters.color && (
+          <button
+            type="button"
+            onClick={() => updateParam("color", "")}
+            className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
+          >
+            ✕
+          </button>
+        )}
+      </div>
 
-      <FilterSelect
-        options={["Male", "Female", "Unisex"] as const}
-        paramKey="gender"
-        placeholder="Select Gender"
-        value={filters.gender}
-      />
+      {/* Gender Filter */}
+      <div className="relative w-full">
+        <select
+          className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
+          value={filters.gender}
+          onChange={(e) => updateParam("gender", e.target.value)}
+        >
+          <option value="">Select Gender</option>
+          {["Male", "Female", "Unisex"].map((gender) => (
+            <option key={gender} value={gender}>
+              {gender}
+            </option>
+          ))}
+        </select>
+        {filters.gender && (
+          <button
+            type="button"
+            onClick={() => updateParam("gender", "")}
+            className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
+          >
+            ✕
+          </button>
+        )}
+      </div>
     </div>
   );
 }
