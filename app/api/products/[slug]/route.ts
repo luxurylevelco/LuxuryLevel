@@ -1,253 +1,123 @@
 import { supabase } from "@/lib/supabase";
-import { Brand } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
-async function getAllCategoryIds(rootId: number): Promise<number[]> {
-  const ids: number[] = [rootId];
-  const stack: number[] = [rootId];
+// In-memory descendant category resolution
+function getDescendantCategoryIds(
+  allCategories: any[],
+  parentId: string
+): string[] {
+  const result: string[] = [];
+  const stack = [parentId];
 
   while (stack.length > 0) {
-    const currentId = stack.pop();
-    if (!currentId) continue;
-
-    const { data: children, error } = await supabase
-      .from("category")
-      .select("id")
-      .eq("parent_id", currentId);
-
-    if (error) {
-      console.error(
-        `Error fetching children for category ${currentId}:`,
-        error
-      );
-      continue;
-    }
-
-    if (children && children.length > 0) {
-      for (const child of children) {
-        if (child.id && !ids.includes(child.id)) {
-          ids.push(child.id);
-          stack.push(child.id);
-        }
-      }
-    }
+    const current = stack.pop()!;
+    result.push(current);
+    const children = allCategories.filter((c) => c.parent_id === current);
+    stack.push(...children.map((c) => c.id));
   }
 
-  console.log(`Found category IDs: ${ids}`);
-  return ids;
+  return result;
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  const { slug: categoryName } = await params;
+// Common filter application function
+function applyProductFilters(query: any, params: any, categoryIds?: string[]) {
+  if (params.brandId) query = query.eq("brand_id", params.brandId);
+  if (params.categoryId && categoryIds)
+    query = query.in("category_id", categoryIds);
+  if (params.color) query = query.eq("color", params.color);
+  if (params.minPrice) query = query.gte("price", Number(params.minPrice));
+  if (params.maxPrice) query = query.lte("price", Number(params.maxPrice));
+  return query;
+}
+
+export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
 
-  const page = parseInt(searchParams.get("page") || "1");
-  const noOfItems = parseInt(searchParams.get("noOfItems") || "10");
+  const params = {
+    page: Number(searchParams.get("page") || 1),
+    pageSize: Number(searchParams.get("pageSize") || 12),
+    categoryId: searchParams.get("categoryId"),
+    brandId: searchParams.get("brandId"),
+    color: searchParams.get("color"),
+    minPrice: searchParams.get("minPrice"),
+    maxPrice: searchParams.get("maxPrice"),
+  };
 
-  const from = (page - 1) * noOfItems;
-  const to = from + noOfItems - 1;
+  const from = (params.page - 1) * params.pageSize;
+  const to = from + params.pageSize - 1;
 
-  const filterColor = searchParams.get("color");
-  const filterGender = searchParams.get("gender");
-  const filterName = searchParams.get("name");
-  const filterBrand = searchParams.get("brand");
-
-  // Step 1: Find the category ID for category name
-  const { data: category, error: categoryError } = await supabase
-    .from("category")
-    .select("id")
-    .ilike("name", `%${categoryName}%`)
-    .single();
-
-  if (categoryError || !category) {
-    return NextResponse.json(
-      { error: `${categoryName} category not found.` },
-      { status: 404 }
-    );
-  }
-
-  // Step 2: Get all category IDs (including children, grandchildren, etc.)
-  const categoryIds = await getAllCategoryIds(category.id);
-
-  let brandIds: string[] = [];
-  let subBrands: Brand[] = [];
-
-  if (filterBrand) {
-    // Get the brand that matches the filterBrand
-    const { data: mainBrand, error: mainBrandError } = await supabase
-      .from("brand")
-      .select("*")
-      .eq("id", filterBrand)
-      .single();
-
-    if (mainBrandError || !mainBrand) {
+  // --- Category filtering setup
+  let categoryIds: string[] | undefined;
+  if (params.categoryId) {
+    const { data: allCategories } = await supabase
+      .from("category")
+      .select("id, parent_id");
+    if (!allCategories)
       return NextResponse.json(
-        { error: mainBrandError?.message || "Brand not found" },
-        { status: 404 }
-      );
-    }
-
-    // Get all brands that are children of this brand
-    const { data: childBrands, error: childBrandError } = await supabase
-      .from("brand")
-      .select("*")
-      .eq("parent_id", filterBrand);
-
-    if (childBrandError) {
-      return NextResponse.json(
-        { error: childBrandError.message },
+        { error: "Failed to load categories" },
         { status: 500 }
       );
-    }
-
-    // Add brandIds (main brand + children)
-    brandIds = [mainBrand.id, ...(childBrands?.map((b) => b.id) ?? [])];
-
-    // If this brand has a parent, it's a child itself — fetch its siblings
-    if (mainBrand.parent_id) {
-      const { data: siblingBrands, error: siblingError } = await supabase
-        .from("brand")
-        .select("*")
-        .eq("parent_id", mainBrand.parent_id);
-
-      if (siblingError) {
-        return NextResponse.json(
-          { error: siblingError.message },
-          { status: 500 }
-        );
-      }
-
-      subBrands = siblingBrands;
-    } else {
-      console.log("Main brand has doesnt have parent id!");
-      // If it's a parent, return its children as subBrands
-      subBrands = childBrands ?? [];
-    }
+    categoryIds = getDescendantCategoryIds(allCategories, params.categoryId);
   }
 
-  // Step 4: Prepare base query for filters
-  let baseQuery = supabase
+  // --- Count query (minimal fields)
+  let countQuery = supabase
     .from("product")
-    .select("*", { count: "exact", head: true })
-    .in("category_id", categoryIds);
+    .select("id", { count: "exact", head: false });
+  countQuery = applyProductFilters(countQuery, params, categoryIds);
+  const { count, error: countError } = await countQuery;
+  if (countError)
+    return NextResponse.json(
+      { error: "Failed to fetch count" },
+      { status: 500 }
+    );
 
-  if (filterColor) {
-    baseQuery = baseQuery.ilike("color", `%${filterColor}%`);
-  }
-
-  if (filterGender) {
-    baseQuery = baseQuery.eq("gender", filterGender);
-  }
-
-  if (filterName) {
-    baseQuery = baseQuery.ilike("name", `%${filterName}%`);
-  }
-
-  if (brandIds.length > 0) {
-    baseQuery = baseQuery.in("brand_id", brandIds);
-  }
-
-  const { count, error: countError } = await baseQuery;
-
-  if (countError) {
-    return NextResponse.json({ error: countError.message }, { status: 500 });
-  }
-
-  const totalPages = Math.ceil((count || 0) / noOfItems);
-
-  // Step 5: Fetch paginated filtered products
-  let productQuery = supabase
-    .from("product")
-    .select(
-      `
-      id,
-      ref_no,
-      name,
-      description,
-      color,
-      gender,
-      stock,
-      price,
-      image_1,
-      image_2,
-      image_3,
-      created_at,
-      updated_at
-    `
-    )
-    .in("category_id", categoryIds)
-    .range(from, to)
-    .order("created_at", { ascending: false });
-
-  if (filterColor) {
-    productQuery = productQuery.ilike("color", `%${filterColor}%`);
-  }
-
-  if (filterGender) {
-    productQuery = productQuery.eq("gender", filterGender);
-  }
-
-  if (filterName) {
-    productQuery = productQuery.ilike("name", `%${filterName}%`);
-  }
-
-  if (brandIds.length > 0) {
-    productQuery = productQuery.in("brand_id", brandIds);
-  }
-
+  // --- Product query
+  let productQuery = supabase.from("product").select("*").range(from, to);
+  productQuery = applyProductFilters(productQuery, params, categoryIds);
   const { data: products, error: productError } = await productQuery;
+  if (productError)
+    return NextResponse.json(
+      { error: "Failed to fetch products" },
+      { status: 500 }
+    );
 
-  if (productError) {
-    return NextResponse.json({ error: productError.message }, { status: 500 });
-  }
-
-  // Step 6: Fetch unique colors for filtered products
-  let colorQuery = supabase
-    .from("product")
-    .select("color")
-    .in("category_id", categoryIds)
-    .not("color", "is", null);
-
-  if (filterColor) {
-    colorQuery = colorQuery.ilike("color", `%${filterColor}%`);
-  }
-
-  if (filterGender) {
-    colorQuery = colorQuery.eq("gender", filterGender);
-  }
-
-  if (filterName) {
-    colorQuery = colorQuery.ilike("name", `%${filterName}%`);
-  }
-
-  if (brandIds.length > 0) {
-    colorQuery = colorQuery.in("brand_id", brandIds);
-  }
-
-  const { data: colorData, error: colorError } = await colorQuery;
-
-  if (colorError) {
-    return NextResponse.json({ error: colorError.message }, { status: 500 });
-  }
-
-  const uniqueColors = Array.from(
-    new Set(
-      colorData
-        .map((p) => p.color?.trim())
-        .filter((color): color is string => !!color)
-    )
+  // --- Unique colors from products
+  const uniqueColors = Array.from(new Set(products.map((p) => p.color))).filter(
+    Boolean
   );
 
+  // --- Brand tree (single query)
+  let brandData = null;
+  if (params.brandId) {
+    const { data: allBrands } = await supabase
+      .from("brand")
+      .select("id, parent_id, name");
+    if (!allBrands)
+      return NextResponse.json(
+        { error: "Failed to load brands" },
+        { status: 500 }
+      );
+
+    const mainBrand = allBrands.find((b) => b.id === params.brandId);
+    const childBrands = allBrands.filter((b) => b.parent_id === params.brandId);
+    const siblingBrands = mainBrand?.parent_id
+      ? allBrands.filter(
+          (b) => b.parent_id === mainBrand.parent_id && b.id !== mainBrand.id
+        )
+      : [];
+
+    brandData = {
+      mainBrand,
+      childBrands,
+      siblingBrands,
+    };
+  }
+
   return NextResponse.json({
-    subBrands: subBrands,
-    colors: uniqueColors,
     products,
-    page: {
-      current: page,
-      total: totalPages,
-    },
+    count,
+    colors: uniqueColors,
+    brand: brandData,
   });
 }
