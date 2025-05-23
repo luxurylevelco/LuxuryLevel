@@ -1,123 +1,186 @@
 import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 
-// In-memory descendant category resolution
-function getDescendantCategoryIds(
-  allCategories: any[],
-  parentId: string
-): string[] {
-  const result: string[] = [];
-  const stack = [parentId];
+async function getAllCategoryIds(rootId: number): Promise<number[]> {
+  const ids = new Set<number>([rootId]);
+  const stack = [rootId];
 
   while (stack.length > 0) {
-    const current = stack.pop()!;
-    result.push(current);
-    const children = allCategories.filter((c) => c.parent_id === current);
-    stack.push(...children.map((c) => c.id));
+    const currentId = stack.pop()!;
+    const { data: children, error } = await supabase
+      .from("category")
+      .select("id")
+      .eq("parent_id", currentId);
+
+    if (error) {
+      console.error(
+        `Error fetching children for category ${currentId}:`,
+        error
+      );
+      continue;
+    }
+
+    for (const child of children || []) {
+      if (!ids.has(child.id)) {
+        ids.add(child.id);
+        stack.push(child.id);
+      }
+    }
   }
 
-  return result;
+  console.log(`Found category IDs: ${[...ids]}`);
+  return [...ids];
 }
 
-// Common filter application function
-function applyProductFilters(query: any, params: any, categoryIds?: string[]) {
-  if (params.brandId) query = query.eq("brand_id", params.brandId);
-  if (params.categoryId && categoryIds)
-    query = query.in("category_id", categoryIds);
-  if (params.color) query = query.eq("color", params.color);
-  if (params.minPrice) query = query.gte("price", Number(params.minPrice));
-  if (params.maxPrice) query = query.lte("price", Number(params.maxPrice));
-  return query;
-}
-
-export async function GET(req: NextRequest) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug: categoryName } = await params;
   const { searchParams } = new URL(req.url);
 
-  const params = {
-    page: Number(searchParams.get("page") || 1),
-    pageSize: Number(searchParams.get("pageSize") || 12),
-    categoryId: searchParams.get("categoryId"),
-    brandId: searchParams.get("brandId"),
-    color: searchParams.get("color"),
-    minPrice: searchParams.get("minPrice"),
-    maxPrice: searchParams.get("maxPrice"),
+  const page = parseInt(searchParams.get("page") || "1");
+  const noOfItems = parseInt(searchParams.get("noOfItems") || "10");
+  const from = (page - 1) * noOfItems;
+  const to = from + noOfItems - 1;
+
+  const filterColor = searchParams.get("color");
+  const filterGender = searchParams.get("gender");
+  const filterName = searchParams.get("name");
+  const filterBrand = searchParams.get("brand");
+
+  // Step 1: Find the category ID for category name
+  const { data: category, error: categoryError } = await supabase
+    .from("category")
+    .select("id")
+    .ilike("name", `%${categoryName}%`)
+    .single();
+
+  if (categoryError || !category) {
+    return NextResponse.json(
+      { error: `${categoryName} category not found.` },
+      { status: 404 }
+    );
+  }
+
+  // Step 2: Get all category IDs (including children, grandchildren, etc.)
+  const categoryIds = await getAllCategoryIds(category.id);
+
+  // Step 3: Fetch brand data in one query if filterBrand is provided
+  let brandIds: string[] = [];
+  let subBrands = [];
+
+  if (filterBrand) {
+    // Fetch main brand and its hierarchy in one query
+    const { data: brands, error: brandError } = await supabase
+      .from("brand")
+      .select("*")
+      .or(`id.eq.${filterBrand},parent_id.eq.${filterBrand}`);
+
+    if (brandError || !brands || brands.length === 0) {
+      return NextResponse.json(
+        { error: brandError?.message || "Brand not found" },
+        { status: 404 }
+      );
+    }
+
+    const mainBrand = brands.find((b) => b.id === filterBrand);
+    if (!mainBrand) {
+      return NextResponse.json({ error: "Brand not found" }, { status: 404 });
+    }
+
+    brandIds = brands.map((b) => b.id);
+
+    // Fetch siblings if mainBrand has a parent
+    if (mainBrand.parent_id) {
+      const { data: siblingBrands, error: siblingError } = await supabase
+        .from("brand")
+        .select("*")
+        .eq("parent_id", mainBrand.parent_id);
+
+      if (siblingError) {
+        return NextResponse.json(
+          { error: siblingError.message },
+          { status: 500 }
+        );
+      }
+      subBrands = siblingBrands || [];
+    } else {
+      subBrands = brands.filter((b) => b.id !== mainBrand.id);
+    }
+  }
+
+  // Step 4: Build base query for products and colors
+  const buildQuery = (selectFields: string, withCount: boolean = false) => {
+    let query = supabase
+      .from("product")
+      .select(selectFields, withCount ? { count: "exact", head: true } : {})
+      .in("category_id", categoryIds);
+
+    if (filterColor) {
+      query = query.ilike("color", `%${filterColor}%`);
+    }
+    if (filterGender) {
+      query = query.eq("gender", filterGender);
+    }
+    if (filterName) {
+      query = query.ilike("name", `%${filterName}%`);
+    }
+    if (brandIds.length > 0) {
+      query = query.in("brand_id", brandIds);
+    }
+
+    return query;
   };
 
-  const from = (params.page - 1) * params.pageSize;
-  const to = from + params.pageSize - 1;
+  // Step 5: Fetch count, products, and colors in parallel
+  const [countResponse, productResponse, colorResponse] = await Promise.all([
+    buildQuery("*", true),
+    buildQuery(
+      "id, ref_no, name, description, color, gender, stock, price, image_1, image_2, image_3, created_at, updated_at"
+    )
+      .range(from, to)
+      .order("created_at", { ascending: false }),
+    buildQuery("color").not("color", "is", null),
+  ]);
 
-  // --- Category filtering setup
-  let categoryIds: string[] | undefined;
-  if (params.categoryId) {
-    const { data: allCategories } = await supabase
-      .from("category")
-      .select("id, parent_id");
-    if (!allCategories)
-      return NextResponse.json(
-        { error: "Failed to load categories" },
-        { status: 500 }
-      );
-    categoryIds = getDescendantCategoryIds(allCategories, params.categoryId);
+  // Handle count response
+  const { count, error: countError } = countResponse;
+  if (countError) {
+    return NextResponse.json({ error: countError.message }, { status: 500 });
   }
 
-  // --- Count query (minimal fields)
-  let countQuery = supabase
-    .from("product")
-    .select("id", { count: "exact", head: false });
-  countQuery = applyProductFilters(countQuery, params, categoryIds);
-  const { count, error: countError } = await countQuery;
-  if (countError)
-    return NextResponse.json(
-      { error: "Failed to fetch count" },
-      { status: 500 }
-    );
+  // Handle product response
+  const { data: products, error: productError } = productResponse;
+  if (productError) {
+    return NextResponse.json({ error: productError.message }, { status: 500 });
+  }
 
-  // --- Product query
-  let productQuery = supabase.from("product").select("*").range(from, to);
-  productQuery = applyProductFilters(productQuery, params, categoryIds);
-  const { data: products, error: productError } = await productQuery;
-  if (productError)
-    return NextResponse.json(
-      { error: "Failed to fetch products" },
-      { status: 500 }
-    );
+  // Handle color response
+  const { data: colorData, error: colorError } = await colorResponse;
+  if (colorError) {
+    return NextResponse.json({ error: colorError.message }, { status: 500 });
+  }
 
-  // --- Unique colors from products
-  const uniqueColors = Array.from(new Set(products.map((p) => p.color))).filter(
-    Boolean
+  // Use 'any' to bypass TypeScript error for color property access
+  const uniqueColors = Array.from(
+    new Set(
+      //eslint-disable-next-line
+      (colorData as any[])
+        ?.map((p) => p.color?.trim())
+        .filter((color) => !!color) ?? []
+    )
   );
 
-  // --- Brand tree (single query)
-  let brandData = null;
-  if (params.brandId) {
-    const { data: allBrands } = await supabase
-      .from("brand")
-      .select("id, parent_id, name");
-    if (!allBrands)
-      return NextResponse.json(
-        { error: "Failed to load brands" },
-        { status: 500 }
-      );
-
-    const mainBrand = allBrands.find((b) => b.id === params.brandId);
-    const childBrands = allBrands.filter((b) => b.parent_id === params.brandId);
-    const siblingBrands = mainBrand?.parent_id
-      ? allBrands.filter(
-          (b) => b.parent_id === mainBrand.parent_id && b.id !== mainBrand.id
-        )
-      : [];
-
-    brandData = {
-      mainBrand,
-      childBrands,
-      siblingBrands,
-    };
-  }
+  const totalPages = Math.ceil((count || 0) / noOfItems);
 
   return NextResponse.json({
-    products,
-    count,
+    subBrands,
     colors: uniqueColors,
-    brand: brandData,
+    products,
+    page: {
+      current: page,
+      total: totalPages,
+    },
   });
 }

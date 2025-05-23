@@ -16,9 +16,9 @@ function findRootBrand(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
-  const productId = params.slug;
+  const { slug: productId } = await params;
 
   // Fetch product
   const { data: product, error: productError } = await supabase
