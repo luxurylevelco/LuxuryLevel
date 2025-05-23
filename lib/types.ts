@@ -53,9 +53,25 @@ export interface BrandResponse {
   page: PageInfo;
 }
 
+export interface ProductCard {
+  id: number;
+  name: string;
+  price: number | null;
+  image_1: string | null;
+  image_2: string | null;
+  image_3: string | null;
+  brand_name?: string;
+}
+
+export interface ProductBrand {
+  id: number;
+  name: string;
+}
+
 export interface ProductResponse {
+  subBrands: ProductBrand[] | null;
   colors: string[];
-  products: Product[];
+  products: ProductCard[];
   page: PageInfo;
 }
 

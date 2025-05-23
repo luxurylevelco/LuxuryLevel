@@ -40,7 +40,7 @@ export default async function CardsSectionWrapper({
   return (
     <CardsSection
       products={data.products || []}
-      subBrandsList={data.subBrand || []}
+      subBrandsList={data.subBrands || []}
       pageInfo={data.page ?? null}
       brandsList={brandList}
       colorsList={data.colors ?? null}

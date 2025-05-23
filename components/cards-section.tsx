@@ -16,7 +16,7 @@ export default function CardsSection({
 }: {
   products: ProductResponse["products"];
   pageInfo: ProductResponse["page"];
-  brandsList: Brand[] | null;
+  brandsList: ProductResponse["subBrands"];
   colorsList: ProductResponse["colors"] | null;
   subCategoryList: Category[] | null;
   pathname: string;

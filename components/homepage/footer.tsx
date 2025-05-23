@@ -17,10 +17,10 @@ interface FooterLink {
 // Footer link values
 const footerLinks: FooterLink[] = [
   { name: 'Company Overview', href: '/#overview' },
-  { name: 'Contact Us', href: '/contact' },
-  { name: 'Terms & Conditions', href: '/terms' },
-  { name: 'Privacy Policy', href: '/privacy' },
-  { name: 'Return Policy', href: '/returns' },
+  { name: 'Contact Us', href: '/contact-us' },
+  { name: 'Terms & Conditions', href: '/terms-condition' },
+  { name: 'Privacy Policy', href: '/privacy-policy' },
+  { name: 'Return Policy', href: '/return-policy' },
 ];
 
 // Social media icon values
@@ -57,10 +57,10 @@ export default function Footer() {
             </div>
 
             <div>
-              <Link href='/' className='underline'>
+              <p className='underline'>
                 Al-Qibla - Ahmad Al-Jaber St. Al-Zumurodah Tower 3rd Floor -
                 Office No. 1,2,3
-              </Link>
+              </p>
             </div>
 
             <div>
@@ -99,7 +99,7 @@ export default function Footer() {
               CONTACT US AT:
             </p>
             <p>Tel.: (+965) 90085003 - 90086003</p>
-            <p>Email: luxurylevelco@gmail.com</p>
+            <p>Email: trading@Luxurylevelco.com</p>
             <p>P.O. Box: 29208 Safat - Code: 13152 Kuwait</p>
           </div>
         </div>

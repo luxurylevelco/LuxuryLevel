@@ -8,26 +8,33 @@ import dynamic from "next/dynamic";
 // Lazy load Search component
 const Search = dynamic(() => import("@/components/search"), { ssr: false });
 
+interface ProductFiltersProps {
+  availableColors: ProductResponse["colors"] | null;
+  brandsList: ProductResponse["subBrands"];
+  subCategoryList: Category[] | null;
+  pathname: string;
+  subBrandsList: Brand[] | null;
+}
+
+// Define a common interface for select options
+interface SelectOption {
+  id: string | number;
+  name: string;
+}
+
 export default function ProductFilters({
   availableColors,
   brandsList,
   subCategoryList,
   pathname,
   subBrandsList,
-}: {
-  availableColors: ProductResponse["colors"] | null;
-  brandsList: Brand[] | null;
-  subCategoryList: Category[] | null;
-  pathname: string;
-  subBrandsList: Brand[] | null;
-}) {
+}: ProductFiltersProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   // Memoize toSentenceCase
-  const toSentenceCase = useMemo(
-    () => (str: string) =>
-      str.charAt(0).toUpperCase() + str.slice(1).toLowerCase(),
+  const toSentenceCase = useCallback(
+    (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase(),
     []
   );
 
@@ -40,7 +47,7 @@ export default function ProductFilters({
   const formattedSubCats = useMemo(
     () =>
       subCategoryList?.map((item) => ({
-        ...item,
+        id: item.id,
         name: toSentenceCase(item.name),
       })) || [],
     [subCategoryList, toSentenceCase]
@@ -49,7 +56,7 @@ export default function ProductFilters({
   const formattedBrands = useMemo(
     () =>
       brandsList?.map((brand) => ({
-        ...brand,
+        id: brand.id,
         name: toSentenceCase(brand.name),
       })) || [],
     [brandsList, toSentenceCase]
@@ -58,7 +65,7 @@ export default function ProductFilters({
   const formattedSubBrands = useMemo(
     () =>
       subBrandsList?.map((brand) => ({
-        ...brand,
+        id: brand.id,
         name: toSentenceCase(brand.name),
       })) || [],
     [subBrandsList, toSentenceCase]
@@ -76,44 +83,46 @@ export default function ProductFilters({
     [searchParams]
   );
 
-  // Update param helper with correct pathname
+  // Batch URL updates
   const updateParam = useCallback(
-    (key: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value) {
-        params.set(key, value);
+    (key: string, value: string | null) => {
+      const params = new URLSearchParams(searchParams);
+      if (value?.trim()) {
+        params.set(key, value.trim());
       } else {
         params.delete(key);
       }
       params.delete("page");
-      router.push(`${pathname}?${params.toString()}`);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     },
     [router, pathname, searchParams]
   );
 
   // Clear all filters
   const clearAllFilters = useCallback(() => {
-    router.push(pathname);
+    router.replace(pathname, { scroll: false });
   }, [router, pathname]);
+
+  // Check if any filters are active
+  const hasActiveFilters = useMemo(
+    () => Object.values(filters).some((value) => value !== ""),
+    [filters]
+  );
 
   return (
     <div className="lg:w-[500px] xl:w-full space-y-4">
-      <div className="flex items-center justify-between">
-        {(filters.color ||
-          filters.gender ||
-          filters.brand ||
-          filters.subCategory ||
-          filters.subBrand) && (
+      {hasActiveFilters && (
+        <div className="flex justify-end">
           <button
             onClick={clearAllFilters}
             className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            aria-label="Clear all filters"
           >
             Clear All Filters
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Search Input */}
       <Search
         searchParamKey="name"
         placeholder="Search watch name/title..."
@@ -121,136 +130,71 @@ export default function ProductFilters({
         pathname={pathname}
       />
 
-      {/* Brand Filter */}
-      {!!formattedBrands.length && (
-        <div className="relative w-full">
-          <select
-            className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
-            value={filters.brand}
-            onChange={(e) => updateParam("brand", e.target.value)}
-          >
-            <option value="">Select Brand</option>
-            {formattedBrands.map((brand) => (
-              <option key={brand.id} value={brand.id}>
-                {brand.name}
-              </option>
-            ))}
-          </select>
-          {filters.brand && (
-            <button
-              type="button"
-              onClick={() => updateParam("brand", "")}
-              className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-            >
-              ✕
-            </button>
-          )}
-        </div>
+      {/* Reusable Select Component */}
+      {[
+        {
+          label: "Brand",
+          key: "brand",
+          value: filters.brand,
+          options: formattedBrands,
+        },
+        {
+          label: "Sub Brand",
+          key: "sub_brand",
+          value: filters.subBrand,
+          options: formattedSubBrands,
+        },
+        {
+          label: "Sub Category",
+          key: "sub_category",
+          value: filters.subCategory,
+          options: formattedSubCats,
+        },
+        {
+          label: "Color",
+          key: "color",
+          value: filters.color,
+          options: formattedColors.map((color) => ({ id: color, name: color })),
+        },
+        {
+          label: "Gender",
+          key: "gender",
+          value: filters.gender,
+          options: ["Male", "Female", "Unisex"].map((gender) => ({
+            id: gender,
+            name: gender,
+          })),
+        },
+      ].map(
+        ({ label, key, value, options }) =>
+          !!options.length && (
+            <div key={key} className="relative w-full">
+              <select
+                className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
+                value={value}
+                onChange={(e) => updateParam(key, e.target.value)}
+                aria-label={`Select ${label}`}
+              >
+                <option value="">Select {label}</option>
+                {options.map((option: SelectOption) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+              {value && (
+                <button
+                  type="button"
+                  onClick={() => updateParam(key, "")}
+                  className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
+                  aria-label={`Clear ${label} filter`}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          )
       )}
-
-      {/* Sub Brand Filter if there is any */}
-      {!!formattedSubBrands.length && (
-        <div className="relative w-full">
-          <select
-            className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
-            value={filters.subBrand}
-            onChange={(e) => updateParam("sub_brand", e.target.value)}
-          >
-            <option value="">Select Sub Brand</option>
-            {formattedSubBrands.map((brand) => (
-              <option key={brand.id} value={brand.id}>
-                {brand.name}
-              </option>
-            ))}
-          </select>
-          {filters.subBrand && (
-            <button
-              type="button"
-              onClick={() => updateParam("sub_brand", "")}
-              className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Sub Category Filter */}
-      {!!formattedSubCats.length && (
-        <div className="relative w-full">
-          <select
-            className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
-            value={toSentenceCase(filters.subCategory)}
-            onChange={(e) => updateParam("sub_category", e.target.value)}
-          >
-            <option value="">Select Sub Category</option>
-            {formattedSubCats.map((cat) => (
-              <option key={cat.id} value={cat.name}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-          {filters.subCategory && (
-            <button
-              type="button"
-              onClick={() => updateParam("sub_category", "")}
-              className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Color Filter */}
-      <div className="relative w-full">
-        <select
-          className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
-          value={filters.color}
-          onChange={(e) => updateParam("color", e.target.value)}
-        >
-          <option value="">Select Color</option>
-          {formattedColors.map((color) => (
-            <option key={color} value={color}>
-              {color}
-            </option>
-          ))}
-        </select>
-        {filters.color && (
-          <button
-            type="button"
-            onClick={() => updateParam("color", "")}
-            className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-          >
-            ✕
-          </button>
-        )}
-      </div>
-
-      {/* Gender Filter */}
-      <div className="relative w-full">
-        <select
-          className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
-          value={filters.gender}
-          onChange={(e) => updateParam("gender", e.target.value)}
-        >
-          <option value="">Select Gender</option>
-          {["Male", "Female", "Unisex"].map((gender) => (
-            <option key={gender} value={gender}>
-              {gender}
-            </option>
-          ))}
-        </select>
-        {filters.gender && (
-          <button
-            type="button"
-            onClick={() => updateParam("gender", "")}
-            className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-          >
-            ✕
-          </button>
-        )}
-      </div>
     </div>
   );
 }
