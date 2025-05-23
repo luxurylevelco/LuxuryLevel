@@ -82,7 +82,7 @@ export const productCardData: ProductCardProps[] = [
 
 export default function FeaturedWatches() {
   return (
-    <div className='section-style bg-white py-10 px-10 xl:px-20 2xl:px-72 w-full h-fit flex flex-col gap-10'>
+    <div className='bg-white p-10 xl:px-20 2xl:px-60 w-full h-fit flex flex-col gap-10'>
       <div className='flex w-full items-center flex-col'>
         <p className='font-semibold text-4xl text-black'>Featured Watches</p>
       </div>

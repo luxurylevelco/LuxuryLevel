@@ -3,9 +3,9 @@ import Image from 'next/image';
 
 export default function VipDiscount() {
   return (
-    <div className='page-style flex flex-row w-full h-fit py-10 2xl:px-72 gap-10'>
+    <div className='page-style flex flex-row w-full h-fit py-10 2xl:px-60 gap-10'>
       {/* Left side */}
-      <div className='flex flex-col justify-center items-center w-1/2 gap-10'>
+      <div className='flex flex-col justify-center items-center w-1/2 gap-6'>
         <div>
           <p className='font-semibold text-4xl text-black'>VIP DISCOUNT</p>
         </div>

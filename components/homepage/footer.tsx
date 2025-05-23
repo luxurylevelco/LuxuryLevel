@@ -105,7 +105,7 @@ export default function Footer() {
         </div>
 
         {/* Social media icons */}
-        <div className='bg-black flex flex-col justify-center items-center gap-6 py-6 px-96'>
+        <div className='bg-black flex flex-col justify-center items-center gap-6 py-6 px-20 md:px-40 xl:px-80'>
           <div className='flex flex-row gap-5 justify-center items-center'>
             {socialMediaLinks.map((social) => (
               <Link

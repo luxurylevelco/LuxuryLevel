@@ -5,10 +5,10 @@ export default function About() {
   return (
     <div
       id='overview'
-      className='page-style flex flex-row w-full h-fit py-10 2xl:px-72 gap-10'
+      className='page-style flex flex-row w-full h-fit py-10 2xl:px-60 gap-10'
     >
       {/* Left side */}
-      <div className='flex flex-col justify-center items-center w-1/2 gap-10'>
+      <div className='flex flex-col justify-center items-center w-1/2 gap-6'>
         <div>
           <p className='font-semibold text-4xl text-black'>COMPANY OVERVIEW</p>
         </div>
@@ -34,7 +34,7 @@ export default function About() {
           </p>
         </div>
         <div>
-          <Link href='/' className='flex justify-center'>
+          <Link href='/about-us' className='flex justify-center'>
             <div className='cursor-pointer bg-white text-black text-lg font-semibold px-6 py-2 border border-black hover:bg-black hover:text-white transition duration-300 transform hover:translate-y-3 inline-block'>
               Know more
             </div>
@@ -46,7 +46,7 @@ export default function About() {
       <div className='w-1/2 flex justify-center items-center'>
         <div className='relative w-full h-[500px]'>
           <Image
-            src='/homepage-assets/about-us.webp'
+            src='/homepage-assets/owner.webp'
             alt='About Us Image'
             fill
             className='object-cover'
