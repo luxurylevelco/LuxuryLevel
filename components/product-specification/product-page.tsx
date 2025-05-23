@@ -183,8 +183,8 @@ export default function ProductInfo({
           </div>
 
           <div className="flex w-full flex-col gap-2 mt-10">
-            <a
-              href=""
+            <Link
+              href="/"
               className="bg-green-600 hover:bg-green-700  text-white button"
             >
               <Image
@@ -194,8 +194,11 @@ export default function ProductInfo({
                 height={24}
               />
               <span>Inquire on WhatsApp</span>
-            </a>
-            <a href="" className=" hover:bg-gray-100  border text-black button">
+            </Link>
+            <Link
+              href="/"
+              className=" hover:bg-gray-100  border text-black button"
+            >
               <Image
                 src={"/svgs/email-black.svg"}
                 alt={"inquire in whatsapp button"}
@@ -203,7 +206,7 @@ export default function ProductInfo({
                 height={24}
               />
               <span>Send an email</span>
-            </a>
+            </Link>
           </div>
         </div>
 
