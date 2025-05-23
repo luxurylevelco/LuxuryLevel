@@ -14,6 +14,7 @@ export interface Product {
   image_3: string | null;
   created_at: string;
   updated_at: string;
+  brand_name?: string;
 }
 
 export interface Brand {
@@ -61,4 +62,5 @@ export interface ProductResponse {
 export interface ProductInformationResponse {
   brandInfo: Brand;
   productInfo: Product;
+  relatedProducts: Product[];
 }

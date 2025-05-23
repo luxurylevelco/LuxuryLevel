@@ -1,18 +1,18 @@
-import Link from 'next/link';
-import Image from 'next/image';
+import Link from "next/link";
+import Image from "next/image";
 
 export default function About() {
   return (
     <div
-      id='overview'
-      className='page-style flex flex-row w-full h-fit py-10 2xl:px-60 gap-10'
+      id="overview"
+      className="page-style flex flex-row w-full h-fit py-10 2xl:px-60 gap-10"
     >
       {/* Left side */}
-      <div className='flex flex-col justify-center items-center w-1/2 gap-6'>
+      <div className="flex flex-col justify-center items-center w-1/2 gap-6">
         <div>
-          <p className='font-semibold text-4xl text-black'>COMPANY OVERVIEW</p>
+          <p className="font-semibold text-4xl text-black">COMPANY OVERVIEW</p>
         </div>
-        <div className='flex flex-col gap-5 text-center'>
+        <div className="flex flex-col gap-5 text-center">
           <p>
             Luxury Level was founded in 2014 in Kuwait by Rahim Ghanaei, a
             seasoned expert in the luxury watch industry. With over two decades
@@ -34,8 +34,8 @@ export default function About() {
           </p>
         </div>
         <div>
-          <Link href='/about-us' className='flex justify-center'>
-            <div className='cursor-pointer bg-white text-black text-lg font-semibold px-6 py-2 border border-black hover:bg-black hover:text-white transition duration-300 transform hover:translate-y-3 inline-block'>
+          <Link href="/about-us" className="flex justify-center">
+            <div className="cursor-pointer bg-white text-black text-lg font-semibold px-6 py-2 border border-black hover:bg-black hover:text-white transition duration-300 transform hover:translate-y-3 inline-block">
               Know more
             </div>
           </Link>
@@ -43,13 +43,13 @@ export default function About() {
       </div>
 
       {/* Right side (Image) */}
-      <div className='w-1/2 flex justify-center items-center'>
-        <div className='relative w-full h-[500px]'>
+      <div className="w-1/2 flex justify-center items-center">
+        <div className="relative w-full h-[500px]">
           <Image
-            src='/homepage-assets/owner.webp'
-            alt='About Us Image'
+            src="/homepage-assets/owner.webp"
+            alt="About Us Image"
             fill
-            className='object-cover'
+            className="object-contain"
           />
         </div>
       </div>

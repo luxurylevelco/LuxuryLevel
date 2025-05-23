@@ -70,8 +70,8 @@ export default function ProductFilters({
   );
 
   const clearAllFilters = useCallback(() => {
-    router.push(`/`); // clear all
-  }, [router]);
+    router.push(pathname); // use pathname to retain current path
+  }, [router, pathname]);
 
   return (
     <div className="lg:w-[500px] xl:w-full space-y-4">

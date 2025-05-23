@@ -3,7 +3,6 @@
 import { Category } from "@/lib/types";
 import { Poppins } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 // Load Poppins font with a CSS variable
 const poppins = Poppins({
@@ -14,24 +13,12 @@ const poppins = Poppins({
 
 export default function JewelryCategoriesMenu({
   toggleMobileNav,
+  categories,
 }: {
   toggleMobileNav?: () => void;
+  categories: Category[];
 }) {
-  const [categories, setCategories] = useState<Category[]>([]);
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchBrands = async () => {
-      const res = await fetch(`/api/categories/jewelry/sub-categories`, {
-        method: "GET",
-      });
-      const categories = await res.json();
-
-      setCategories(categories);
-    };
-
-    fetchBrands();
-  }, []);
 
   const redirect = (category: Category) => {
     if (toggleMobileNav) {

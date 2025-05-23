@@ -53,7 +53,7 @@ export default async function Page({
         brandsList={brandsList.brands}
         colorsList={productData.colors ?? null}
         subCategoryList={null}
-        pathname={`all-products`}
+        pathname={`products`}
       />
     </>
   );

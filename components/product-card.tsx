@@ -14,7 +14,6 @@ export default function ProductCard({
   imgSrc,
   hoverImgSrc,
   productName,
-  price,
   href,
   className,
 }: ProductCardProps) {
@@ -31,7 +30,7 @@ export default function ProductCard({
               src={imgSrc}
               alt={productName}
               fill
-              className={`object-cover transition-opacity duration-300 ${
+              className={`object-contain transition-opacity duration-300 ${
                 !!hoverImgSrc ? "group-hover:opacity-0" : ""
               }`}
             />
@@ -42,7 +41,7 @@ export default function ProductCard({
                 src={hoverImgSrc}
                 alt={`${productName} (Hover)`}
                 fill
-                className="object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                className="object-contain transition-opacity duration-300 opacity-0 group-hover:opacity-100"
               />
             </div>
           )}
@@ -50,13 +49,13 @@ export default function ProductCard({
 
         {/* Info section */}
         <div className="h-1/3 flex flex-col justify-start items-center text-center  p-4">
-          <p className="text-sm lg:text-base text-black w-full">
+          <p className="text-sm 2xl:text-base text-black w-full line-clamp-4">
             {productName}
           </p>
 
-          {price !== null && (
+          {/* {price !== null && (
             <p className="text-green-700 font-semibold text-md pt-2">{price}</p>
-          )}
+          )} */}
         </div>
       </div>
     </Link>

@@ -2,7 +2,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { data } from "@/lib/constants/jewelry-products";
-import { uniqueByKey } from "@/lib/utils";
 
 export async function POST() {
   try {

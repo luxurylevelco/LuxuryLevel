@@ -3,7 +3,6 @@
 import { Brand } from "@/lib/types";
 import { Poppins } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 // Load Poppins font with a CSS variable
 const poppins = Poppins({
@@ -14,25 +13,27 @@ const poppins = Poppins({
 
 export default function OurBrandsMenu({
   toggleMobileNav,
+  brands,
 }: {
   toggleMobileNav?: () => void;
+  brands: Brand[];
 }) {
-  const [brands, setbrands] = useState<Brand[]>([]);
+  // const [brands, setbrands] = useState<Brand[]>([]);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchBrands = async () => {
-      const res = await fetch(`/api/brands`, {
-        method: "GET",
-      });
-      const brands = await res.json();
-      const _brands: Brand[] = brands.brands;
+  // useEffect(() => {
+  //   const fetchBrands = async () => {
+  //     const res = await fetch(`${process.env.API_URL}/api/brands`, {
+  //       method: "GET",
+  //     });
+  //     const brands = await res.json();
+  //     const _brands: Brand[] = brands.brands;
 
-      setbrands(_brands);
-    };
+  //     setbrands(_brands);
+  //   };
 
-    fetchBrands();
-  }, []);
+  //   fetchBrands();
+  // }, []);
 
   const redirect = (brand: Brand) => {
     if (toggleMobileNav) {

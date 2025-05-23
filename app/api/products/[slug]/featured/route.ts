@@ -108,7 +108,6 @@ async function getLimitedProductsWithHierarchy(
 
   return results;
 }
-
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -118,6 +117,7 @@ export async function GET(
     const { searchParams } = new URL(req.url);
 
     const limit = searchParams.get("limit");
+    const brandQuery = searchParams.get("brand");
 
     // Get category ID
     const { data: categoryData, error: categoryIdError } = await supabase
@@ -138,39 +138,61 @@ export async function GET(
 
     const categoryId = (categoryData as Category).id;
 
-    // Get the featured brand ids
-    const { data: brandData, error: brandIdsError } = await supabase
-      .from("brand")
-      .select("id")
-      .eq("featured", true);
+    let featuredBrandIds: number[] = [];
 
-    if (brandIdsError || !brandData || brandData.length === 0) {
-      return NextResponse.json(
-        {
-          error: brandIdsError?.message || "No featured brands found.",
-        },
-        { status: 404 }
-      );
+    if (brandQuery) {
+      // Get the specific brand by name
+      const { data: brandData, error: brandError } = await supabase
+        .from("brand")
+        .select("id, featured")
+        .ilike("name", `%${brandQuery}%`)
+        .single();
+
+      if (brandError || !brandData) {
+        return NextResponse.json(
+          {
+            error: brandError?.message || `Brand '${brandQuery}' not found.`,
+          },
+          { status: 404 }
+        );
+      }
+
+      if (!brandData.featured) {
+        return NextResponse.json(
+          {
+            error: `Brand '${brandQuery}' is not featured.`,
+          },
+          { status: 400 }
+        );
+      }
+
+      featuredBrandIds = [brandData.id];
+    } else {
+      // Default: get all featured brands
+      const { data: brandData, error: brandIdsError } = await supabase
+        .from("brand")
+        .select("id")
+        .eq("featured", true);
+
+      if (brandIdsError || !brandData || brandData.length === 0) {
+        return NextResponse.json(
+          {
+            error: brandIdsError?.message || "No featured brands found.",
+          },
+          { status: 404 }
+        );
+      }
+
+      featuredBrandIds = (brandData as Brand[]).map((brand) => brand.id);
     }
-
-    const featuredBrandIds: number[] = (brandData as Brand[]).map(
-      (brand) => brand.id
-    );
 
     // Get products with hierarchy support
     const products: Product[] = await getLimitedProductsWithHierarchy(
       supabase,
       featuredBrandIds,
       categoryId,
-      limit ? Number(limit) : 2 // limit_per_brand
+      limit ? Number(limit) : 2
     );
-
-    console.log("Featured brand IDs:", featuredBrandIds);
-    console.log(
-      "All brand IDs (including one sub-brand per brand):",
-      await getAllBrandIds(supabase, featuredBrandIds)
-    );
-    console.log("Products found:", products?.length || 0);
 
     return NextResponse.json({
       products,

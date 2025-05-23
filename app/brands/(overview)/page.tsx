@@ -17,7 +17,7 @@ export default async function Page() {
         {/* Header  */}
         <div className="text-center space-y-4">
           <p className="text-lg font-bold ">
-            We Buy and Sell World's Most Luxury Watch Brands
+            We Buy and Sell World&apos;s Most Luxury Watch Brands
           </p>
           <p className="text-lg font-normal ">
             We are not an official dealer for the products we sell and have no

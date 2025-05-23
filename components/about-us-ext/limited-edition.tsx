@@ -1,29 +1,28 @@
-import Image from 'next/image';
-import Link from 'next/link';
+import Image from "next/image";
 
 export default function LimitedEdition() {
   return (
-    <div className='padding min-h-screen bg-white flex flex-col'>
-      <div className='flex flex-row w-full h-fit 2xl:px-20 gap-10'>
+    <div className="padding min-h-screen bg-white flex flex-col">
+      <div className="flex flex-row w-full h-fit 2xl:px-20 gap-10">
         {/* Left side (Image) */}
-        <div className='w-1/2 flex justify-center items-center'>
-          <div className='relative w-full h-[500px]'>
+        <div className="w-1/2 flex justify-center items-center">
+          <div className="relative w-full h-[500px]">
             <Image
-              src='/homepage-assets/limited-img.webp'
-              alt='About Us Image'
+              src="/homepage-assets/limited-img.webp"
+              alt="About Us Image"
               fill
-              className='object-cover'
+              className="object-cover"
             />
           </div>
         </div>
         {/* Right side */}
-        <div className='flex flex-col justify-center items-center w-1/2 gap-6'>
+        <div className="flex flex-col justify-center items-center w-1/2 gap-6">
           <div>
-            <p className='font-semibold text-4xl text-black'>
+            <p className="font-semibold text-4xl text-black">
               LIMITED EDITION WATCHES
             </p>
           </div>
-          <div className='flex flex-col gap-5 text-center'>
+          <div className="flex flex-col gap-5 text-center">
             <p>
               Introducing our highly coveted Limited Edition Watches, the
               epitome of rarity and exclusivity. These timepieces are
