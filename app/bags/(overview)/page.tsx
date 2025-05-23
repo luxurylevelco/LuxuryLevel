@@ -1,5 +1,7 @@
 import Banner from "@/components/banner";
-import CardsSection from "@/components/cards-section";
+import CardsSectionWrapper from "@/components/cards-section-wrappers/spec-wrapper";
+import CardsSectionLoading from "@/components/cards-section-wrappers/loading";
+import { Suspense } from "react";
 
 export default async function Page({
   searchParams,
@@ -31,34 +33,17 @@ export default async function Page({
 
   const queryString = params.toString();
 
-  const [resbags, resbagsBrands, resbagsCategories] = await Promise.all([
-    fetch(
-      `${process.env.API_URL}/api/products/${
-        sub_category || "bags"
-      }?${queryString}`
-    ),
-    fetch(`${process.env.API_URL}/api/categories/bags/available-brands`),
-    fetch(`${process.env.API_URL}/api/categories/bags/sub-categories`),
-  ]);
-
-  const [bagsData, bagsBrandsList, bagsCatsList] = await Promise.all([
-    resbags.json(),
-    resbagsBrands.json(),
-    resbagsCategories.json(),
-  ]);
-
   return (
     <>
       <Banner title={"BAGS"} classnameForBgSrc={""} />
-      <CardsSection
-        products={bagsData.products || []}
-        pageInfo={bagsData.page ?? null}
-        brandsList={bagsBrandsList}
-        colorsList={bagsData.colors ?? null}
-        subCategoryList={bagsCatsList}
-        subBrandsList={bagsData.subBrands}
-        pathname="bags"
-      />
+      <Suspense fallback={<CardsSectionLoading />}>
+        <CardsSectionWrapper
+          queryString={queryString}
+          sub_category={sub_category}
+          tableName="bags"
+          pathname="bags"
+        />
+      </Suspense>
     </>
   );
 }

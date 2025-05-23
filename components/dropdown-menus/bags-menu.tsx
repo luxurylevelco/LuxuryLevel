@@ -25,7 +25,7 @@ export default function BagsMenu({
       toggleMobileNav();
     }
 
-    router.push(`/bags?brands=${brand.id}`);
+    router.push(`/bags?brand=${brand.id}`);
   };
 
   return (
