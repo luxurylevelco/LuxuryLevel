@@ -1,28 +1,10 @@
 import { supabase } from "@/lib/supabase";
+import { ProductResponse } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
 // Types
 interface Brand {
   id: number;
-}
-
-interface Product {
-  id: number;
-  ref_no: string | null;
-  name: string;
-  description: string | null;
-  color: string | null;
-  gender: string | null;
-  stock: number | null;
-  price: number | null;
-  image_1: string | null;
-  image_2: string | null;
-  image_3: string | null;
-  created_at: string;
-  updated_at: string;
-  category_id: number | null;
-  brand_id: number;
-  brand_name: string | null;
 }
 
 interface Category {
@@ -61,7 +43,7 @@ async function getLimitedProductsWithHierarchy(
   brandIds: number[],
   categoryId: number,
   limitPerBrand: number
-): Promise<Product[]> {
+): Promise<ProductResponse["products"]> {
   // Step 1: Get brand IDs, including one sub-brand per brand
   const allBrandIds: number[] = await getAllBrandIds(supabase, brandIds);
 
@@ -70,12 +52,12 @@ async function getLimitedProductsWithHierarchy(
   }
 
   // Step 2: Get products for all brands, filtered by category
-  const results: Product[] = [];
+  const results: ProductResponse["products"] = [];
 
   for (const brandId of allBrandIds) {
     const { data: products, error } = await supabase
       .from("product")
-      .select("*")
+      .select("id, name, price, image_1,image_2, image_3")
       .eq("brand_id", brandId)
       .eq("category_id", categoryId)
       .order("created_at", { ascending: false })
@@ -98,7 +80,9 @@ async function getLimitedProductsWithHierarchy(
     }
 
     if (products && products.length > 0) {
-      const productsWithBrandName = products.map((product: Product) => ({
+      const productsWithBrandName = (
+        products as ProductResponse["products"]
+      ).map((product) => ({
         ...product,
         brand_name: brandName.name,
       }));
@@ -187,12 +171,13 @@ export async function GET(
     }
 
     // Get products with hierarchy support
-    const products: Product[] = await getLimitedProductsWithHierarchy(
-      supabase,
-      featuredBrandIds,
-      categoryId,
-      limit ? Number(limit) : 2
-    );
+    const products: ProductResponse["products"] =
+      await getLimitedProductsWithHierarchy(
+        supabase,
+        featuredBrandIds,
+        categoryId,
+        limit ? Number(limit) : 2
+      );
 
     return NextResponse.json({
       products,

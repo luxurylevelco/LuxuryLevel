@@ -1,93 +1,90 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 
-export default function Search({
-  className,
-  toggleMobileNav,
-  searchParamKey,
-  placeholder,
-  pathname,
-}: {
+interface SearchProps {
   className?: string;
   toggleMobileNav?: () => void;
   searchParamKey: string;
   placeholder: string;
   pathname: string;
-}) {
-  const [query, setQuery] = useState<string>("");
+}
+
+export default function Search({
+  className = "",
+  toggleMobileNav,
+  searchParamKey,
+  placeholder,
+  pathname,
+}: SearchProps) {
+  const [query, setQuery] = useState("");
   const searchParams = useSearchParams();
   const router = useRouter();
+  const searchValue = searchParams.get(searchParamKey) ?? "";
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  // Memoize handlers to prevent unnecessary re-renders
+  const updateSearchParams = useCallback(
+    (newQuery: string | null) => {
+      const params = new URLSearchParams(searchParams);
+      if (newQuery?.trim()) {
+        params.set(searchParamKey, newQuery.trim());
+      } else {
+        params.delete(searchParamKey);
+      }
+      router.push(`/${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams, searchParamKey]
+  );
 
-    if (!query.trim()) return;
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!query.trim()) return;
+      toggleMobileNav?.();
+      updateSearchParams(query);
+    },
+    [query, toggleMobileNav, updateSearchParams]
+  );
 
-    if (toggleMobileNav) {
-      toggleMobileNav();
-    }
-
-    const params = new URLSearchParams(searchParams.toString());
-    params.set(searchParamKey, query.trim());
-
-    router.push(`/${pathname}?${params.toString()}`);
-  };
-
-  const handleClear = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete(searchParamKey);
-    router.push(`/${pathname}?${params.toString()}`);
-    setQuery(""); // Optional: clear local input
-  };
-
-  const value = searchParams.get(searchParamKey) ?? "";
+  const handleClear = useCallback(() => {
+    setQuery("");
+    updateSearchParams(null);
+  }, [updateSearchParams]);
 
   return (
     <form
       onSubmit={handleSubmit}
-      className={`flex items-center w-full h-[40px] rounded-full border border-gray-300 px-4 gap-2 ${className}`}
+      className={`flex h-10 w-full items-center gap-2 rounded-full border border-gray-300 px-4 ${className}`}
     >
-      {/* Left Icon */}
-      <Image
-        src="/svgs/search-icon.svg"
-        alt="search icon"
-        width={16}
-        height={16}
-      />
-
-      {/* Input */}
+      <Image src="/svgs/search-icon.svg" alt="Search" width={16} height={16} />
       <input
         type="text"
-        value={query || value}
-        onChange={(e) => setQuery(e.currentTarget.value)}
-        className="w-full bg-transparent focus:outline-none text-sm"
+        value={query || searchValue}
+        onChange={(e) => setQuery(e.target.value)}
+        className="w-full bg-transparent text-sm focus:outline-none"
         placeholder={placeholder}
+        aria-label="Search"
       />
-
-      {/* Clear Button */}
-      {searchParams.get(searchParamKey) && (
+      {searchValue && (
         <button
           type="button"
           onClick={handleClear}
           className="p-1 hover:opacity-80"
+          aria-label="Clear search"
         >
-          <Image
-            src="/svgs/x-icon.svg"
-            alt="clear search"
-            width={20}
-            height={20}
-          />
+          <Image src="/svgs/x-icon.svg" alt="" width={20} height={20} />
         </button>
       )}
-
-      {/* Right Submit Button */}
-      <button type="submit" className="p-1 hover:opacity-80">
+      <button
+        type="submit"
+        className="p-1 hover:opacity-80"
+        aria-label="Submit search"
+      >
         <Image
           src="/svgs/arrow-right-search-submit.svg"
-          alt="submit search"
+          alt=""
           width={24}
           height={24}
         />
