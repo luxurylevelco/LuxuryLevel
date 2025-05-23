@@ -3,39 +3,29 @@ export default function OtherInfo() {
     <div className='flex flex-col bg-white h-fit w-full 2xl:px-40 py-10 gap-8'>
       <div className='flex flex-col gap-3'>
         <p className='font-bold text-3xl'>
-          Luxury Souq: A Trusted Destination for Luxury Watches and Jewelry
+          Luxury Level: A Trusted Destination for Luxury Watches and Jewelry
         </p>
         <p>
-          The CEO of Luxury Souq, Mr. Khaled Ebrahimi, is an Emirati businessman
-          with a deep passion for luxury watches. His love for these exquisite
-          timepieces comes from his father, who belongs to a family with a long
-          history in the watch trading industry.{' '}
+          The CEO of Luxury Level, Mr. Rahim Ghanaei, a seasoned expert in the
+          luxury watch industry. With over two decades of experience in business
+          and a deep-rooted passion for horology, Rahim has been actively
+          involved in the watch trade since 2002.{' '}
         </p>
         <p>
-          To pursue his lifelong passion, he traveled to Switzerland to earn a
-          Master’s Degree in International Business, specializing in Luxury
-          Goods Management. Additionally, he graduated from the International
-          Geneva Institute (IGI) with expertise in gemology, including diamond
-          polishing and colored stone grading.
+          With a career rooted in passion, precision, and integrity, Mr. Ghanaei
+          has cultivated a reputation as a trusted authority in the high-end
+          watch industry. Under his leadership, LL has evolved into a premier
+          trading house, catering to discerning collectors and connoisseurs
+          across the region.
         </p>
         <p>
-          Mr. Khaled Ebrahimi is not just a businessman, but also someone who
-          loves to travel and explore. He enjoys attending international watch
-          exhibitions worldwide, including in Hong Kong, Miami, New York,
-          Germany, and Switzerland. Through these events, he not only indulges
-          in his hobby of collecting watches but also has the opportunity to
-          meet new people and establish connections.
+          Driven by a commitment to authenticity, exclusivity, and exceptional
+          client service, LL continues to set the standard in the luxury watch
+          market, offering rare and prestigious timepieces that embody
+          craftsmanship and heritage.
         </p>
         <p>
-          With his passion for luxury watches and desire to make a mark in the
-          industry, Mr. Khaled Ebrahimi embarked on building a Luxury Souq.
-          Armed with his knowledge and a clear vision, he started with a rented
-          space of 1500 square feet and a team of only five employees, including
-          himself. Through hard work and unwavering determination, his efforts
-          paid off.{' '}
-        </p>
-        <p>
-          Today, Luxury Souq has established a reputation for offering some of
+          Today, Luxury Level has established a reputation for offering some of
           the rarest, most authentic, and high-quality pre-owned Swiss-made
           watches and other luxury goods, all at competitive prices in the
           market.
@@ -46,8 +36,8 @@ export default function OtherInfo() {
           Expanding Our Reach: International Office and E-Commerce
         </p>
         <p>
-          In 2013, Luxury Souq opened an office in Hong Kong to better serve our
-          international customers. This move allowed us to cater to clients’
+          In 2013, Luxury Level opened an office in Hong Kong to better serve
+          our international customers. This move allowed us to cater to clients’
           needs worldwide and ensure their satisfaction. We understand the
           importance of offering customers a smooth and enjoyable experience
           outside of Dubai. As a result, we expanded our services through online
@@ -69,7 +59,7 @@ export default function OtherInfo() {
           Staying Connected: Social Media and Customer Satisfaction
         </p>
         <p>
-          Luxury Souq maintains an active presence on various social media
+          Luxury Level maintains an active presence on various social media
           platforms to keep our customers engaged and informed about our latest
           offerings. Connect with use through the Twitter, YouTube, Facebook,
           Instagram, and Snapchat. We share our latest watches and exciting
@@ -82,7 +72,7 @@ export default function OtherInfo() {
           Our Commitment to Customer Satisfaction
         </p>
         <p>
-          Luxury Souq’s primary goal is to ensure our clients are delighted. We
+          Luxury Level’s primary goal is to ensure our clients are delighted. We
           believe in providing high-quality service, honesty, and efficiency
           throughout the process. Our knowledgeable team is ready to help every
           customer.
