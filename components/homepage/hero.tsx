@@ -1,29 +1,29 @@
-import Image from "next/image";
+import Image from 'next/image';
 
 export default function Hero() {
   return (
     <div className="section-style relative bg-[url('/homepage-assets/hero.webp')] bg-cover bg-center bg-no-repeat p-20 bg-black">
-      <div className="absolute bottom-28 left-24 flex flex-col h-fit">
-        <div className=" w-[100px]">
+      <div className='absolute bottom-14 left-10 md:bottom-28 md:left-24 flex flex-col h-fit'>
+        <div className='w-[100px]'>
           <Image
-            src="/homepage-assets/whatsapp-logo.webp"
-            alt="Whatsapp"
+            src='/homepage-assets/whatsapp-logo.webp'
+            alt='Whatsapp'
             width={500}
             height={500}
-            className="w-full h-auto"
+            className='w-full h-auto'
           />
         </div>
 
         <div>
-          <p className="font-semibold text-white text-2xl">Message us on</p>
-          <p className="font-bold text-white text-2xl">Whatsapp</p>
+          <p className='font-semibold text-white text-2xl'>Message us on</p>
+          <p className='font-bold text-white text-2xl'>Whatsapp</p>
         </div>
 
-        <div className="pt-5">
-          <p className="text-gray-400 text-lg">
+        <div className='pt-5'>
+          <p className='text-gray-400 text-lg'>
             Get First Access To New Arrivals
           </p>
-          <p className="text-gray-400 text-lg">Exclusive Offers And Updates</p>
+          <p className='text-gray-400 text-lg'>Exclusive Offers And Updates</p>
         </div>
       </div>
     </div>

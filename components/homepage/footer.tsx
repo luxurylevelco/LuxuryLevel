@@ -42,10 +42,10 @@ export default function Footer() {
   return (
     <footer className='footer p-0'>
       <div>
-        <div className='bg-gray-100 w-full h-fit flex flex-row gap-10 p-20 justify-center items-start'>
+        <div className='bg-gray-100 w-full h-fit flex flex-col md:flex-row gap-10 p-20 justify-center items-center md:items-start text-center md:text-start'>
           {/* Left Section */}
-          <div className='flex flex-col w-1/4 items-start gap-5'>
-            <div className='flex flex-col'>
+          <div className='flex flex-col w-full md:w-1/4 items-center md:items-start gap-5'>
+            <div className='flex flex-col items-center md:items-start'>
               <Image
                 src='/svgs/level-logo.svg'
                 alt='Whatsapp'

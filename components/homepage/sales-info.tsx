@@ -38,7 +38,7 @@ const salesInfoData: SalesInfoProps[] = [
 
 export function SalesInfoCard({ iconSrc, label, sublabel }: SalesInfoProps) {
   return (
-    <div className='flex items-center justify-center gap-4 p-8'>
+    <div className='flex flex-col md:flex-row items-center justify-center gap-4 p-8'>
       <Image src={iconSrc} alt={label} width={32} height={32} />
       <div className='text-center'>
         <div className='font-semibold text-xl'>{label}</div>
@@ -51,7 +51,7 @@ export function SalesInfoCard({ iconSrc, label, sublabel }: SalesInfoProps) {
 export default function SalesInfo() {
   return (
     <div
-      className={`${robotoCondensed.className} section-style bg-white h-[100px] flex justify-center items-center`}
+      className={`${robotoCondensed.className} section-style bg-white h-fit md:h-[100px] flex flex-col md:flex-row justify-center items-center`}
     >
       {salesInfoData.map((item, idx) => (
         <SalesInfoCard key={idx} {...item} />

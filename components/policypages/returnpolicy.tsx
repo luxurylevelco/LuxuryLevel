@@ -1,6 +1,6 @@
 export default function ReturnPolicy() {
   return (
-    <div className='h-fit w-full bg-white px-60 pt-10 pb-20 flex flex-col justify-center items-start gap-12'>
+    <div className='h-fit w-full bg-white px-10 md:px-20 lg:px-60 pt-10 pb-20 flex flex-col justify-center items-start gap-12'>
       <p>
         Customer satisfaction is important to Luxurylevel. We ensure every
         customer shopping experience will be exceptional. If any customer needs

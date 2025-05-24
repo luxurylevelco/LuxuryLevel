@@ -1,6 +1,6 @@
 export default function OtherInfo() {
   return (
-    <div className='flex flex-col bg-white h-fit w-full 2xl:px-40 py-10 gap-8'>
+    <div className='flex flex-col bg-white h-fit w-full px-10 2xl:px-40 py-10 gap-8'>
       <div className='flex flex-col gap-3'>
         <p className='font-bold text-3xl'>
           Luxury Level: A Trusted Destination for Luxury Watches and Jewelry
