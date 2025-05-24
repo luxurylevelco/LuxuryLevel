@@ -146,7 +146,6 @@ export async function GET(req: NextRequest) {
   }
 
   // Suppress TypeScript error for color property access
-  // eslint-disable-next-line
   const uniqueColors = Array.from(
     new Set(
       // eslint-disable-next-line

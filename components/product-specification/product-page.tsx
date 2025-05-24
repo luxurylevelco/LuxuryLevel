@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import RelatedProducts from "./related-products";
 import { ProductInformationResponse } from "@/lib/types";
+import { getWhatsAppUrl } from "@/lib/utils";
 
 function ZoomableImage({ src }: { src: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -105,6 +106,8 @@ export default function ProductInfo({
     }
   }
 
+  const message = `Hi! I'd like to inquire about ${productInfo.name}\n\nHere's the link:\n${process.env.NEXT_PUBLIC_FRONTEND_URL}/products/${productInfo.id}`;
+
   return (
     <div className="bg-white w-full min-h-screen px-20 py-32 2xl:px-72 2xl:py-40 flex flex-col gap-20">
       <div className="h-fit w-full flex flex-row justify-between">
@@ -184,7 +187,10 @@ export default function ProductInfo({
 
           <div className="flex w-full flex-col gap-2 mt-10">
             <Link
-              href="/"
+              href={getWhatsAppUrl({
+                message: encodeURIComponent(message),
+              })}
+              target="_blank"
               className="bg-green-600 hover:bg-green-700  text-white button"
             >
               <Image
@@ -196,7 +202,7 @@ export default function ProductInfo({
               <span>Inquire on WhatsApp</span>
             </Link>
             <Link
-              href="/"
+              href={`/contact-us?message=${encodeURIComponent(message)}`}
               className=" hover:bg-gray-100  border text-black button"
             >
               <Image
@@ -284,9 +290,9 @@ export default function ProductInfo({
       </div>
 
       {/* Related Products */}
-      <div>
+      {relatedProducts.length > 0 && (
         <RelatedProducts products={relatedProducts} />
-      </div>
+      )}
     </div>
   );
 }

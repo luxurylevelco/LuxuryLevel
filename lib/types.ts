@@ -53,7 +53,7 @@ export interface BrandResponse {
   page: PageInfo;
 }
 
-export interface ProductCard {
+export interface ProductCardProps {
   id: number;
   name: string;
   price: number | null;
@@ -71,7 +71,7 @@ export interface ProductBrand {
 export interface ProductResponse {
   subBrands: ProductBrand[] | null;
   colors: string[];
-  products: ProductCard[];
+  products: ProductCardProps[];
   page: PageInfo;
 }
 
@@ -79,4 +79,34 @@ export interface ProductInformationResponse {
   brandInfo: Brand;
   productInfo: Product;
   relatedProducts: Product[];
+}
+
+export interface BrandInfoFeaturedProps {
+  id: string;
+  logo_url: string;
+}
+
+export interface FeaturedResponse {
+  brandInfo?: BrandInfoFeaturedProps;
+  products: ProductCardProps[];
+}
+
+export interface FiltersParams {
+  page: string | null;
+  color: string | null;
+  gender: string | null;
+  name: string | null;
+  brand: string | null;
+  sub_category: string | null;
+  sub_brand: string | null;
+}
+
+export interface BaseEmailProps {
+  name: string;
+  email: string;
+  message: string;
+}
+
+export interface SendEmailProps extends BaseEmailProps {
+  to: string;
 }

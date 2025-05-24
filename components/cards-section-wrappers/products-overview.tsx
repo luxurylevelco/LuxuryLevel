@@ -6,10 +6,12 @@ export default async function CardsSectionWrapper({
   queryString: string;
 }) {
   const [resbags, brandsRes] = await Promise.all([
-    fetch(`${process.env.API_URL}/api/products?${queryString}`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}//products?${queryString}`, {
       next: { revalidate: 60 },
     }),
-    fetch(`${process.env.API_URL}/api/brands`, { next: { revalidate: 60 } }),
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}//brands`, {
+      next: { revalidate: 60 },
+    }),
   ]);
 
   const [productData, brandsList] = await Promise.all([

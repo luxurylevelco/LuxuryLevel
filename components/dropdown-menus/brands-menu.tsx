@@ -23,7 +23,7 @@ export default function OurBrandsMenu({
 
   // useEffect(() => {
   //   const fetchBrands = async () => {
-  //     const res = await fetch(`${process.env.API_URL}/api/brands`, {
+  //     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}//brands`, {
   //       method: "GET",
   //     });
   //     const brands = await res.json();

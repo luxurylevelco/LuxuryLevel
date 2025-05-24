@@ -2,9 +2,21 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["luxurysouq.com", "cdn-jnbkl.nitrocdn.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "luxurysouq.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn-jnbkl.nitrocdn.com",
+        port: "",
+        pathname: "/**",
+      },
+    ],
   },
-  // pageExtensions: ["page.tsx"],
 };
 
 export default nextConfig;

@@ -19,7 +19,7 @@ const robotoCondensed = Roboto_Condensed({
 
 function Logo() {
   return (
-    <div>
+    <Link href={"/"}>
       <Image
         src={"/svgs/level-logo.svg"}
         alt={"search icon"}
@@ -27,7 +27,7 @@ function Logo() {
         width={50}
         height={50}
       />
-    </div>
+    </Link>
   );
 }
 
@@ -189,6 +189,11 @@ function Menu({
       hasDropdown: true,
       element: <BagsMenu toggleMobileNav={toggleMobileNav} brands={bagsMenu} />,
     },
+    {
+      title: "CONTACT US",
+      link: "/contact-us",
+      hasDropdown: false,
+    },
   ];
 
   return (
@@ -246,6 +251,7 @@ function MobileMenuButton(props: {
             searchParamKey="name"
             placeholder="Search All Products..."
             pathname="products"
+            resetOnSearch={true}
           />
         </Suspense>
 
@@ -297,6 +303,7 @@ function DesktopSearch() {
           className="w-[250px]"
           pathname="products"
           searchParamKey="name"
+          resetOnSearch={true}
           placeholder="Search All Products..."
         />
       </div>

@@ -46,10 +46,10 @@ export default function ProductFilters({
 
   const formattedSubCats = useMemo(
     () =>
-      subCategoryList?.map((item) => ({
-        id: item.id,
-        name: toSentenceCase(item.name),
-      })) || [],
+      subCategoryList?.map((item) => {
+        const name = toSentenceCase(item.name);
+        return { id: name, name };
+      }) || [],
     [subCategoryList, toSentenceCase]
   );
 
@@ -93,7 +93,7 @@ export default function ProductFilters({
         params.delete(key);
       }
       params.delete("page");
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      router.replace(`/${pathname}?${params.toString()}`, { scroll: false });
     },
     [router, pathname, searchParams]
   );
@@ -125,7 +125,7 @@ export default function ProductFilters({
 
       <Search
         searchParamKey="name"
-        placeholder="Search watch name/title..."
+        placeholder="Search product name"
         className="w-full"
         pathname={pathname}
       />
@@ -170,7 +170,11 @@ export default function ProductFilters({
           !!options.length && (
             <div key={key} className="relative w-full">
               <select
-                className="w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10"
+                className={`w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10 ${
+                  value
+                    ? "border-gray-300 text-black"
+                    : "border-gray-200 text-gray-400"
+                }`}
                 value={value}
                 onChange={(e) => updateParam(key, e.target.value)}
                 aria-label={`Select ${label}`}
