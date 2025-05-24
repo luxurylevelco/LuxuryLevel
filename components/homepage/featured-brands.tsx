@@ -3,34 +3,53 @@ import { Brand } from "@/lib/types";
 import Link from "next/link";
 
 export default async function FeaturedBrands() {
-  const dataRes = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}//brands/featured`,
-    {
-      next: { revalidate: 60 },
-    }
-  );
+  let featuredBrands: Brand[] = [];
 
-  const featuredBrands: Brand[] = await dataRes.json();
+  try {
+    const dataRes = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/brands/featured`, // fixed double slashes
+      {
+        next: { revalidate: 60 },
+      }
+    );
+
+    const contentType = dataRes.headers.get("content-type") || "";
+
+    if (!dataRes.ok || !contentType.includes("application/json")) {
+      throw new Error(`Invalid response: ${dataRes.statusText}`);
+    }
+
+    featuredBrands = await dataRes.json();
+  } catch (error) {
+    console.error("Failed to fetch featured brands:", error);
+  }
 
   return (
     <div className="section-style py-10 px-10 md:px-20 w-full h-fit flex flex-col md:gap-10">
       <div className="flex w-full items-center flex-col">
         <p className="font-semibold text-4xl text-black">Featured Brands</p>
         <p className="text-lg pt-10 text-black text-center">
-          Discover an unparalled selection of luxury watches from the
+          Discover an unparalleled selection of luxury watches from the
           world&apos;s top brands.
         </p>
       </div>
+
       <div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 py-4">
-          {featuredBrands.map((brand, idx) => (
-            <BrandCard
-              key={idx}
-              imgSrc={brand.logo_url || "/placeholder-image.webp"}
-              href={`/brands/${brand.id}/`}
-            />
-          ))}
-        </div>
+        {featuredBrands.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 py-4">
+            {featuredBrands.map((brand, idx) => (
+              <BrandCard
+                key={idx}
+                imgSrc={brand.logo_url || "/placeholder-image.webp"}
+                href={`/brands/${brand.id}/`}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500 pt-8">
+            No featured brands found.
+          </p>
+        )}
       </div>
 
       <Link href="/brands" className="flex justify-center">
