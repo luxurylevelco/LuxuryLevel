@@ -32,7 +32,7 @@ body {
 
 @layer base {
   .padding {
-    @apply px-10 py-20;
+    @apply p-6 md:px-10 md:py-20;
   }
 
   .card-style {

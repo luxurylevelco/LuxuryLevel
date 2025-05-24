@@ -35,7 +35,7 @@ export default function WatchesMenu({
             key={gender}
             onClick={() => redirect(gender)}
             className={`font-normal pr-4  text-start 
-              border-r-[1px] border-gray-300 lg:text-[12px] xl:text-[14px] `}
+              lg:border-r-[1px] border-gray-300 lg:text-[12px] xl:text-[14px] hover:font-semibold`}
           >
             {gender.toUpperCase()}
           </button>

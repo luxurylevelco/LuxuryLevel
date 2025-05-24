@@ -1,5 +1,6 @@
 "use client";
 
+import Spinner from "@/components/spinner";
 import { BaseEmailProps } from "@/lib/types";
 import { useState } from "react";
 
@@ -46,10 +47,10 @@ export default function ContactUs({ message }: { message: string | null }) {
   };
 
   return (
-    <div className="min-h-screen relative bg-[url('/homepage-assets/contactus.webp')] bg-cover bg-center bg-no-repeat justify-center items-center p-10 md:px-28 md:py-20 bg-black">
+    <div className="min-h-screen relative bg-[url('/homepage-assets/contactus.webp')] bg-cover bg-center bg-no-repeat flex lg:justify-start items-center p-10 md:px-28 md:py-20 bg-black">
       <div className="flex flex-col bg-black bg-opacity-60 rounded-2xl justify-center items-start h-fit w-full lg:w-[650px] p-5 md:p-10 mt-20 md:mt-5">
         <div>
-          <p className="font-bold text-3xl md:text-4xl xl:text-5xl text-white">
+          <p className="font-bold text-2xl md:text-4xl xl:text-5xl text-white">
             We’re Here to Assist You
           </p>
         </div>
@@ -110,7 +111,13 @@ export default function ContactUs({ message }: { message: string | null }) {
               disabled={isLoading}
               className="mt-4 w-full lg:w-[500px] bg-white text-black px-6 py-2 font-semibold hover:bg-gray-300 hover:text-black border border-black transition-all duration-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Sending..." : "Send Message"}
+              {isLoading ? (
+                <span className="flex flex-row gap-4 items-center justify-center">
+                  Sending <Spinner className="h-5 w-5" />
+                </span>
+              ) : (
+                "Send Message"
+              )}
             </button>
           </form>
         </div>

@@ -41,7 +41,7 @@ export default function JewelryCategoriesMenu({
             key={category.id}
             onClick={() => redirect(category)}
             className={`font-normal pr-4  text-start 
-              border-r-[1px] border-gray-300 lg:text-[12px] xl:text-[14px] `}
+              lg:border-r-[1px] border-gray-300 lg:text-[12px] xl:text-[14px] hover:font-semibold `}
           >
             {category.name}
           </button>

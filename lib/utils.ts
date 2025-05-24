@@ -45,6 +45,8 @@ export function toSentenceCase(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 }
 
-export const getWhatsAppUrl = ({ message }: { message: string }) => {
-  return `https://wa.me/${process.env.WHATSAPP_NO}?text=${message}`;
+export const getWhatsAppUrl = ({ message }: { message?: string }) => {
+  return `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NO}${
+    message && `?text=${message}`
+  }`;
 };

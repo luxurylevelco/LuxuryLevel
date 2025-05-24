@@ -1,14 +1,14 @@
-import Image from 'next/image';
+import Image from "next/image";
 
 export default function VipDiscount() {
   return (
-    <div className='page-style flex flex-col md:flex-row w-full h-fit py-10 2xl:px-60 gap-10'>
+    <div className="page-style flex flex-col md:flex-row w-full h-fit py-10 2xl:px-60 gap-10">
       {/* Left side */}
-      <div className='flex flex-col justify-center items-center md:w-1/2 gap-6'>
+      <div className="flex flex-col justify-center items-center md:w-1/2 gap-6">
         <div>
-          <p className='font-semibold text-4xl text-black'>VIP DISCOUNT</p>
+          <p className="font-semibold text-4xl text-black">VIP DISCOUNT</p>
         </div>
-        <div className='flex flex-col gap-5 text-center'>
+        <div className="flex flex-col gap-5 text-center">
           <p>
             We always have special deals and big discounts for our loyal and
             valued customers. If you love expensive watches and admire their
@@ -28,13 +28,14 @@ export default function VipDiscount() {
       </div>
 
       {/* Right side (Image) */}
-      <div className='md:w-1/2 flex justify-center items-center'>
-        <div className='relative w-full h-[500px]'>
+      <div className="md:w-1/2 flex justify-center items-center">
+        <div className="relative w-full h-[500px]">
           <Image
-            src='/homepage-assets/vipdisc.webp'
-            alt='About Us Image'
+            src="/homepage-assets/vipdisc.webp"
+            alt="About Us Image"
             fill
-            className='object-cover'
+            sizes="400"
+            className="object-cover"
           />
         </div>
       </div>

@@ -110,7 +110,7 @@ export default function ProductFilters({
   );
 
   return (
-    <div className="lg:w-[500px] xl:w-full space-y-4">
+    <div className="w-full space-y-4">
       {hasActiveFilters && (
         <div className="flex justify-end">
           <button
@@ -130,75 +130,80 @@ export default function ProductFilters({
         pathname={pathname}
       />
 
-      {/* Reusable Select Component */}
-      {[
-        {
-          label: "Brand",
-          key: "brand",
-          value: filters.brand,
-          options: formattedBrands,
-        },
-        {
-          label: "Sub Brand",
-          key: "sub_brand",
-          value: filters.subBrand,
-          options: formattedSubBrands,
-        },
-        {
-          label: "Sub Category",
-          key: "sub_category",
-          value: filters.subCategory,
-          options: formattedSubCats,
-        },
-        {
-          label: "Color",
-          key: "color",
-          value: filters.color,
-          options: formattedColors.map((color) => ({ id: color, name: color })),
-        },
-        {
-          label: "Gender",
-          key: "gender",
-          value: filters.gender,
-          options: ["Male", "Female", "Unisex"].map((gender) => ({
-            id: gender,
-            name: gender,
-          })),
-        },
-      ].map(
-        ({ label, key, value, options }) =>
-          !!options.length && (
-            <div key={key} className="relative w-full">
-              <select
-                className={`w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10 ${
-                  value
-                    ? "border-gray-300 text-black"
-                    : "border-gray-200 text-gray-400"
-                }`}
-                value={value}
-                onChange={(e) => updateParam(key, e.target.value)}
-                aria-label={`Select ${label}`}
-              >
-                <option value="">Select {label}</option>
-                {options.map((option: SelectOption) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
-              {value && (
-                <button
-                  type="button"
-                  onClick={() => updateParam(key, "")}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-                  aria-label={`Clear ${label} filter`}
+      <div className="flex flex-row flex-wrap xl:flex-col xl:flex-nowrap w-full gap-2">
+        {/* Reusable Select Component */}
+        {[
+          {
+            label: "Brand",
+            key: "brand",
+            value: filters.brand,
+            options: formattedBrands,
+          },
+          {
+            label: "Sub Brand",
+            key: "sub_brand",
+            value: filters.subBrand,
+            options: formattedSubBrands,
+          },
+          {
+            label: "Sub Category",
+            key: "sub_category",
+            value: filters.subCategory,
+            options: formattedSubCats,
+          },
+          {
+            label: "Color",
+            key: "color",
+            value: filters.color,
+            options: formattedColors.map((color) => ({
+              id: color,
+              name: color,
+            })),
+          },
+          {
+            label: "Gender",
+            key: "gender",
+            value: filters.gender,
+            options: ["Male", "Female", "Unisex"].map((gender) => ({
+              id: gender,
+              name: gender,
+            })),
+          },
+        ].map(
+          ({ label, key, value, options }) =>
+            !!options.length && (
+              <div key={key} className="relative xl:w-full">
+                <select
+                  className={`w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10 ${
+                    value
+                      ? "border-gray-300 text-black"
+                      : "border-gray-200 text-gray-400"
+                  }`}
+                  value={value}
+                  onChange={(e) => updateParam(key, e.target.value)}
+                  aria-label={`Select ${label}`}
                 >
-                  ✕
-                </button>
-              )}
-            </div>
-          )
-      )}
+                  <option value="">Select {label}</option>
+                  {options.map((option: SelectOption) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name}
+                    </option>
+                  ))}
+                </select>
+                {value && (
+                  <button
+                    type="button"
+                    onClick={() => updateParam(key, "")}
+                    className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
+                    aria-label={`Clear ${label} filter`}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            )
+        )}
+      </div>
     </div>
   );
 }
