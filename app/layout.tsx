@@ -27,13 +27,19 @@ export default async function RootLayout({
 
   try {
     const [brandsRes, jewelryRes, bagsRes] = await Promise.all([
-      fetch(`${process.env.API_URL}/api/brands`, { method: "GET" }),
-      fetch(`${process.env.API_URL}/api/categories/jewelry/sub-categories`, {
-        method: "GET",
-      }),
-      fetch(`${process.env.API_URL}/api/categories/bags/available-brands`, {
-        method: "GET",
-      }),
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}//brands`, { method: "GET" }),
+      fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}//categories/jewelry/sub-categories`,
+        {
+          method: "GET",
+        }
+      ),
+      fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}//categories/bags/available-brands`,
+        {
+          method: "GET",
+        }
+      ),
     ]);
 
     if (!brandsRes.ok || !jewelryRes.ok || !bagsRes.ok) {

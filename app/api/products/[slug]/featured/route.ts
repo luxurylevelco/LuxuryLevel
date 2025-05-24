@@ -1,15 +1,11 @@
 import { supabase } from "@/lib/supabase";
-import { ProductResponse } from "@/lib/types";
+import {
+  Brand,
+  Category,
+  FeaturedResponse,
+  ProductResponse,
+} from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
-
-// Types
-interface Brand {
-  id: number;
-}
-
-interface Category {
-  id: number;
-}
 
 // Function to get brand IDs, selecting only one sub-brand per parent brand
 async function getAllBrandIds(
@@ -18,31 +14,29 @@ async function getAllBrandIds(
 ): Promise<number[]> {
   const allBrandIds = new Set<number>(brandIds);
 
-  // Fetch one sub-brand per parent brand
   const { data: subBrands, error } = await supabase
     .from("brand")
     .select("id, parent_id")
     .in("parent_id", brandIds)
-    .limit(1, { foreignTable: "parent_id" }); // Limit to one sub-brand per parent
+    .limit(1, { foreignTable: "parent_id" });
 
   if (error || !subBrands || subBrands.length === 0) {
     return Array.from(allBrandIds);
   }
 
-  // Add the single sub-brand IDs to the set
-  subBrands.forEach((subBrand: Brand & { parent_id: number }) => {
+  subBrands.forEach((subBrand) => {
     allBrandIds.add(subBrand.id);
   });
 
   return Array.from(allBrandIds);
 }
 
-// Function to get limited products per brand with hierarchy
+// Function to get limited products per brand with hierarchy, ensuring no duplicates by name
 async function getLimitedProductsWithHierarchy(
   supabase: typeof import("@/lib/supabase").supabase,
   brandIds: number[],
   categoryId: number,
-  limitPerBrand: number
+  totalLimit: number
 ): Promise<ProductResponse["products"]> {
   // Step 1: Get brand IDs, including one sub-brand per brand
   const allBrandIds: number[] = await getAllBrandIds(supabase, brandIds);
@@ -51,47 +45,56 @@ async function getLimitedProductsWithHierarchy(
     return [];
   }
 
-  // Step 2: Get products for all brands, filtered by category
-  const results: ProductResponse["products"] = [];
+  // Step 2: Fetch products for all brands in a single query
+  const { data: products, error } = await supabase
+    .from("product")
+    .select("id, name, price, image_1, image_2, image_3, brand_id")
+    .in("brand_id", allBrandIds)
+    .eq("category_id", categoryId)
+    .order("created_at", { ascending: false });
 
-  for (const brandId of allBrandIds) {
-    const { data: products, error } = await supabase
-      .from("product")
-      .select("id, name, price, image_1,image_2, image_3")
-      .eq("brand_id", brandId)
-      .eq("category_id", categoryId)
-      .order("created_at", { ascending: false })
-      .limit(limitPerBrand);
-
-    if (error) {
-      console.error(`Error fetching products for brand ${brandId}:`, error);
-      continue;
-    }
-
-    const { data: brandName, error: brandNameError } = await supabase
-      .from("brand")
-      .select("name")
-      .eq("id", brandId)
-      .single();
-
-    if (brandNameError) {
-      console.error(`Error fetching brand name for brand ${brandId}:`, error);
-      continue;
-    }
-
-    if (products && products.length > 0) {
-      const productsWithBrandName = (
-        products as ProductResponse["products"]
-      ).map((product) => ({
-        ...product,
-        brand_name: brandName.name,
-      }));
-      results.push(...productsWithBrandName);
-    }
+  if (error || !products || products.length === 0) {
+    console.error("Error fetching products:", error);
+    return [];
   }
 
-  return results;
+  // Step 3: Deduplicate products by name, keeping the first occurrence
+  const seenNames = new Set<string>();
+  const uniqueProducts = products.filter((product) => {
+    if (seenNames.has(product.name)) {
+      return false;
+    }
+    seenNames.add(product.name);
+    return true;
+  });
+
+  // Step 4: Fetch brand names for all brand IDs
+  const { data: brands, error: brandsError } = await supabase
+    .from("brand")
+    .select("id, name")
+    .in("id", allBrandIds);
+
+  if (brandsError || !brands) {
+    console.error("Error fetching brand names:", brandsError);
+    return [];
+  }
+
+  // Create a map of brand ID to brand name for efficient lookup
+  const brandNameMap = new Map<number, string>(
+    brands.map((brand: { id: number; name: string }) => [brand.id, brand.name])
+  );
+
+  // Step 5: Add brand names to unique products and apply total limit
+  const productsWithBrandName = uniqueProducts
+    .map((product) => ({
+      ...product,
+      brand_name: brandNameMap.get(product.brand_id) || "Unknown Brand",
+    }))
+    .slice(0, totalLimit); // Apply the total limit after deduplication
+
+  return productsWithBrandName;
 }
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -123,12 +126,11 @@ export async function GET(
     const categoryId = (categoryData as Category).id;
 
     let featuredBrandIds: number[] = [];
-
+    let brandInfo: FeaturedResponse["brandInfo"] = undefined;
     if (brandQuery) {
-      // Get the specific brand by name
       const { data: brandData, error: brandError } = await supabase
         .from("brand")
-        .select("id, featured")
+        .select("id, logo_url, featured")
         .ilike("name", `%${brandQuery}%`)
         .single();
 
@@ -149,10 +151,9 @@ export async function GET(
           { status: 400 }
         );
       }
-
+      brandInfo = brandData;
       featuredBrandIds = [brandData.id];
     } else {
-      // Default: get all featured brands
       const { data: brandData, error: brandIdsError } = await supabase
         .from("brand")
         .select("id")
@@ -180,6 +181,7 @@ export async function GET(
       );
 
     return NextResponse.json({
+      ...(brandInfo ? { brandInfo } : {}),
       products,
       totalProducts: products?.length || 0,
     });

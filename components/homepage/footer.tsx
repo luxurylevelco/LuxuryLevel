@@ -1,11 +1,12 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import { Roboto_Condensed } from 'next/font/google';
+import Image from "next/image";
+import Link from "next/link";
+import { Roboto_Condensed } from "next/font/google";
+import { getWhatsAppUrl } from "@/lib/utils";
 
 // Font setup
 const robotoCondensed = Roboto_Condensed({
-  subsets: ['latin'],
-  weight: ['400', '700'],
+  subsets: ["latin"],
+  weight: ["400", "700"],
 });
 
 // Interface for footer links
@@ -16,48 +17,53 @@ interface FooterLink {
 
 // Footer link values
 const footerLinks: FooterLink[] = [
-  { name: 'Company Overview', href: '/#overview' },
-  { name: 'Contact Us', href: '/contact-us' },
-  { name: 'Terms & Conditions', href: '/terms-condition' },
-  { name: 'Privacy Policy', href: '/privacy-policy' },
-  { name: 'Return Policy', href: '/return-policy' },
+  { name: "Company Overview", href: "/#overview" },
+  { name: "Contact Us", href: "/contact-us" },
+  { name: "Terms & Conditions", href: "/terms-condition" },
+  { name: "Privacy Policy", href: "/privacy-policy" },
+  { name: "Return Policy", href: "/return-policy" },
 ];
 
 // Social media icon values
 const socialMediaLinks = [
   {
-    name: 'Instagram',
-    href: 'https://instagram.com',
-    icon: '/svgs/ig.svg',
+    name: "Instagram",
+    href: "https://instagram.com",
+    icon: "/svgs/ig.svg",
   },
   {
-    name: 'Facebook',
-    href: 'https://facebook.com',
-    icon: '/svgs/fb.svg',
+    name: "Facebook",
+    href: "https://facebook.com",
+    icon: "/svgs/fb.svg",
   },
-  { name: 'Twitter', href: 'https://twitter.com', icon: '/svgs/twt.svg' },
+  { name: "Twitter", href: "https://twitter.com", icon: "/svgs/twt.svg" },
+  {
+    name: "WhatsApp",
+    href: getWhatsAppUrl({ message: "" }),
+    icon: "/svgs/whatsapp2.svg",
+  },
 ];
 
 export default function Footer() {
   return (
-    <footer className='footer p-0'>
+    <footer className="footer p-0">
       <div>
-        <div className='bg-gray-100 w-full h-fit flex flex-row gap-10 p-20 justify-center items-start'>
+        <div className="bg-gray-100 w-full h-fit flex flex-col md:flex-row gap-10 p-20 justify-center items-center md:items-start text-center md:text-start">
           {/* Left Section */}
-          <div className='flex flex-col w-1/4 items-start gap-5'>
-            <div className='flex flex-col'>
+          <div className="flex flex-col w-full md:w-1/4 items-center md:items-start gap-5">
+            <div className="flex flex-col items-center md:items-start">
               <Image
-                src='/svgs/level-logo.svg'
-                alt='Whatsapp'
+                src="/svgs/level-logo.svg"
+                alt="Whatsapp"
                 width={85}
                 height={85}
-                className='object-contain'
+                className="object-contain"
               />
-              <p className='font-semibold text-3xl'>Luxury Level</p>
+              <p className="font-semibold text-3xl">Luxury Level</p>
             </div>
 
             <div>
-              <p className='underline'>
+              <p className="underline">
                 Al-Qibla - Ahmad Al-Jaber St. Al-Zumurodah Tower 3rd Floor -
                 Office No. 1,2,3
               </p>
@@ -65,7 +71,7 @@ export default function Footer() {
 
             <div>
               <p>
-                <strong>Timings:</strong> 11:30 AM to 8:30 PM{' '}
+                <strong>Timings:</strong> 11:30 AM to 8:30 PM{" "}
                 <strong>(Saturday to Thursday)</strong>
               </p>
               <p>
@@ -75,7 +81,7 @@ export default function Footer() {
           </div>
 
           {/* Right Section */}
-          <div className='flex flex-col'>
+          <div className="flex flex-col">
             <p
               className={`font-semibold text-xl mb-2 ${robotoCondensed.className}`}
             >
@@ -85,14 +91,15 @@ export default function Footer() {
               <Link
                 key={link.name}
                 href={link.href}
-                className='hover:underline text-gray-800'
+                target="_blank"
+                className="hover:underline text-gray-800"
               >
                 {link.name}
               </Link>
             ))}
           </div>
 
-          <div className='flex flex-col'>
+          <div className="flex flex-col">
             <p
               className={`font-semibold text-xl mb-2 ${robotoCondensed.className}`}
             >
@@ -105,16 +112,16 @@ export default function Footer() {
         </div>
 
         {/* Social media icons */}
-        <div className='bg-black flex flex-col justify-center items-center gap-6 py-6 px-20 md:px-40 xl:px-80'>
-          <div className='flex flex-row gap-5 justify-center items-center'>
+        <div className="bg-black flex flex-col justify-center items-center gap-6 py-6 px-20 md:px-40 xl:px-80">
+          <div className="flex flex-row gap-5 justify-center items-center">
             {socialMediaLinks.map((social) => (
               <Link
                 key={social.name}
                 href={social.href}
-                target='_blank'
-                rel='noopener noreferrer'
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label={social.name}
-                className='hover:opacity-75 transition-opacity duration-300'
+                className="hover:opacity-75 transition-opacity duration-300"
               >
                 <Image
                   src={social.icon}
@@ -127,9 +134,9 @@ export default function Footer() {
           </div>
 
           {/* Line separator */}
-          <div className='w-full border-t border-gray-600 my-4' />
+          <div className="w-full border-t border-gray-600 my-4" />
 
-          <div className='text-white text-center'>
+          <div className="text-white text-center">
             Copyright &copy; 2025 Luxury Level. All rights reserved.
           </div>
         </div>

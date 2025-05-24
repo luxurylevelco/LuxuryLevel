@@ -21,20 +21,6 @@ export default function OurBrandsMenu({
   // const [brands, setbrands] = useState<Brand[]>([]);
   const router = useRouter();
 
-  // useEffect(() => {
-  //   const fetchBrands = async () => {
-  //     const res = await fetch(`${process.env.API_URL}/api/brands`, {
-  //       method: "GET",
-  //     });
-  //     const brands = await res.json();
-  //     const _brands: Brand[] = brands.brands;
-
-  //     setbrands(_brands);
-  //   };
-
-  //   fetchBrands();
-  // }, []);
-
   const redirect = (brand: Brand) => {
     if (toggleMobileNav) {
       toggleMobileNav();
@@ -56,7 +42,7 @@ export default function OurBrandsMenu({
             key={brand.id}
             onClick={() => redirect(brand)}
             className={`font-normal pr-2 lg:text-[12px] xl:text-[14px] text-start 
-               border-r-[1px] border-gray-300`}
+               lg:border-r-[1px] border-gray-300 hover:font-semibold`}
           >
             {brand.name}
           </button>

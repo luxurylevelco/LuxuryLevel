@@ -3,9 +3,9 @@ import Image from "next/image";
 export default function CompanyOverviewExt() {
   return (
     <div className="padding min-h-screen bg-white flex flex-col">
-      <div className="flex flex-row w-full h-fit 2xl:px-40 gap-10">
+      <div className="flex flex-col md:flex-row w-full h-fit 2xl:px-40 gap-10">
         {/* Left side */}
-        <div className="flex flex-col justify-center items-start w-1/2 gap-6">
+        <div className="flex flex-col justify-center items-start w-full md:w-1/2 gap-6">
           <div>
             <p className="font-bold text-4xl text-black">
               WHAT MAKES US DIFFERENT?
@@ -40,12 +40,13 @@ export default function CompanyOverviewExt() {
         </div>
 
         {/* Right side (Image) */}
-        <div className="w-1/2 flex justify-center items-center">
+        <div className="w-full md:w-1/2 flex justify-center items-center">
           <div className="relative w-full h-[500px]">
             <Image
               src="/homepage-assets/owner.webp"
               alt="About Us Image"
               fill
+              sizes="400"
               className="object-cover"
             />
           </div>

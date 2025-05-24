@@ -1,6 +1,6 @@
 export default function PrivacyPolicy() {
   return (
-    <div className='h-fit w-full bg-white px-60 pt-10 pb-20 flex flex-col justify-center items-start gap-12'>
+    <div className='h-fit w-full bg-white px-10 md:px-20 lg:px-60 pt-10 pb-20 flex flex-col justify-center items-start gap-12'>
       <p>
         This privacy policy (“Policy”) describes how the personally identifiable
         information (“Personal Information”) you may provide on the

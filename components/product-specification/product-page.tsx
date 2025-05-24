@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef, Fragment } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import RelatedProducts from "./related-products";
 import { ProductInformationResponse } from "@/lib/types";
+import { getWhatsAppUrl } from "@/lib/utils";
 
 function ZoomableImage({ src }: { src: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,7 +26,7 @@ function ZoomableImage({ src }: { src: string }) {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className="relative w-[450px] h-[450px] overflow-hidden"
+      className="relative  w-full  overflow-hidden  flex items-center justify-center"
     >
       <Image
         src={src}
@@ -75,43 +76,15 @@ export default function ProductInfo({
     );
   };
 
-  const textArr = productInfo.description?.split(/\n+Watch Specification\n+/i);
-
-  const hasWatchSpecs = productInfo.description?.includes(
-    "Watch Specification"
-  );
-
-  const isWatchSpecsIndexTwo = textArr && textArr?.length > 1 && hasWatchSpecs;
-
-  let desc: string[] = [];
-  let specs: string[] = [];
-
-  if (textArr) {
-    if (isWatchSpecsIndexTwo) {
-      desc = textArr?.[0]
-        ?.split(/\n+/)
-        .map((line) => line.trim())
-        .filter(Boolean);
-      specs = textArr?.[1]
-        ?.split(/\n+/)
-        .map((line) => line.trim())
-        .filter(Boolean);
-    } else {
-      desc = textArr?.[1]
-        ?.split(/\n+/)
-        .map((line) => line.trim())
-        .filter(Boolean);
-      specs = textArr?.[0]?.split(/\n+/).map((line) => line.trim());
-    }
-  }
+  const message = `Hi! I'd like to inquire about ${productInfo.name}\n\nHere's the link:\n${process.env.NEXT_PUBLIC_FRONTEND_URL}/products/${productInfo.id}`;
 
   return (
-    <div className="bg-white w-full min-h-screen px-20 py-32 2xl:px-72 2xl:py-40 flex flex-col gap-20">
-      <div className="h-fit w-full flex flex-row justify-between">
+    <div className="bg-white w-full min-h-screen padding py-20 md:px-20 md:py-32 2xl:px-72 2xl:py-40 flex flex-col gap-10">
+      <div className="h-fit w-full flex flex-col lg:flex-row lg:justify-between gap-10 lg:gap-0">
         {/* Product Images */}
-        <div className="w-1/3 flex flex-col gap-4">
+        <div className="w-full lg:w-1/3 flex flex-col gap-4 ">
           {/* Main Display Image with Navigation */}
-          <div className="relative w-fit">
+          <div className="relative lg:w-fit ">
             <ZoomableImage src={imageSources[currentIndex] || ""} />
 
             {/* Navigation Buttons */}
@@ -130,7 +103,7 @@ export default function ProductInfo({
           </div>
 
           {/* Thumbnails */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 ">
             {imageSources.map((src, index) => {
               if (!src) return null;
 
@@ -138,10 +111,10 @@ export default function ProductInfo({
                 <Image
                   key={index}
                   src={src}
-                  alt={`Thumbnail ${index + 1}`}
-                  width={100}
-                  height={100}
-                  className={`cursor-pointer hover:-translate-y-1 transition-transform duration-300 ${
+                  alt={`Thumbnail ${index + 1}  `}
+                  width={80}
+                  height={80}
+                  className={`cursor-pointer hover:-translate-y-1 transition-transform duration-300 object-contain  ${
                     currentIndex === index ? "" : "bg-black opacity-50"
                   }`}
                   onClick={() => setCurrentIndex(index)}
@@ -152,7 +125,7 @@ export default function ProductInfo({
         </div>
 
         {/* Product Specs */}
-        <div className="w-1/3 flex flex-col gap-5">
+        <div className="w-full lg:w-1/3 flex flex-col gap-5 ">
           <p className="text-3xl font-semibold">{productInfo.name}</p>
 
           {/* <p className="text-gray-500">
@@ -184,7 +157,10 @@ export default function ProductInfo({
 
           <div className="flex w-full flex-col gap-2 mt-10">
             <Link
-              href="/"
+              href={getWhatsAppUrl({
+                message: encodeURIComponent(message),
+              })}
+              target="_blank"
               className="bg-green-600 hover:bg-green-700  text-white button"
             >
               <Image
@@ -196,7 +172,7 @@ export default function ProductInfo({
               <span>Inquire on WhatsApp</span>
             </Link>
             <Link
-              href="/"
+              href={`/contact-us?message=${encodeURIComponent(message)}`}
               className=" hover:bg-gray-100  border text-black button"
             >
               <Image
@@ -211,10 +187,10 @@ export default function ProductInfo({
         </div>
 
         {/* Divider */}
-        <div className="border-r border-gray-300" />
+        <div className=" border-b lg:border-r border-gray-300" />
 
         {/* Brand Info */}
-        <div className="w-60 flex flex-col items-center">
+        <div className="flex flex-col items-center ">
           <p className="text-lg font-semibold">{brandInfo.name}</p>
           <Link href={`/brands/${brandInfo.id}`}>
             <Image
@@ -229,64 +205,45 @@ export default function ProductInfo({
       </div>
 
       {/* Description  */}
-
       <div className="h-fit flex flex-col items-start text-lg gap-6">
-        {desc && (
-          <div className="flex flex-col gap-3">
-            <p className="font-bold text-3xl">Description</p>
-
-            {desc?.map((line, index) => {
-              const isTitle = line.split(" ").length <= 8;
-
-              if (index === 0) {
-                return (
-                  <Fragment key={index}>
-                    {" "}
-                    <p
-                      key={index}
-                      className={`${isTitle && "font-semibold text-2xl"}`}
-                    >
-                      {line}
-                    </p>
-                    <div className="my-5 border-b" />
-                  </Fragment>
-                );
-              }
-
+        <div className="bg-gray-100 rounded-lg w-full h-fit  p-4 sm:p-10 ">
+          {productInfo.description?.split("\n").map((details, index) => {
+            if (
+              details.includes(":") &&
+              details.split(":").length === 2 &&
+              details.split(" ").length < 20
+            ) {
+              const specDetail = details.split(":");
               return (
-                <p
-                  key={index}
-                  className={`${isTitle && "font-semibold text-2xl"}`}
-                >
-                  {line}
+                <p key={index} className="font-semibold mt-1 text-lg">
+                  {specDetail[0]}
+                  {":"}
+                  <span className="font-normal">{specDetail[1]}</span>
                 </p>
               );
-            })}
-          </div>
-        )}
+            }
 
-        <div className="bg-gray-100 rounded-lg w-full h-fit mt-10 p-10">
-          <p className="font-bold text-2xl mb-4">Watch Specification</p>
-          <ul className="list-disc pl-5 space-y-2">
-            {specs?.map((details, index) => {
-              const detailsArr = details.split(":");
+            if (details.split(" ").length < 10) {
               return (
-                <li key={index}>
-                  <p className="font-bold">
-                    {detailsArr?.[0]} :
-                    <span className="font-normal ml-2">{detailsArr?.[1]}</span>
-                  </p>
-                </li>
+                <p key={index} className="font-semibold text-2xl mt-4 ">
+                  {details}
+                </p>
               );
-            })}
-          </ul>
+            }
+
+            return (
+              <p key={index} className="">
+                {details}
+              </p>
+            );
+          })}
         </div>
       </div>
 
       {/* Related Products */}
-      <div>
+      {relatedProducts.length > 0 && (
         <RelatedProducts products={relatedProducts} />
-      </div>
+      )}
     </div>
   );
 }

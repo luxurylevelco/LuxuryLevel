@@ -2,9 +2,9 @@ import Image from "next/image";
 
 export default function VipDiscount() {
   return (
-    <div className="page-style flex flex-row w-full h-fit py-10 2xl:px-60 gap-10">
+    <div className="page-style flex flex-col md:flex-row w-full h-fit py-10 2xl:px-60 gap-10">
       {/* Left side */}
-      <div className="flex flex-col justify-center items-center w-1/2 gap-6">
+      <div className="flex flex-col justify-center items-center md:w-1/2 gap-6">
         <div>
           <p className="font-semibold text-4xl text-black">VIP DISCOUNT</p>
         </div>
@@ -28,12 +28,13 @@ export default function VipDiscount() {
       </div>
 
       {/* Right side (Image) */}
-      <div className="w-1/2 flex justify-center items-center">
+      <div className="md:w-1/2 flex justify-center items-center">
         <div className="relative w-full h-[500px]">
           <Image
             src="/homepage-assets/vipdisc.webp"
             alt="About Us Image"
             fill
+            sizes="400"
             className="object-cover"
           />
         </div>

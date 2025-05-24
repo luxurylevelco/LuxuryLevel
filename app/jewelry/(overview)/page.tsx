@@ -2,40 +2,47 @@ import Banner from "@/components/banner";
 import CardsSectionWrapper from "@/components/cards-section-wrappers/spec-wrapper";
 import CardsSectionLoading from "@/components/cards-section-wrappers/loading";
 import { Suspense } from "react";
+import { FiltersParams } from "@/lib/types";
+
+const NO_OF_ITEMS = "18";
+
+const isValidString = (value: unknown): value is string =>
+  typeof value === "string" && value.trim() !== "";
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{
-    page: string | null;
-    color: string | null;
-    gender: string | null;
-    brand: string | null;
-    name: string | null;
-    sub_category: string | null;
-    sub_brand: string | null;
-  }>;
+  searchParams: Promise<FiltersParams>;
 }) {
-  // assume this is inside an async fn, e.g. a React useEffect or getServerSideProps
   const { page, color, gender, name, brand, sub_category, sub_brand } =
     await searchParams;
 
-  const params = new URLSearchParams({
-    noOfItems: "18",
-  });
+  const paramsMap = {
+    page: isValidString(page) ? page : "1",
+    color: isValidString(color) ? color : null,
+    gender: isValidString(gender) ? gender : null,
+    name: isValidString(name) ? name : null,
+    brand: isValidString(sub_brand)
+      ? sub_brand
+      : isValidString(brand)
+      ? brand
+      : null,
+    sub_category: isValidString(sub_category) ? sub_category : null,
+    noOfItems: NO_OF_ITEMS,
+  };
 
-  if (page) params.set("page", page);
-  if (color) params.set("color", color);
-  if (brand) params.set("brand", sub_brand || brand);
-  if (gender) params.set("gender", gender);
-  if (name) params.set("name", name);
-  if (sub_category) params.set("sub_category", sub_category);
-
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(paramsMap)) {
+    if (value) params.set(key, value);
+  }
   const queryString = params.toString();
 
   return (
     <>
-      <Banner title={"JEWELRIES"} classnameForBgSrc={""} />
+      <Banner
+        title={"JEWELRIES"}
+        classnameForBgSrc="bg-[url(/banners/jewelry.webp)] bg-[center_top_40%] "
+      />
       <Suspense fallback={<CardsSectionLoading />}>
         <CardsSectionWrapper
           queryString={queryString}

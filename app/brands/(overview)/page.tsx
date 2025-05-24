@@ -6,10 +6,13 @@ export default async function Page() {
   let brands: Brand[] = [];
 
   try {
-    const resBrands = await fetch(`${process.env.API_URL}/api/brands`, {
-      method: "GET",
-      next: { revalidate: 60 },
-    });
+    const resBrands = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}//brands`,
+      {
+        method: "GET",
+        next: { revalidate: 60 },
+      }
+    );
     if (!resBrands.ok)
       throw new Error(`Failed to fetch brands: ${resBrands.status}`);
     const _brands = await resBrands.json();
@@ -20,7 +23,10 @@ export default async function Page() {
 
   return (
     <>
-      <Banner title={"OUR BRANDS"} classnameForBgSrc={""} />
+      <Banner
+        title={"OUR BRANDS"}
+        classnameForBgSrc="bg-[url(/banners/watches.webp)] bg-[center_top_10%] "
+      />
       <div className="padding min-h-screen bg-white space-y-10 xl:px-60">
         <div className="text-center space-y-4">
           <p className="text-lg font-bold">

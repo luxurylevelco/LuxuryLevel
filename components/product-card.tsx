@@ -18,9 +18,9 @@ export default function ProductCard({
   className,
 }: ProductCardProps) {
   return (
-    <Link href={href} className="block">
+    <Link href={href} className="block ">
       <div
-        className={`${className} h-[400px] w-full overflow-hidden group transition duration-300 flex flex-col p-4 border-transparent `}
+        className={`${className} h-[300px] md:h-[400px] w-full overflow-hidden group transition duration-300 flex flex-col  border-transparent `}
       >
         {/* Image container */}
         <div className="relative h-2/3 w-full">
@@ -30,7 +30,8 @@ export default function ProductCard({
               src={imgSrc}
               alt={productName}
               fill
-              className={`object-contain transition-opacity duration-300 ${
+              sizes="400"
+              className={`object-cover  transition-opacity duration-300 ${
                 !!hoverImgSrc ? "group-hover:opacity-0" : ""
               }`}
             />
@@ -41,6 +42,7 @@ export default function ProductCard({
                 src={hoverImgSrc}
                 alt={`${productName} (Hover)`}
                 fill
+                sizes="400"
                 className="object-contain transition-opacity duration-300 opacity-0 group-hover:opacity-100"
               />
             </div>
@@ -48,8 +50,8 @@ export default function ProductCard({
         </div>
 
         {/* Info section */}
-        <div className="h-1/3 flex flex-col justify-start items-center text-center  p-4">
-          <p className="text-sm 2xl:text-base text-black w-full line-clamp-4">
+        <div className="h-1/3 flex flex-col justify-center items-center  px-2 ">
+          <p className="text-sm 2xl:text-base text-black w-full leading-tight text-center">
             {productName}
           </p>
 

@@ -1,18 +1,18 @@
 export default function TermsAndCond() {
   return (
-    <div className='h-fit w-full bg-white px-60 pt-10 pb-20 flex flex-col justify-center items-start gap-12'>
+    <div className='h-fit w-full bg-white px-10 md:px-20 lg:px-60 pt-10 pb-20 flex flex-col justify-center items-start gap-12'>
       <p>
-        By accessing or using our website at www.luxurylevel.com, you acknowledge
-        that you have read, understood and agreed to be bound by these Terms and
-        Conditions (Terms and Conditions) and our Website Use/Purchase Policies
-        (Policies). <br /> <br /> We reserve the right to add, delete, modify,
-        or otherwise alter any or all of our Terms and Conditions and Policies
-        at any time without further notice, at our sole discretion. It is your
-        responsibility to check our Website to determine the then-current Terms
-        and Conditions and Policies to which you are bound. <br /> <br /> If you
-        do not agree to abide by these or any future Terms and Conditions or
-        Policies, do not use or access, or continue to use or access, our
-        Website.
+        By accessing or using our website at www.luxurylevel.com, you
+        acknowledge that you have read, understood and agreed to be bound by
+        these Terms and Conditions (Terms and Conditions) and our Website
+        Use/Purchase Policies (Policies). <br /> <br /> We reserve the right to
+        add, delete, modify, or otherwise alter any or all of our Terms and
+        Conditions and Policies at any time without further notice, at our sole
+        discretion. It is your responsibility to check our Website to determine
+        the then-current Terms and Conditions and Policies to which you are
+        bound. <br /> <br /> If you do not agree to abide by these or any future
+        Terms and Conditions or Policies, do not use or access, or continue to
+        use or access, our Website.
       </p>
       <div className='flex flex-col gap-3'>
         <p className='font-bold text-3xl'>SITE CONTENT</p>

@@ -1,61 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import ProductCard, { ProductCardProps } from "../product-card";
-import { ProductInformationResponse } from "@/lib/types";
-
-export const relatedProdData: ProductCardProps[] = [
-  {
-    imgSrc: "/rolex-watches/rolexpepsi-watch.webp",
-    hoverImgSrc: "/rolex-watches/rolexpepsi2-watch.webp",
-    productName:
-      "Rolex Gmt Master II 126710BLRO-0001 Pepsi Oystersteel Jubilee Bracelet Black Dial",
-    price: "AED89,000.00",
-    href: "/watches",
-  },
-  {
-    imgSrc: "/rolex-watches/rolexpepsiwhitegold-watch.webp",
-    hoverImgSrc: "/rolex-watches/rolexpepsiwhitegold2-watch.webp",
-    productName:
-      "Rolex GMT Master II 126719BLRO Automatic 18 ct White Gold Pepsi Bezel Meteorite Dial",
-    price: "AED220,000.00",
-    href: "/watches",
-  },
-  {
-    imgSrc: "/rolex-watches/rolexyacht-watch.webp",
-    hoverImgSrc: "/rolex-watches/rolexyacht2-watch.webp",
-    productName:
-      "Rolex Yacht Master 126621-0001 18K Everose Gold Chocolate Dial",
-    price: "AED72,000.00",
-    href: "/watches",
-  },
-  {
-    imgSrc: "/rolex-watches/rolexday-watch.webp",
-    hoverImgSrc: "/rolex-watches/rolexday2-watch.webp",
-    productName:
-      "Rolex Day-Date 228238-0059 Yellow Gold Onyx Baguette Black Dial",
-    price: "AED240,000.00",
-    href: "/watches",
-  },
-  {
-    imgSrc: "/rolex-watches/rolexdaytona-watch.webp",
-    hoverImgSrc: "/rolex-watches/rolexdaytona2-watch.webp",
-    productName:
-      "Rolex Daytona 126505 Rose Gold Sundust Dial with Black Sub Dials",
-    price: "AED220,000.00",
-    href: "/watches",
-  },
-  {
-    imgSrc: "/rolex-watches/rolexyellowgold-watch.webp",
-    hoverImgSrc: "/rolex-watches/rolexyellowgold2-watch.webp",
-    productName:
-      "Rolex GMT Master II Oyester Perpetual 126718GRNR 18 ct Yellow Gold Black Dial",
-    price: "AED160,000.00",
-    href: "/watches",
-  },
-];
-
-const PRODUCTS_PER_PAGE = 4;
+import { useState, useEffect, useRef } from "react";
+import ProductCard from "../product-card";
+import type { ProductInformationResponse } from "@/lib/types";
 
 export default function RelatedProducts({
   products,
@@ -63,7 +10,30 @@ export default function RelatedProducts({
   products: ProductInformationResponse["relatedProducts"];
 }) {
   const [currentPage, setCurrentPage] = useState(0);
-  const totalPages = Math.ceil(relatedProdData.length / PRODUCTS_PER_PAGE);
+  const [itemsPerPage, setItemsPerPage] = useState(1);
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  // Update itemsPerPage based on screen width
+  useEffect(() => {
+    const updateItemsPerPage = () => {
+      const width = window.innerWidth;
+      if (width >= 1280) setItemsPerPage(4); // xl
+      else if (width >= 1024) setItemsPerPage(3); // lg
+      else if (width >= 640) setItemsPerPage(2); // sm
+      else setItemsPerPage(1);
+    };
+
+    updateItemsPerPage();
+    window.addEventListener("resize", updateItemsPerPage);
+    return () => window.removeEventListener("resize", updateItemsPerPage);
+  }, []);
+
+  // Reset to first page when itemsPerPage changes
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [itemsPerPage]);
+
+  const totalPages = Math.ceil(products.length / itemsPerPage);
 
   const handlePrev = () => {
     setCurrentPage((prev) => (prev === 0 ? totalPages - 1 : prev - 1));
@@ -73,55 +43,123 @@ export default function RelatedProducts({
     setCurrentPage((prev) => (prev === totalPages - 1 ? 0 : prev + 1));
   };
 
-  const startIdx = currentPage * PRODUCTS_PER_PAGE;
-  const currentProducts = products.slice(
-    startIdx,
-    startIdx + PRODUCTS_PER_PAGE
-  );
+  // Don't render if no products
+  if (!products || products.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="section-style bg-white py-10 px-5 w-full h-fit flex flex-col gap-10">
+    <div className="bg-white py-10 px-5 w-full h-fit flex flex-col gap-10">
       {/* Header */}
       <div className="flex w-full items-center flex-col">
         <p className="font-semibold text-3xl">Related Products</p>
       </div>
 
-      {/* Product Grid with Side Arrows */}
+      {/* Product Carousel with Side Arrows */}
       <div className="relative flex items-center justify-center">
-        {/* Navigation Buttons */}
-        <button
-          onClick={handlePrev}
-          className="absolute top-1/2 left-0 transform -translate-y-1/2 text-gray-300 text-7xl hover:text-black z-10"
-        >
-          ‹
-        </button>
+        {/* Previous Button */}
+        {totalPages > 1 && (
+          <button
+            onClick={handlePrev}
+            className="absolute top-1/2 left-0 transform -translate-y-1/2 text-gray-300 text-5xl hover:text-black z-10 transition-colors duration-200"
+            aria-label="Previous products"
+          >
+            ‹
+          </button>
+        )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {currentProducts.map((prod, idx) => (
-            <ProductCard
-              key={idx}
-              imgSrc={
-                prod.image_1 ||
-                prod.image_2 ||
-                prod.image_3 ||
-                "/placeholder-image.webp"
-              }
-              hoverImgSrc={prod.image_3 || prod.image_2 || prod.image_1}
-              href={`/products/${prod.id}`}
-              productName={prod.name}
-              price={prod.price ? String(prod.price) : null}
-              className="border-none"
+        {/* Carousel Container */}
+        <div className="overflow-hidden w-full max-w-7xl">
+          <div
+            ref={carouselRef}
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{
+              width: `${totalPages * 100}%`,
+              transform: `translateX(-${currentPage * (100 / totalPages)}%)`,
+            }}
+          >
+            {/* Create pages */}
+            {Array.from({ length: totalPages }).map((_, pageIndex) => {
+              const pageProducts = products.slice(
+                pageIndex * itemsPerPage,
+                (pageIndex + 1) * itemsPerPage
+              );
+
+              return (
+                <div
+                  key={pageIndex}
+                  className="flex"
+                  style={{ width: `${100 / totalPages}%` }}
+                >
+                  {pageProducts.map((prod, idx) => (
+                    <div
+                      key={`${pageIndex}-${idx}`}
+                      className="flex-shrink-0 px-2 flex items-center justify-center"
+                      style={{ width: `${100 / itemsPerPage}%` }}
+                    >
+                      <ProductCard
+                        imgSrc={
+                          prod.image_1 ||
+                          prod.image_2 ||
+                          prod.image_3 ||
+                          "/placeholder-image.webp"
+                        }
+                        hoverImgSrc={
+                          prod.image_3 || prod.image_2 || prod.image_1
+                        }
+                        href={`/products/${prod.id}`}
+                        productName={prod.name}
+                        price={prod.price ? String(prod.price) : null}
+                        className="border-none"
+                      />
+                    </div>
+                  ))}
+                  {/* Fill empty slots if last page has fewer items */}
+                  {pageProducts.length < itemsPerPage &&
+                    Array.from({
+                      length: itemsPerPage - pageProducts.length,
+                    }).map((_, emptyIdx) => (
+                      <div
+                        key={`empty-${pageIndex}-${emptyIdx}`}
+                        className="flex-shrink-0 px-2"
+                        style={{ width: `${100 / itemsPerPage}%` }}
+                      />
+                    ))}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Next Button */}
+        {totalPages > 1 && (
+          <button
+            onClick={handleNext}
+            className="absolute top-1/2 right-0 transform -translate-y-1/2 text-gray-300 text-5xl hover:text-black z-10 transition-colors duration-200"
+            aria-label="Next products"
+          >
+            ›
+          </button>
+        )}
+      </div>
+
+      {/* Page Indicators */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-4">
+          {Array.from({ length: totalPages }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentPage(index)}
+              className={`w-3 h-3 rounded-full transition-colors duration-200 ${
+                index === currentPage
+                  ? "bg-black"
+                  : "bg-gray-300 hover:bg-gray-400"
+              }`}
+              aria-label={`Go to page ${index + 1}`}
             />
           ))}
         </div>
-
-        <button
-          onClick={handleNext}
-          className="absolute top-1/2 right-0 transform -translate-y-1/2 text-gray-300 text-7xl hover:text-black z-10"
-        >
-          ›
-        </button>
-      </div>
+      )}
     </div>
   );
 }

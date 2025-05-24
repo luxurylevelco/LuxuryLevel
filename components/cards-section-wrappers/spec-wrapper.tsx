@@ -13,7 +13,7 @@ export default async function CardsSectionWrapper({
 }) {
   const [dataRes, brandListRes, subCategoriesRes] = await Promise.all([
     fetch(
-      `${process.env.API_URL}/api/products/${
+      `${process.env.NEXT_PUBLIC_API_URL}//products/${
         sub_category || tableName
       }?${queryString}`,
       {
@@ -21,14 +21,17 @@ export default async function CardsSectionWrapper({
       }
     ),
     fetch(
-      `${process.env.API_URL}/api/categories/${tableName}/available-brands`,
+      `${process.env.NEXT_PUBLIC_API_URL}//categories/${tableName}/available-brands`,
       {
         next: { revalidate: 60 },
       }
     ),
-    fetch(`${process.env.API_URL}/api/categories/${tableName}/sub-categories`, {
-      next: { revalidate: 60 },
-    }),
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}//categories/${tableName}/sub-categories`,
+      {
+        next: { revalidate: 60 },
+      }
+    ),
   ]);
 
   const [data, brandList, catList] = await Promise.all([

@@ -39,3 +39,14 @@ export async function serverRequest<T>({
   const data: T = await res.json();
   return data;
 }
+
+export function toSentenceCase(text: string): string {
+  if (!text) return "";
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+export const getWhatsAppUrl = ({ message }: { message?: string }) => {
+  return `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NO}${
+    message && `?text=${message}`
+  }`;
+};

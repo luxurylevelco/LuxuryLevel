@@ -1,6 +1,6 @@
 "use client";
 
-import { JSX, Suspense, useState } from "react";
+import { type JSX, Suspense, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import SearchComp from "@/components/search";
@@ -11,7 +11,8 @@ import OurBrandsMenu from "@/components/dropdown-menus/brands-menu";
 import WatchesMenu from "@/components/dropdown-menus/watches-menu";
 import JewelryCategoriesMenu from "@/components/dropdown-menus/jewelry-menu";
 import BagsMenu from "@/components/dropdown-menus/bags-menu";
-import { Brand, Category } from "@/lib/types";
+import type { Brand, Category } from "@/lib/types";
+
 const robotoCondensed = Roboto_Condensed({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -19,15 +20,15 @@ const robotoCondensed = Roboto_Condensed({
 
 function Logo() {
   return (
-    <div>
+    <Link href={"/"}>
       <Image
         src={"/svgs/level-logo.svg"}
-        alt={"search icon"}
-        className="object-contain "
+        alt={"Level logo"}
+        className="object-contain"
         width={50}
         height={50}
       />
-    </div>
+    </Link>
   );
 }
 
@@ -70,7 +71,7 @@ function MenuItem({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <Link href={link} className="flex gap-2 items-center">
+        <Link href={link} className="flex gap-2 items-center whitespace-nowrap">
           {title}
           {hasDropdown && (
             <Image
@@ -87,7 +88,7 @@ function MenuItem({
 
         {hasDropdown && (
           <div
-            className={`absolute top-4 left-1/2 -translate-x-1/2 mt-2 w-max z-50 transition-all duration-300 ease-out ${
+            className={`absolute top-full left-1/2 -translate-x-1/2  w-max z-50 transition-all duration-300 ease-out ${
               isHovered
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 -translate-y-2 pointer-events-none"
@@ -127,12 +128,11 @@ function MenuItem({
           )}
         </div>
 
+        {/* Mobile Dropdown - No individual overflow handling */}
         {hasDropdown && (
           <div
-            className={`overflow-hidden transition-all duration-300 ${
-              isOpen
-                ? "max-h-64 opacity-100 overflow-y-auto"
-                : "max-h-0 opacity-0"
+            className={`transition-all duration-300 ${
+              isOpen ? "opacity-100" : "opacity-0 max-h-0 overflow-hidden"
             }`}
           >
             <div className="pl-4 py-2 font-normal">{element}</div>
@@ -189,11 +189,16 @@ function Menu({
       hasDropdown: true,
       element: <BagsMenu toggleMobileNav={toggleMobileNav} brands={bagsMenu} />,
     },
+    {
+      title: "CONTACT US",
+      link: "/contact-us",
+      hasDropdown: false,
+    },
   ];
 
   return (
     <div
-      className={`flex ${robotoCondensed.className} gap-4 font-semibold lg:absolute lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 flex-col lg:flex-row `}
+      className={`flex ${robotoCondensed.className} gap-6 font-semibold flex-col lg:flex-row`}
     >
       {menuMap.map((item) => (
         <MenuItem
@@ -234,22 +239,32 @@ function MobileMenuButton(props: {
         className={`overlay ${isMobileNavOpen ? "flex" : "-translate-x-full"}`}
       />
 
+      {/* Updated Mobile Menu Container with overflow-y-auto */}
       <div
-        className={`fixed top-0 left-0 h-screen w-[75%] space-y-6 bg-white z-50 shadow-lg transform transition-transform duration-300 p-6
+        className={`fixed top-0 left-0 h-screen w-[75%] bg-white z-50 shadow-lg transform transition-transform duration-300 flex flex-col
     ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}
   `}
       >
-        <Suspense>
-          <SearchComp
-            className={""}
-            toggleMobileNav={toggleMobileNav}
-            searchParamKey="name"
-            placeholder="Search All Products..."
-            pathname="products"
-          />
-        </Suspense>
+        {/* Fixed Header Section */}
+        <div className="flex-shrink-0 p-6 border-b border-gray-100">
+          <Suspense>
+            <SearchComp
+              className={""}
+              toggleMobileNav={toggleMobileNav}
+              searchParamKey="name"
+              placeholder="Search All Products..."
+              pathname="products"
+              resetOnSearch={true}
+            />
+          </Suspense>
+        </div>
 
-        <Menu toggleMobileNav={toggleMobileNav} {...props} />
+        {/* Scrollable Menu Section */}
+        <div className="flex-1 overflow-y-auto p-6">
+          <Menu toggleMobileNav={toggleMobileNav} {...props} />
+        </div>
+
+        {/* Close Button */}
         <button
           className={`flex lg:hidden absolute top-2 -right-12 rounded-full default-white-bg p-2 shadow-md ${
             isMobileNavOpen ? "flex" : "hidden"
@@ -258,7 +273,7 @@ function MobileMenuButton(props: {
         >
           <Image
             src={"/svgs/x-icon.svg"}
-            alt={"hamburger-menu icon"}
+            alt={"close menu icon"}
             width={16}
             height={16}
           />
@@ -297,6 +312,7 @@ function DesktopSearch() {
           className="w-[250px]"
           pathname="products"
           searchParamKey="name"
+          resetOnSearch={true}
           placeholder="Search All Products..."
         />
       </div>
@@ -310,17 +326,32 @@ export default function Navbar(props: {
   bagsMenu: Brand[];
 }) {
   return (
-    <div className="navbar ">
-      <Logo />
-      <MobileMenuButton {...props} />
-      <div className="hidden lg:flex">
-        <Menu {...props} />
+    <div className="navbar">
+      {/* Mobile Layout */}
+      <div className="flex lg:hidden items-center justify-between w-full">
+        <Logo />
+        <MobileMenuButton {...props} />
       </div>
-      <Suspense>
-        <div className="hidden lg:flex">
-          <DesktopSearch />
+
+      {/* Desktop Layout */}
+      <div className="hidden lg:grid lg:grid-cols-3 lg:items-center w-full">
+        {/* Logo - Left */}
+        <div className="flex justify-start">
+          <Logo />
         </div>
-      </Suspense>
+
+        {/* Menu - Center */}
+        <div className="flex justify-center">
+          <Menu {...props} />
+        </div>
+
+        {/* Search - Right */}
+        <div className="flex justify-end">
+          <Suspense>
+            <DesktopSearch />
+          </Suspense>
+        </div>
+      </div>
     </div>
   );
 }

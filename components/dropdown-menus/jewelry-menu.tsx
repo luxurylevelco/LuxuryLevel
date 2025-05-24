@@ -1,6 +1,7 @@
 "use client";
 
 import { Category } from "@/lib/types";
+import { toSentenceCase } from "@/lib/utils";
 import { Poppins } from "next/font/google";
 import { useRouter } from "next/navigation";
 
@@ -25,7 +26,7 @@ export default function JewelryCategoriesMenu({
       toggleMobileNav();
     }
 
-    router.push(`/jewelry?sub_category=${category.name}`);
+    router.push(`/jewelry?sub_category=${toSentenceCase(category.name)}`);
   };
 
   return (
@@ -40,7 +41,7 @@ export default function JewelryCategoriesMenu({
             key={category.id}
             onClick={() => redirect(category)}
             className={`font-normal pr-4  text-start 
-              border-r-[1px] border-gray-300 lg:text-[12px] xl:text-[14px] `}
+              lg:border-r-[1px] border-gray-300 lg:text-[12px] xl:text-[14px] hover:font-semibold `}
           >
             {category.name}
           </button>

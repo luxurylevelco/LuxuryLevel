@@ -9,12 +9,15 @@ export interface BrandCardProps {
 
 export default function BrandCard({ imgSrc, href, desc }: BrandCardProps) {
   return (
-    <Link
-      href={href}
-      className="block hover:scale-105 transition-all duration-200"
-    >
+    <Link href={href} className=" hover:scale-105 transition-all duration-200">
       <div className="relative h-[200px] w-full rounded-xl  overflow-hidden transform transition duration-300 ">
-        <Image src={imgSrc} alt="Watch" fill className="object-contain" />
+        <Image
+          src={imgSrc}
+          alt="Watch"
+          fill
+          sizes="400"
+          className="object-contain"
+        />
       </div>
       {desc && <p className="text-center  text-sm lg:text-lg">{desc}</p>}
     </Link>

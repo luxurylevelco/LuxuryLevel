@@ -23,8 +23,8 @@ export default function CardsSection({
   subBrandsList: Brand[] | null;
 }) {
   return (
-    <div className="w-full min-h-screen padding bg-white gap-4 flex  ">
-      <div className="w-full flex justify-start items-start xl:w-1/4 flex-col gap-2">
+    <div className="w-full min-h-screen padding bg-white gap-10 xlgap-4 flex flex-col xl:flex-row  ">
+      <div className="w-full flex justify-start items-start  xl:w-1/4 flex-col gap-2">
         <h1 className="text-lg font-semibold">Filters</h1>
         <ProductFilters
           availableColors={colorsList}
@@ -35,7 +35,7 @@ export default function CardsSection({
         />
       </div>
       <div className="flex flex-col w-full space-y-10 xl:w-3/4">
-        <div className="w-full  grid grid-cols-2 md:grid-cols-3  lg:grid-cols-4 2xl:grid-cols-6  gap-4">
+        <div className="w-full  grid grid-cols-2 md:grid-cols-3  xl:grid-cols-4  gap-2 md:gap-4">
           {products.length > 0 ? (
             <>
               {products?.map((product) => (

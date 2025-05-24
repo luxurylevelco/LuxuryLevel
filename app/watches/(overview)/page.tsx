@@ -35,7 +35,10 @@ export default async function Page({
 
   return (
     <>
-      <Banner title={"WATCHES"} classnameForBgSrc={""} />
+      <Banner
+        title={"WATCHES"}
+        classnameForBgSrc="bg-[url(/banners/watches.webp)] bg-[center_top_10%] "
+      />
       <Suspense fallback={<CardsSectionLoading />}>
         <CardsSectionWrapper
           queryString={queryString}
