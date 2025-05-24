@@ -1,6 +1,6 @@
 "use client";
 
-import { BaseEmailProps, SendEmailProps } from "@/lib/types";
+import { BaseEmailProps } from "@/lib/types";
 import { useState } from "react";
 
 export default function ContactUs({ message }: { message: string | null }) {
@@ -24,23 +24,18 @@ export default function ContactUs({ message }: { message: string | null }) {
     e.preventDefault();
     setIsLoading(true);
 
-    const body: SendEmailProps = {
-      ...formData,
-      to: process.env.NEXT_PUBLIC_EMAIL!,
-    };
-
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/send-email`, {
         method: "POST",
-        body: JSON.stringify(body),
+        body: JSON.stringify(formData),
       });
 
-      const _res: { message: string } = await res.json();
+      const _res: { message: string; error: string } = await res.json();
 
-      alert(_res.message || "Inquiry sent sucessfully");
+      alert(_res.message || _res.error);
 
       setFormData({ email: "", name: "", message: "" });
-    } catch (error: unknown) {
+    } catch (error) {
       alert(
         (error as { message: string }).message ||
           "Failed to send message. Please try again."

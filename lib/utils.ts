@@ -46,5 +46,5 @@ export function toSentenceCase(text: string): string {
 }
 
 export const getWhatsAppUrl = ({ message }: { message: string }) => {
-  return `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NO}?text=${message}`;
+  return `https://wa.me/${process.env.WHATSAPP_NO}?text=${message}`;
 };

@@ -1,10 +1,10 @@
-import { SendEmailProps } from "@/lib/types";
+import { BaseEmailProps } from "@/lib/types";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
 export async function POST(req: Request) {
   try {
-    const { to, name, email, message }: SendEmailProps = await req.json();
+    const { name, email, message }: BaseEmailProps = await req.json();
 
     // Basic input validation
     if (!name || !email || !message) {
@@ -25,14 +25,14 @@ export async function POST(req: Request) {
       port: 465,
       secure: true,
       auth: {
-        user: process.env.NEXT_PUBLIC_EMAIL!,
-        pass: process.env.NEXT_PUBLIC_EMAIL_PASSWORD!,
+        user: process.env.SMTP_EMAIL!,
+        pass: process.env.SMTP_EMAIL_PASSWORD!,
       },
     });
 
     const mailOptions = {
       from: '"Luxury Level Co" <rahimghanaei@luxurylevelco.com>',
-      to: to,
+      to: process.env.SMTP_EMAIL!,
       subject: `Product Inquiry from ${name}`,
       html: `
         <p><strong>From:</strong> ${name}</p>
