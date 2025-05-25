@@ -50,3 +50,8 @@ export const getWhatsAppUrl = ({ message }: { message?: string }) => {
     message && `?text=${message}`
   }`;
 };
+
+export const isValidString = (value: unknown): value is string =>
+  typeof value === "string" && value.trim() !== "";
+
+export const NO_OF_ITEMS = "18";

@@ -20,7 +20,7 @@ export default async function Page({
   // assume this is inside an async fn, e.g. a React useEffect or getServerSideProps
   const { id: brand } = await params;
 
-  const { page, color, gender, name, sub_category, sub_brand } =
+  const { page, color, gender, name, subBrand, subCategory } =
     await searchParams;
 
   const paramsMap = {
@@ -28,12 +28,12 @@ export default async function Page({
     color: isValidString(color) ? color : null,
     gender: isValidString(gender) ? gender : null,
     name: isValidString(name) ? name : null,
-    brand: isValidString(sub_brand)
-      ? sub_brand
+    brand: isValidString(subBrand)
+      ? subBrand
       : isValidString(brand)
       ? brand
       : null,
-    sub_category: isValidString(sub_category) ? sub_category : null,
+    sub_category: isValidString(subCategory) ? subCategory : null,
     noOfItems: NO_OF_ITEMS,
   };
 

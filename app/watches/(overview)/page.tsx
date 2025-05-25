@@ -1,36 +1,37 @@
 import Banner from "@/components/banner";
 import CardsSectionLoading from "@/components/cards-section-wrappers/loading";
 import CardsSectionWrapper from "@/components/cards-section-wrappers/spec-wrapper";
+import { FiltersParams } from "@/lib/types";
+import { isValidString, NO_OF_ITEMS } from "@/lib/utils";
 import { Suspense } from "react";
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{
-    page: string | null;
-    color: string | null;
-    gender: string | null;
-    brand: string | null;
-    name: string | null;
-    sub_category: string | null;
-    sub_brand: string | null;
-  }>;
+  searchParams: Promise<FiltersParams>;
 }) {
   // assume this is inside an async fn, e.g. a React useEffect or getServerSideProps
-  const { page, color, gender, name, brand, sub_category, sub_brand } =
+  const { page, color, gender, name, brand, subCategory, subBrand } =
     await searchParams;
 
-  const params = new URLSearchParams({
-    noOfItems: "18",
-  });
+  const paramsMap = {
+    page: isValidString(page) ? page : "1",
+    color: isValidString(color) ? color : null,
+    gender: isValidString(gender) ? gender : null,
+    name: isValidString(name) ? name : null,
+    brand: isValidString(subBrand)
+      ? subBrand
+      : isValidString(brand)
+      ? brand
+      : null,
+    sub_category: isValidString(subCategory) ? subCategory : null,
+    noOfItems: NO_OF_ITEMS,
+  };
 
-  if (page) params.set("page", page);
-  if (color) params.set("color", color);
-  if (brand) params.set("brand", sub_brand || brand);
-  if (gender) params.set("gender", gender);
-  if (name) params.set("name", name);
-  if (sub_category) params.set("sub_category", sub_category);
-
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(paramsMap)) {
+    if (value) params.set(key, value);
+  }
   const queryString = params.toString();
 
   return (
@@ -42,7 +43,7 @@ export default async function Page({
       <Suspense fallback={<CardsSectionLoading />}>
         <CardsSectionWrapper
           queryString={queryString}
-          sub_category={sub_category}
+          sub_category={subCategory}
           tableName={"watches"}
           pathname={"watches"}
         />
