@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 
@@ -21,16 +21,18 @@ export default function Search({
   providedPath,
   resetOnSearch = false,
 }: SearchProps) {
-  const [query, setQuery] = useState("");
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const router = useRouter();
   const searchValue = searchParams.get(searchParamKey) ?? "";
-  const pathname = usePathname();
+  const [query, setQuery] = useState(searchValue);
+
+  const currentPath = providedPath || pathname;
 
   const updateSearchParams = useCallback(
     (newQuery: string | null) => {
       const params = resetOnSearch
-        ? new URLSearchParams() // Clear all if resetOnSearch is true
+        ? new URLSearchParams()
         : new URLSearchParams(searchParams);
 
       if (newQuery?.trim()) {
@@ -39,17 +41,19 @@ export default function Search({
         params.delete(searchParamKey);
       }
 
-      router.replace(`${providedPath || pathname}?${params.toString()}`);
+      const paramStr = params.toString();
+      router.replace(`${currentPath}${paramStr ? `?${paramStr}` : ""}`);
     },
-    [pathname, router, searchParams, searchParamKey, resetOnSearch]
+    [currentPath, resetOnSearch, router, searchParamKey, searchParams]
   );
 
   const handleSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (!query.trim()) return;
+      const trimmed = query.trim();
+      if (!trimmed) return;
       toggleMobileNav?.();
-      updateSearchParams(query);
+      updateSearchParams(trimmed);
     },
     [query, toggleMobileNav, updateSearchParams]
   );
@@ -59,6 +63,8 @@ export default function Search({
     updateSearchParams(null);
   }, [updateSearchParams]);
 
+  const showClearButton = useMemo(() => !!searchValue, [searchValue]);
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -67,20 +73,20 @@ export default function Search({
       <Image src="/svgs/search-icon.svg" alt="Search" width={16} height={16} />
       <input
         type="text"
-        value={query || searchValue}
+        value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="w-full bg-transparent text-sm focus:outline-none"
         placeholder={placeholder}
         aria-label="Search"
       />
-      {searchValue && (
+      {showClearButton && (
         <button
           type="button"
           onClick={handleClear}
           className="p-1 hover:opacity-80"
           aria-label="Clear search"
         >
-          <Image src="/svgs/x-icon.svg" alt="" width={20} height={20} />
+          <Image src="/svgs/x-icon.svg" alt="Clear" width={20} height={20} />
         </button>
       )}
       <button
@@ -90,7 +96,7 @@ export default function Search({
       >
         <Image
           src="/svgs/arrow-right-search-submit.svg"
-          alt=""
+          alt="Submit"
           width={24}
           height={24}
         />
