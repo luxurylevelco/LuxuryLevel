@@ -2,18 +2,15 @@ import Banner from "@/components/banner";
 import CardsSectionLoading from "@/components/cards-section-wrappers/loading";
 import CardsSectionWrapper from "@/components/cards-section-wrappers/products-overview";
 import { FiltersParams } from "@/lib/types";
+import { isValidString, NO_OF_ITEMS } from "@/lib/utils";
 import { Suspense } from "react";
-const NO_OF_ITEMS = "18";
-
-const isValidString = (value: unknown): value is string =>
-  typeof value === "string" && value.trim() !== "";
 
 export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<FiltersParams>;
 }) {
-  const { page, color, gender, name, brand, sub_category, sub_brand } =
+  const { page, color, gender, name, brand, subCategory, subBrand } =
     await searchParams;
 
   const paramsMap = {
@@ -21,12 +18,12 @@ export default async function Page({
     color: isValidString(color) ? color : null,
     gender: isValidString(gender) ? gender : null,
     name: isValidString(name) ? name : null,
-    brand: isValidString(sub_brand)
-      ? sub_brand
+    brand: isValidString(subBrand)
+      ? subBrand
       : isValidString(brand)
       ? brand
       : null,
-    sub_category: isValidString(sub_category) ? sub_category : null,
+    sub_category: isValidString(subCategory) ? subCategory : null,
     noOfItems: NO_OF_ITEMS,
   };
 

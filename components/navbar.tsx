@@ -198,7 +198,7 @@ function Menu({
 
   return (
     <div
-      className={`flex ${robotoCondensed.className} gap-6 font-semibold flex-col lg:flex-row`}
+      className={`flex ${robotoCondensed.className} gap-2 lg:gap-6 font-semibold flex-col lg:flex-row`}
     >
       {menuMap.map((item) => (
         <MenuItem
@@ -245,8 +245,11 @@ function MobileMenuButton(props: {
     ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}
   `}
       >
+        <div className="px-6 pt-6 ">
+          <Logo />
+        </div>
         {/* Fixed Header Section */}
-        <div className="flex-shrink-0 p-6 border-b border-gray-100">
+        <div className="flex-shrink-0 p-6 border-b border-gray-100 ">
           <Suspense>
             <SearchComp
               className={""}
@@ -329,7 +332,6 @@ export default function Navbar(props: {
     <div className="navbar">
       {/* Mobile Layout */}
       <div className="flex lg:hidden items-center justify-between w-full">
-        <Logo />
         <MobileMenuButton {...props} />
       </div>
 

@@ -45,7 +45,7 @@ export default function ProductFilters({
   const formattedSubCats = useMemo(
     () =>
       subCategoryList?.map((item) => ({
-        id: item.name,
+        id: toSentenceCase(item.name),
         name: toSentenceCase(item.name),
       })) || [],
     [subCategoryList, toSentenceCase]
@@ -81,8 +81,8 @@ export default function ProductFilters({
   useEffect(() => {
     setSelectedValues((prev) => ({
       brand: prev.brand || searchParams.get("brand") || "",
-      subCategory: prev.subCategory || searchParams.get("sub_category") || "",
-      subBrand: prev.subBrand || searchParams.get("sub_brand") || "",
+      subCategory: prev.subCategory || searchParams.get("subCategory") || "",
+      subBrand: prev.subBrand || searchParams.get("subBrand") || "",
       color: prev.color || searchParams.get("color") || "",
       gender: prev.gender || searchParams.get("gender") || "",
     }));

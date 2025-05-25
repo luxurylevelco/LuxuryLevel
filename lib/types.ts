@@ -97,8 +97,8 @@ export interface FiltersParams {
   gender: string | null;
   name: string | null;
   brand: string | null;
-  sub_category: string | null;
-  sub_brand: string | null;
+  subCategory: string | null;
+  subBrand: string | null;
 }
 
 export interface BaseEmailProps {
