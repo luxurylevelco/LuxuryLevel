@@ -12,15 +12,15 @@ import CardsSectionLoading from "@/components/cards-section-wrappers/loading";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Luxury Watches | Rolex, Patek Philippe, and More | Timepiece Hub",
+  title: "Luxury Watches | Rolex, Patek Philippe, and More | Luxury Level",
   description:
     "Explore our curated collection of luxury watches from top brands like Rolex and Patek Philippe. Trusted sellers, VIP discounts, and fast delivery.",
   openGraph: {
-    title: "Luxury Watches | Rolex, Patek Philippe, and More | Timepiece Hub",
+    title: "Luxury Watches | Rolex, Patek Philippe, and More | Luxury Level",
     description:
       "Discover timeless elegance with our premium selection of watches. Shop now for exclusive deals on luxury timepieces.",
     url: process.env.NEXT_PUBLIC_FRONTEND_URL, // Replace with your real site URL
-    siteName: "Timepiece Hub",
+    siteName: "Luxury Level",
     images: [
       {
         url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/banners/watches`, // Replace with your image
