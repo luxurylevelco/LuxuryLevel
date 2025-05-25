@@ -257,6 +257,7 @@ function MobileMenuButton(props: {
               searchParamKey="name"
               placeholder="Search All Products..."
               resetOnSearch={true}
+              providedPath="/products"
             />
           </Suspense>
         </div>
@@ -315,6 +316,7 @@ function DesktopSearch() {
           searchParamKey="name"
           resetOnSearch={true}
           placeholder="Search All Products..."
+          providedPath="/products"
         />
       </div>
     </div>
