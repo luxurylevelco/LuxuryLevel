@@ -1,7 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig: import("next").NextConfig = {
   images: {
-    domains: ["luxurysouq.com", "cdn-jnbkl.nitrocdn.com"],
+    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "luxurysouq.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn-jnbkl.nitrocdn.com",
+        port: "",
+        pathname: "/**",
+      },
+    ],
   },
 };
 
