@@ -26,7 +26,7 @@ export default function JewelryCategoriesMenu({
       toggleMobileNav();
     }
 
-    router.push(`/jewelry?sub_category=${toSentenceCase(category.name)}`);
+    router.push(`/jewelry?subCategory=${toSentenceCase(category.name)}`);
   };
 
   return (

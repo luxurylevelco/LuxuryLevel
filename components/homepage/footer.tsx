@@ -63,19 +63,21 @@ export default function Footer() {
             </div>
 
             <div>
-              <p className="underline">
+              <Link
+                href="https://www.google.com/maps?q=Al+Zumorrodah+tower"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-blue-600 transition-colors duration-200"
+              >
                 Al-Qibla - Ahmad Al-Jaber St. Al-Zumurodah Tower 3rd Floor -
                 Office No. 1,2,3
-              </p>
+              </Link>
             </div>
 
             <div>
               <p>
-                <strong>Timings:</strong> 11:30 AM to 8:30 PM{" "}
-                <strong>(Saturday to Thursday)</strong>
-              </p>
-              <p>
-                3:30 PM to 8:30 PM <strong>(Friday)</strong>
+                <strong>Timings:</strong> 12:00 PM TO 8:00 PM
+                <strong className="ml-1">(Monday to Friday)</strong>
               </p>
             </div>
           </div>
@@ -106,7 +108,14 @@ export default function Footer() {
               CONTACT US AT:
             </p>
             <p>Tel.: (+965) 90085003 - 90086003</p>
-            <p>Email: trading@Luxurylevelco.com</p>
+
+            <p>
+              Email: habibghanaei@luxurylevelco.com{" "}
+              <span className="font-bold">(Canada)</span> <br />
+              rahimghanaei@luxurylevelco.com{" "}
+              <span className="font-bold">(Kuwait, London, Bahrain)</span>
+            </p>
+
             <p>P.O. Box: 29208 Safat - Code: 13152 Kuwait</p>
           </div>
         </div>

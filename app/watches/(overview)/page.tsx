@@ -45,7 +45,6 @@ export default async function Page({
           queryString={queryString}
           sub_category={subCategory}
           tableName={"watches"}
-          pathname={"watches"}
         />
       </Suspense>
     </>

@@ -44,7 +44,6 @@ export default async function Page({
           queryString={queryString}
           sub_category={subCategory}
           tableName="jewelry"
-          pathname="jewelry"
         />
       </Suspense>
     </>

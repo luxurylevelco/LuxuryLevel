@@ -27,7 +27,6 @@ export default async function CardsSectionWrapper({
       brandsList={brandsList.brands}
       colorsList={productData.colors ?? null}
       subCategoryList={null}
-      pathname={`products`}
     />
   );
 }

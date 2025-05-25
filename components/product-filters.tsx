@@ -1,7 +1,7 @@
 "use client";
 
 import { Brand, Category, ProductResponse } from "@/lib/types";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 
@@ -12,7 +12,6 @@ interface ProductFiltersProps {
   availableColors: ProductResponse["colors"] | null;
   brandsList: ProductResponse["subBrands"];
   subCategoryList: Category[] | null;
-  pathname: string;
   subBrandsList: Brand[] | null;
 }
 
@@ -26,11 +25,11 @@ export default function ProductFilters({
   availableColors,
   brandsList,
   subCategoryList,
-  pathname,
   subBrandsList,
 }: ProductFiltersProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
 
   const toSentenceCase = useCallback(
     (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase(),
@@ -106,7 +105,7 @@ export default function ProductFilters({
         [key]: newVal,
       }));
 
-      router.replace(`/${pathname}?${params.toString()}`, { scroll: false });
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     },
     [router, pathname, searchParams]
   );
@@ -144,7 +143,6 @@ export default function ProductFilters({
         searchParamKey="name"
         placeholder="Search product name"
         className="w-full"
-        pathname={pathname}
       />
 
       <div className="flex flex-row flex-wrap xl:flex-col xl:flex-nowrap w-full gap-2">

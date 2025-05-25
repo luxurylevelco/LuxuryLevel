@@ -12,14 +12,13 @@ export default function CardsSection({
   colorsList,
   subCategoryList,
   subBrandsList,
-  pathname,
 }: {
   products: ProductResponse["products"];
   pageInfo: ProductResponse["page"];
   brandsList: ProductResponse["subBrands"];
   colorsList: ProductResponse["colors"] | null;
   subCategoryList: Category[] | null;
-  pathname: string;
+
   subBrandsList: Brand[] | null;
 }) {
   return (
@@ -30,7 +29,6 @@ export default function CardsSection({
           availableColors={colorsList}
           brandsList={brandsList}
           subCategoryList={subCategoryList}
-          pathname={pathname}
           subBrandsList={subBrandsList}
         />
       </div>
