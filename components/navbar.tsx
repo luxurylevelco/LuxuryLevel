@@ -329,11 +329,13 @@ export default function Navbar(props: {
   bagsMenu: Brand[];
 }) {
   return (
-    <div className="navbar">
+    <div className="navbar relative">
       {/* Mobile Layout */}
       <div className="flex lg:hidden items-center justify-between w-full">
         <MobileMenuButton {...props} />
-        <Logo />
+        <div className="-translate-x-1/2 left-1/2 absolute top-1/2 -translate-y-1/2">
+          <Logo />
+        </div>
       </div>
 
       {/* Desktop Layout */}
