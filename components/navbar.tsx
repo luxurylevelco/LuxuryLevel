@@ -329,7 +329,7 @@ export default function Navbar(props: {
   bagsMenu: Brand[];
 }) {
   return (
-    <div className="navbar relative">
+    <div className="navbar fixed ">
       {/* Mobile Layout */}
       <div className="flex lg:hidden items-center justify-between w-full">
         <MobileMenuButton {...props} />
