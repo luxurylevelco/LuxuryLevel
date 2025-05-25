@@ -9,6 +9,7 @@ interface SearchProps {
   toggleMobileNav?: () => void;
   searchParamKey: string;
   placeholder: string;
+  providedPath?: string;
   resetOnSearch?: boolean;
 }
 
@@ -17,6 +18,7 @@ export default function Search({
   toggleMobileNav,
   searchParamKey,
   placeholder,
+  providedPath,
   resetOnSearch = false,
 }: SearchProps) {
   const [query, setQuery] = useState("");
@@ -37,7 +39,7 @@ export default function Search({
         params.delete(searchParamKey);
       }
 
-      router.push(`${pathname}?${params.toString()}`);
+      router.replace(`${providedPath || pathname}?${params.toString()}`);
     },
     [pathname, router, searchParams, searchParamKey, resetOnSearch]
   );
