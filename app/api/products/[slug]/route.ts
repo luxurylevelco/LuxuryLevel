@@ -144,6 +144,7 @@ export async function GET(
   }
 
   const uniqueColors = Array.from(
+    //eslint-disable-next-line
     new Set(colorData?.map((p: any) => p.color?.trim()).filter(Boolean) ?? [])
   );
 
