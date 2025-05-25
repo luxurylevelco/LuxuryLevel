@@ -256,7 +256,6 @@ function MobileMenuButton(props: {
               toggleMobileNav={toggleMobileNav}
               searchParamKey="name"
               placeholder="Search All Products..."
-              pathname="products"
               resetOnSearch={true}
             />
           </Suspense>
@@ -313,7 +312,6 @@ function DesktopSearch() {
       >
         <SearchComp
           className="w-[250px]"
-          pathname="products"
           searchParamKey="name"
           resetOnSearch={true}
           placeholder="Search All Products..."

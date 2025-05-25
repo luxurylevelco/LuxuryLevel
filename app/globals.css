@@ -30,6 +30,10 @@ body {
   color: var(--foreground);
 }
 
+select {
+  background-color: #ffffff;
+}
+
 @layer base {
   .padding {
     @apply p-6 md:px-10 md:py-20;

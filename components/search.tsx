@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 
 interface SearchProps {
@@ -9,7 +9,6 @@ interface SearchProps {
   toggleMobileNav?: () => void;
   searchParamKey: string;
   placeholder: string;
-  pathname: string;
   resetOnSearch?: boolean;
 }
 
@@ -18,13 +17,13 @@ export default function Search({
   toggleMobileNav,
   searchParamKey,
   placeholder,
-  pathname,
   resetOnSearch = false,
 }: SearchProps) {
   const [query, setQuery] = useState("");
   const searchParams = useSearchParams();
   const router = useRouter();
   const searchValue = searchParams.get(searchParamKey) ?? "";
+  const pathname = usePathname();
 
   const updateSearchParams = useCallback(
     (newQuery: string | null) => {
@@ -38,7 +37,7 @@ export default function Search({
         params.delete(searchParamKey);
       }
 
-      router.push(`/${pathname}?${params.toString()}`);
+      router.push(`${pathname}?${params.toString()}`);
     },
     [pathname, router, searchParams, searchParamKey, resetOnSearch]
   );

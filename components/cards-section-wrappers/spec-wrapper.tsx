@@ -4,12 +4,10 @@ export default async function CardsSectionWrapper({
   queryString,
   sub_category,
   tableName,
-  pathname,
 }: {
   queryString: string;
   sub_category: string | null;
   tableName: string;
-  pathname: string;
 }) {
   const [dataRes, brandListRes, subCategoriesRes] = await Promise.all([
     fetch(
@@ -48,7 +46,6 @@ export default async function CardsSectionWrapper({
       brandsList={brandList}
       colorsList={data.colors ?? null}
       subCategoryList={catList}
-      pathname={pathname}
     />
   );
 }
