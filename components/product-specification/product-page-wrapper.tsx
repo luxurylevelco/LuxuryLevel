@@ -3,7 +3,7 @@ import { ProductInformationResponse } from "@/lib/types";
 
 export default async function ProductPageWrapper({ id }: { id: string }) {
   const resData = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}//products/${id}/information`,
+    `${process.env.NEXT_PUBLIC_API_URL}/products/${id}/information`,
     {
       method: "GET",
       next: { revalidate: 60 },

@@ -1,6 +1,5 @@
 import CardsSectionLoading from "@/components/cards-section-wrappers/loading";
 import ProductPageWrapper from "@/components/product-specification/product-page-wrapper";
-
 import { Suspense } from "react";
 
 export default async function Page({

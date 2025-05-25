@@ -1,23 +1,16 @@
 import CardsSectionWrapper from "@/components/cards-section-wrappers/brands-products";
 import CardsSectionLoading from "@/components/cards-section-wrappers/loading";
 import { FiltersParams } from "@/lib/types";
+import { isValidString, NO_OF_ITEMS } from "@/lib/utils";
 import { Suspense } from "react";
-
-const NO_OF_ITEMS = "18";
-
-const isValidString = (value: unknown): value is string =>
-  typeof value === "string" && value.trim() !== "";
 
 export default async function Page({
   params,
   searchParams,
 }: {
-  params: Promise<{
-    id: string | null;
-  }>;
+  params: Promise<{ id: string | null }>;
   searchParams: Promise<FiltersParams>;
 }) {
-  // assume this is inside an async fn, e.g. a React useEffect or getServerSideProps
   const { id: brand } = await params;
 
   const { page, color, gender, name, subBrand, subCategory } =
