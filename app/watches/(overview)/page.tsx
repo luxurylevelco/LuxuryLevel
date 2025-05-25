@@ -4,13 +4,55 @@ import CardsSectionWrapper from "@/components/cards-section-wrappers/spec-wrappe
 import { FiltersParams } from "@/lib/types";
 import { isValidString, NO_OF_ITEMS } from "@/lib/utils";
 import { Suspense } from "react";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<FiltersParams>;
+}): Promise<Metadata> {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_FRONTEND_URL || "https://luxurylevel.com";
+  const { name } = await searchParams;
+
+  const pageName = isValidString(name) ? name : "Watches";
+
+  return {
+    title: `${pageName} | Luxury Level`,
+    description: `Discover premium ${pageName.toLowerCase()} at Luxury Level. Top quality, style, and durability.`,
+    keywords: [
+      "watches",
+      "luxury watches",
+      "buy watches online",
+      "men watches",
+      "women watches",
+      pageName.toLowerCase(),
+    ],
+    openGraph: {
+      title: `${pageName} | Luxury Level`,
+      description: `Explore Luxury Level's exclusive collection of ${pageName.toLowerCase()}.`,
+      url: `${baseUrl}/watches`,
+      images: [
+        {
+          url: `${baseUrl}/banners/watches.webp`,
+          alt: `${pageName} Collection Banner`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${pageName} | Luxury Level`,
+      description: `Shop high-quality ${pageName.toLowerCase()} at Luxury Level.`,
+      images: [`${baseUrl}/banners/watches.webp`],
+    },
+  };
+}
 
 export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<FiltersParams>;
 }) {
-  // assume this is inside an async fn, e.g. a React useEffect or getServerSideProps
   const { page, color, gender, name, brand, subCategory, subBrand } =
     await searchParams;
 
