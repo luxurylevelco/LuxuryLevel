@@ -2,7 +2,7 @@
 
 import { Brand, Category, ProductResponse } from "@/lib/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 
 // Lazy load Search component
@@ -32,13 +32,11 @@ export default function ProductFilters({
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Memoize toSentenceCase
   const toSentenceCase = useCallback(
     (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase(),
     []
   );
 
-  // Memoize formatted data
   const formattedColors = useMemo(
     () => availableColors?.map(toSentenceCase) || [],
     [availableColors, toSentenceCase]
@@ -46,10 +44,10 @@ export default function ProductFilters({
 
   const formattedSubCats = useMemo(
     () =>
-      subCategoryList?.map((item) => {
-        const name = toSentenceCase(item.name);
-        return { id: name, name };
-      }) || [],
+      subCategoryList?.map((item) => ({
+        id: item.name,
+        name: toSentenceCase(item.name),
+      })) || [],
     [subCategoryList, toSentenceCase]
   );
 
@@ -71,42 +69,62 @@ export default function ProductFilters({
     [subBrandsList, toSentenceCase]
   );
 
-  // Memoize filter values
-  const filters = useMemo(
-    () => ({
-      brand: searchParams.get("brand") || "",
-      subCategory: searchParams.get("sub_category") || "",
-      subBrand: searchParams.get("sub_brand") || "",
-      color: searchParams.get("color") || "",
-      gender: searchParams.get("gender") || "",
-    }),
-    [searchParams]
-  );
+  const [selectedValues, setSelectedValues] = useState({
+    brand: "",
+    subCategory: "",
+    subBrand: "",
+    color: "",
+    gender: "",
+  });
 
-  // Batch URL updates
+  // When searchParams are available, initialize state if empty
+  useEffect(() => {
+    setSelectedValues((prev) => ({
+      brand: prev.brand || searchParams.get("brand") || "",
+      subCategory: prev.subCategory || searchParams.get("sub_category") || "",
+      subBrand: prev.subBrand || searchParams.get("sub_brand") || "",
+      color: prev.color || searchParams.get("color") || "",
+      gender: prev.gender || searchParams.get("gender") || "",
+    }));
+  }, [searchParams]);
+
   const updateParam = useCallback(
-    (key: string, value: string | null) => {
+    (key: keyof typeof selectedValues, value: string | null) => {
       const params = new URLSearchParams(searchParams);
-      if (value?.trim()) {
-        params.set(key, value.trim());
+      const newVal = value?.trim() || "";
+
+      if (newVal) {
+        params.set(key, newVal);
       } else {
         params.delete(key);
       }
       params.delete("page");
+
+      // Update internal state
+      setSelectedValues((prev) => ({
+        ...prev,
+        [key]: newVal,
+      }));
+
       router.replace(`/${pathname}?${params.toString()}`, { scroll: false });
     },
     [router, pathname, searchParams]
   );
 
-  // Clear all filters
   const clearAllFilters = useCallback(() => {
+    setSelectedValues({
+      brand: "",
+      subCategory: "",
+      subBrand: "",
+      color: "",
+      gender: "",
+    });
     router.replace(pathname, { scroll: false });
   }, [router, pathname]);
 
-  // Check if any filters are active
   const hasActiveFilters = useMemo(
-    () => Object.values(filters).some((value) => value !== ""),
-    [filters]
+    () => Object.values(selectedValues).some((value) => value !== ""),
+    [selectedValues]
   );
 
   return (
@@ -116,7 +134,6 @@ export default function ProductFilters({
           <button
             onClick={clearAllFilters}
             className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-            aria-label="Clear all filters"
           >
             Clear All Filters
           </button>
@@ -131,30 +148,29 @@ export default function ProductFilters({
       />
 
       <div className="flex flex-row flex-wrap xl:flex-col xl:flex-nowrap w-full gap-2">
-        {/* Reusable Select Component */}
         {[
           {
             label: "Brand",
             key: "brand",
-            value: filters.brand,
+            value: selectedValues.brand,
             options: formattedBrands,
           },
           {
             label: "Sub Brand",
-            key: "sub_brand",
-            value: filters.subBrand,
+            key: "subBrand",
+            value: selectedValues.subBrand,
             options: formattedSubBrands,
           },
           {
             label: "Sub Category",
-            key: "sub_category",
-            value: filters.subCategory,
+            key: "subCategory",
+            value: selectedValues.subCategory,
             options: formattedSubCats,
           },
           {
             label: "Color",
             key: "color",
-            value: filters.color,
+            value: selectedValues.color,
             options: formattedColors.map((color) => ({
               id: color,
               name: color,
@@ -163,45 +179,51 @@ export default function ProductFilters({
           {
             label: "Gender",
             key: "gender",
-            value: filters.gender,
+            value: selectedValues.gender,
             options: ["Male", "Female", "Unisex"].map((gender) => ({
               id: gender,
               name: gender,
             })),
           },
-        ].map(
-          ({ label, key, value, options }) =>
-            !!options.length && (
-              <div key={key} className="relative xl:w-full">
-                <select
-                  className={`w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10 ${
-                    value
-                      ? "border-gray-300 text-black"
-                      : "border-gray-200 text-gray-400"
-                  }`}
-                  value={value}
-                  onChange={(e) => updateParam(key, e.target.value)}
-                  aria-label={`Select ${label}`}
+        ].map(({ label, key, value, options }) =>
+          !!options.length ? (
+            <div key={key} className="relative xl:w-full">
+              <select
+                className={`w-full rounded-full border px-4 py-2 text-sm appearance-none pr-10 ${
+                  value
+                    ? "border-gray-300 text-black"
+                    : "border-gray-200 text-gray-400"
+                }`}
+                value={value}
+                onChange={(e) =>
+                  updateParam(
+                    key as keyof typeof selectedValues,
+                    e.target.value
+                  )
+                }
+                aria-label={`Select ${label}`}
+              >
+                <option value="">Select {label}</option>
+                {options.map((option: SelectOption) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+              {value && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateParam(key as keyof typeof selectedValues, "")
+                  }
+                  className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
+                  aria-label={`Clear ${label} filter`}
                 >
-                  <option value="">Select {label}</option>
-                  {options.map((option: SelectOption) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
-                {value && (
-                  <button
-                    type="button"
-                    onClick={() => updateParam(key, "")}
-                    className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-red-500"
-                    aria-label={`Clear ${label} filter`}
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            )
+                  ✕
+                </button>
+              )}
+            </div>
+          ) : null
         )}
       </div>
     </div>
