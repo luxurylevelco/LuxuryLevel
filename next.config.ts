@@ -1,20 +1,7 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: import("next").NextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "luxurysouq.com",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "cdn-jnbkl.nitrocdn.com",
-        port: "",
-        pathname: "/**",
-      },
-    ],
+    domains: ["luxurysouq.com", "cdn-jnbkl.nitrocdn.com"],
   },
 };
 
