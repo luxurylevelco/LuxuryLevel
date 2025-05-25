@@ -111,7 +111,7 @@ export default function Footer() {
             <p>
               Email:{" "}
               <a
-                href="https://mail.google.com/mail/?view=cm&fs=1&to=habibghanaei@luxurylevelco.com"
+                href="mailto:habibghanaei@luxurylevelco.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline hover:text-blue-600 transition-colors"
@@ -121,7 +121,7 @@ export default function Footer() {
               <span className="font-bold">(Canada)</span>
               <br />
               <a
-                href="https://mail.google.com/mail/?view=cm&fs=1&to=rahimghanaei@luxurylevelco.com"
+                href="mailto:rahimghanaei@luxurylevelco.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline hover:text-blue-600 transition-colors"
@@ -130,7 +130,6 @@ export default function Footer() {
               </a>{" "}
               <span className="font-bold">(Kuwait, London, Bahrain)</span>
             </p>
-
             <p>P.O. Box: 29208 Safat - Code: 13152 Kuwait</p>
           </div>
         </div>
