@@ -28,15 +28,14 @@ const footerLinks: FooterLink[] = [
 const socialMediaLinks = [
   {
     name: "Instagram",
-    href: "https://instagram.com",
+    href: "https://www.instagram.com/luxurylevelco_",
     icon: "/svgs/ig.svg",
   },
   {
     name: "Facebook",
-    href: "https://facebook.com",
+    href: "https://www.facebook.com/profile.php?id=61576908020676",
     icon: "/svgs/fb.svg",
   },
-  { name: "Twitter", href: "https://twitter.com", icon: "/svgs/twt.svg" },
   {
     name: "WhatsApp",
     href: getWhatsAppUrl({ message: "" }),
@@ -107,12 +106,28 @@ export default function Footer() {
             >
               CONTACT US AT:
             </p>
-            <p>Tel.: (+965) 90085003 - 90086003</p>
+            <p>Tel.: (+965) 90085003 and (+965) 90086003</p>
 
             <p>
-              Email: habibghanaei@luxurylevelco.com{" "}
-              <span className="font-bold">(Canada)</span> <br />
-              rahimghanaei@luxurylevelco.com{" "}
+              Email:{" "}
+              <a
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=habibghanaei@luxurylevelco.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-blue-600 transition-colors"
+              >
+                habibghanaei@luxurylevelco.com
+              </a>{" "}
+              <span className="font-bold">(Canada)</span>
+              <br />
+              <a
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=rahimghanaei@luxurylevelco.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-blue-600 transition-colors"
+              >
+                rahimghanaei@luxurylevelco.com
+              </a>{" "}
               <span className="font-bold">(Kuwait, London, Bahrain)</span>
             </p>
 
