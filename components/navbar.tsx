@@ -331,6 +331,7 @@ export default function Navbar(props: {
       {/* Mobile Layout */}
       <div className="flex lg:hidden items-center justify-between w-full">
         <MobileMenuButton {...props} />
+        <Logo />
       </div>
 
       {/* Desktop Layout */}
