@@ -44,7 +44,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Page() {
   return (
     <>
-      <Banner title={"RETURN POLICY"} classnameForBgSrc={"/banners/watches"} />
+      <Banner
+        title={"RETURN POLICY"}
+        classnameForBgSrc={"bg-[url(/banners/watches.webp)]"}
+      />
       <ReturnPolicy />
     </>
   );

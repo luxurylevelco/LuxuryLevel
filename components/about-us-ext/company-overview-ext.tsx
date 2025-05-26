@@ -47,7 +47,7 @@ export default function CompanyOverviewExt() {
               alt="About Us Image"
               fill
               sizes="400"
-              className="object-cover"
+              className="object-contain"
             />
           </div>
         </div>
