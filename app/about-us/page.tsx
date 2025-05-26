@@ -51,7 +51,7 @@ export default async function Page() {
     <>
       <Banner
         title={"COMPANY OVERVIEW"}
-        classnameForBgSrc={"/banners/jewelry"}
+        classnameForBgSrc={"bg-[url(/banners/jewelry.webp)]"}
       />
       <CompanyOverviewExt />
       <Disclaimer />
