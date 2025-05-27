@@ -118,7 +118,6 @@ export default function Footer() {
               >
                 habibghanaei@luxurylevelco.com
               </a>{" "}
-              <span className="font-bold">(Canada)</span>
               <br />
               <a
                 href="mailto:rahimghanaei@luxurylevelco.com"
@@ -128,7 +127,6 @@ export default function Footer() {
               >
                 rahimghanaei@luxurylevelco.com
               </a>{" "}
-              <span className="font-bold">(Kuwait, London, Bahrain)</span>
             </p>
             <p>P.O. Box: 29208 Safat - Code: 13152 Kuwait</p>
           </div>
