@@ -106,10 +106,15 @@ export default function Footer() {
             >
               CONTACT US AT:
             </p>
-            <p>Tel.: (+965) 90085003 and (+965) 90086003</p>
+            <p>
+              Tel.: (+965) 90085003, (+965) 90086003,
+              <br className="hidden lg:flex" />
+              +1 (519) 702-2309, (+41) 79 557 33 43,
+              <br className="hidden lg:flex" /> and (+44) 7584 664649
+            </p>
 
             <p>
-              Email:{" "}
+              Email:
               <a
                 href="mailto:habibghanaei@luxurylevelco.com"
                 target="_blank"
