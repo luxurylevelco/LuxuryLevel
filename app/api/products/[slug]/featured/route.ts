@@ -1,3 +1,4 @@
+import { r2 } from "@/lib/r2";
 import { supabase } from "@/lib/supabase";
 import {
   Brand,
@@ -5,6 +6,8 @@ import {
   FeaturedResponse,
   ProductResponse,
 } from "@/lib/types";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextRequest, NextResponse } from "next/server";
 
 // Function to get brand IDs, selecting only one sub-brand per parent brand
@@ -85,12 +88,61 @@ async function getLimitedProductsWithHierarchy(
   );
 
   // Step 5: Add brand names to unique products and apply total limit
-  const productsWithBrandName = uniqueProducts
+  let productsWithBrandName = uniqueProducts
     .map((product) => ({
       ...product,
       brand_name: brandNameMap.get(product.brand_id) || "Unknown Brand",
     }))
     .slice(0, totalLimit); // Apply the total limit after deduplication
+
+  // 4) Generate signed URLs for images in products
+  if (productsWithBrandName) {
+    const productsWithSignedUrls = await Promise.all(
+      productsWithBrandName.map(async (product) => {
+        const signedUrls = await Promise.all([
+          product.image_1
+            ? getSignedUrl(
+                r2,
+                new GetObjectCommand({
+                  Bucket: process.env.R2_BUCKET_NAME,
+                  Key: product.image_1,
+                }),
+                { expiresIn: 3600 } // 1 hour expiration
+              )
+            : null,
+          product.image_2
+            ? getSignedUrl(
+                r2,
+                new GetObjectCommand({
+                  Bucket: process.env.R2_BUCKET_NAME,
+                  Key: product.image_2,
+                }),
+                { expiresIn: 3600 }
+              )
+            : null,
+          product.image_3
+            ? getSignedUrl(
+                r2,
+                new GetObjectCommand({
+                  Bucket: process.env.R2_BUCKET_NAME,
+                  Key: product.image_3,
+                }),
+                { expiresIn: 3600 }
+              )
+            : null,
+        ]);
+
+        return {
+          ...product,
+          image_1: signedUrls[0],
+          image_2: signedUrls[1],
+          image_3: signedUrls[2],
+        };
+      })
+    );
+
+    productsWithBrandName = productsWithSignedUrls;
+  }
 
   return productsWithBrandName;
 }

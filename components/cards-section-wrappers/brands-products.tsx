@@ -9,8 +9,8 @@ export default async function CardsSectionWrapper({
   brand: string | null;
 }) {
   const [resbags, resBrandInfo] = await Promise.all([
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}//products?${queryString}`),
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}//brands/${brand}/information`),
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?${queryString}`),
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/brands/${brand}/information`),
   ]);
 
   const [brandProductList, brandInfo] = await Promise.all([

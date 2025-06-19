@@ -1,5 +1,6 @@
 export const data = [
   {
+    IMG_ID: "B1",
     LINK: "https://luxurysouq.com/hermes-birkin-25-rouge-h-togo-leather-with-gold-hardware-handbag/",
     TITLE: "Hermes Birkin 25 Rouge H Togo Leather With Gold Hardware Handbag",
     IMAGE_1:
@@ -11,6 +12,7 @@ export const data = [
     DESCRIPTION: "20cm High x 25cm Wide x 13cm Deep.",
   },
   {
+    IMG_ID: "B2",
     LINK: "https://luxurysouq.com/hermes-kelly-20-sellier-black-epsom-leather-gold-hardware-handbag/",
     TITLE: "Hermes Kelly 20 Sellier Black Epsom Leather Gold Hardware Handbag",
     IMAGE_1:
@@ -22,6 +24,7 @@ export const data = [
     DESCRIPTION: "Size 20. Gold hardware.",
   },
   {
+    IMG_ID: "B3",
     LINK: "https://luxurysouq.com/hermes-birkin-35-black-epsom-leather-with-gold-hardware-handbag/",
     TITLE: "Hermes Birkin 35 Black Epsom Leather With Gold Hardware Handbag",
     IMAGE_1:
@@ -34,6 +37,7 @@ export const data = [
       "Size 35. The epsom leather gives the bag a laminated and structured appearance. The golden hardware makes the bag look very chic.",
   },
   {
+    IMG_ID: "B4",
     LINK: "https://luxurysouq.com/hermes-kelly-20-sellier-rouge-casaque-epsom-leather-gold-hardware-handbag/",
     TITLE:
       "Hermes Kelly 20 Sellier Rouge Casaque Epsom Leather Gold Hardware Handbag",
@@ -47,6 +51,7 @@ export const data = [
       "Size 20. Gold hardware. The interior is lined with Rouge Casaque chevre and has one zip pocket with an Hermes engraved pull and two open pockets on the opposite side.",
   },
   {
+    IMG_ID: "B5",
     LINK: "https://luxurysouq.com/hermes-birkin-35-black-togo-leather-with-gold-hardware-handbag/",
     TITLE: "Hermes Birkin 35 Black Togo Leather With Gold Hardware Handbag",
     IMAGE_1:
@@ -59,6 +64,7 @@ export const data = [
       "A timeless classic that never goes out of style. Handcrafted from the highest quality of leather by skilled artisans, it takes long hours of rigorous effort to stitch a Birkin together. Crafted in France from Togo leather, the bag features dual top rolled handles and a padlock with its keys within a clochette.",
   },
   {
+    IMG_ID: "B6",
     LINK: "https://luxurysouq.com/hermes-kelly-20-sellier-soufre-epsom-gold-hardware-handbag/",
     TITLE: "Hermes Kelly 20 Sellier Soufre Epsom Gold Hardware Handbag",
     IMAGE_1:
@@ -70,6 +76,7 @@ export const data = [
     DESCRIPTION: "Size 20. Gold hardware.",
   },
   {
+    IMG_ID: "B7",
     LINK: "https://luxurysouq.com/hermes-birkin-35-orange-poppy-togo-leather-with-gold-hardware-handbag/",
     TITLE:
       "Hermes Birkin 35 Orange Poppy Togo Leather With Gold Hardware Handbag",
@@ -83,6 +90,7 @@ export const data = [
       "This orange Hermes Birkin bag features tonal stitching, front toggle closure, clochette with lock and two keys, and double rolled handles. The interior of this Hermes Birkin handbag is lined in Orange Poppy chevre with one zip pocket with an Hermes engraved zipper pull and an open pocket on the opposite side.",
   },
   {
+    IMG_ID: "B8",
     LINK: "https://luxurysouq.com/hermes-kelly-20-sellier-blue-du-nord-epsom-leather-ghw-handbag/",
     TITLE: "Hermes Kelly 20 Sellier Blue Du Nord Epsom Leather Ghw Handbag",
     IMAGE_1:
@@ -95,6 +103,7 @@ export const data = [
       "Size 20 royal blue, calf leather, single top handle, detachable shoulder strap, hanging leather tag, twist-lock closure, padlock detail, gold-tone hardware, internal zip-fastening pocket, purse feet.",
   },
   {
+    IMG_ID: "B9",
     LINK: "https://luxurysouq.com/hermes-birkin-30-blue-nuit-togo-leather-gold-hw-handbag/",
     TITLE: "Hermes Birkin 30 Blue Nuit Togo Leather Gold Hw Handbag",
     IMAGE_1:
@@ -107,6 +116,7 @@ export const data = [
       "Exquisite rich Blue Nuit Hermes 30 Birkin bag. Deep navy toned blue. Lush with gold hardware.",
   },
   {
+    IMG_ID: "B10",
     LINK: "https://luxurysouq.com/hermes-kelly-pochette-mini-rouge-casaque-epsom-ghw-bag/",
     TITLE: "Hermes Kelly Pochette Mini Rouge Casaque Epsom Ghw Bag",
     IMAGE_1:
@@ -116,9 +126,10 @@ export const data = [
     COLOR: "Red",
     BRAND: "HERMES",
     DESCRIPTION:
-      "Size: 8.5″x 5″ x 2.5″. This Hermes Kelly Pochette Mini is crafted from Veau Epsom leather, a lightweight and scratch resistant material. The stunning Rouge Casaque color is accentuated by Gold hardware.",
+      "Size: 8.5?x 5? x 2.5?. This Hermes Kelly Pochette Mini is crafted from Veau Epsom leather, a lightweight and scratch resistant material. The stunning Rouge Casaque color is accentuated by Gold hardware.",
   },
   {
+    IMG_ID: "B11",
     LINK: "https://luxurysouq.com/hermes-birkin-30-craie-togo-leather-gold-hw-handbag/",
     TITLE: "Hermes Birkin 30 Craie Togo Leather Gold Hw Handbag",
     IMAGE_1:
@@ -131,6 +142,7 @@ export const data = [
       "Craie, which is the French word for chalk, is one color that has the ability to change asphalt pavements into infinite canvas art pieces. Created for the 2013 Autumn Winter collection, Craie is a predecessor of a great variety of light colors by Hermes, such as the chic Pear Grey, Parchemin and Beton which was recently created for the 2013 Spring Summer collection.",
   },
   {
+    IMG_ID: "B12",
     LINK: "https://luxurysouq.com/hermes-birkin-35-gris-tourterelle-togo-gold-hardware-handbag/",
     TITLE: "Hermes Birkin 35 Gris Tourterelle Togo Gold Hardware Handbag",
     IMAGE_1:
@@ -142,6 +154,7 @@ export const data = [
     DESCRIPTION: "Size 35. Gold Hardware.",
   },
   {
+    IMG_ID: "B13",
     LINK: "https://luxurysouq.com/hermes-birkin-25-orange-togo-leather-gold-hw-handbag/",
     TITLE: "Hermes Birkin 25 Orange Togo Leather Gold Hw Handbag",
     IMAGE_1:
@@ -154,6 +167,7 @@ export const data = [
       "The stunning orange is a bright tangerine tone and a classic Hermes color. This bag is made from Togo leather and is accentuated with rich gold hardware, creating an undeniably chic appearance.",
   },
   {
+    IMG_ID: "B14",
     LINK: "https://luxurysouq.com/hermes-birkin-30-noir-black-togo-gold-hardware-handbag/",
     TITLE: "Hermes Birkin 30 Noir Black Togo Gold Hardware Handbag",
     IMAGE_1:
@@ -166,6 +180,7 @@ export const data = [
       "Size 30. Gold hardware. Crafted from?Togo leather, a favorite due to its lightweight and shape-holding qualities, the?Noir color tone is one of the most popular in the?Herm?s repertoire.",
   },
   {
+    IMG_ID: "B15",
     LINK: "https://luxurysouq.com/hermes-35-canopee-green-togo-leather-handbag/",
     TITLE: "Hermes Birkin 35 Canopee Green Togo Leather Handbag",
     IMAGE_1:
@@ -177,6 +192,7 @@ export const data = [
     DESCRIPTION: "Size 35.",
   },
   {
+    IMG_ID: "B16",
     LINK: "https://luxurysouq.com/hermes-birkin-30-orange-poppy-togo-leather-with-gold-hardware-handbag/",
     TITLE:
       "Hermes Birkin 30 Orange Poppy Togo Leather With Gold Hardware Handbag",
@@ -189,6 +205,7 @@ export const data = [
     DESCRIPTION: "Size 30. Includes lock, keys, clochette dustbag.",
   },
   {
+    IMG_ID: "B17",
     LINK: "https://luxurysouq.com/hermes-kelly-32-sellier-black-epsom-leather-gold-hardware-handbag/",
     TITLE: "Hermes Kelly 32 Sellier Black Epsom Leather Gold Hardware Handbag",
     IMAGE_1:
@@ -201,6 +218,7 @@ export const data = [
       "Size 32. Featuring a round top handle, a detachable shoulder strap, a foldover top with twist-lock closure, hanging padlock detail, a main internal compartment, an internal zipped pocket, a front centre logo stamp, purse feet, gold-tone hardware, a hanging key fob, a structured design and thin sangles.",
   },
   {
+    IMG_ID: "B18",
     LINK: "https://luxurysouq.com/hermes-birkin-25-black-epsom-gold-hardware-handbag/",
     TITLE: "Hermes Birkin 25 Black Epsom Gold Hardware Handbag",
     IMAGE_1:
@@ -212,6 +230,7 @@ export const data = [
     DESCRIPTION: "A black epsom leather birkin 25 with gold hardware.",
   },
   {
+    IMG_ID: "B19",
     LINK: "https://luxurysouq.com/hermes-kelly-32-sellier-craie-epsom-leather-gold-hardware-handbag/",
     TITLE: "Hermes Kelly 32 Sellier Craie Epsom Leather Gold Hardware Handbag",
     IMAGE_1:
@@ -224,6 +243,7 @@ export const data = [
       "Size 32. Craie, which is the French word for chalk, is one colour that has the ability to change asphalt pavements into infinite canvas art pieces.",
   },
   {
+    IMG_ID: "B20",
     LINK: "https://luxurysouq.com/hermes-kelly-25-sellier-black-epsom-leather-palladium-hw/",
     TITLE: "Hermes Kelly 25 Sellier Black Epsom Leather Palladium Hardware",
     IMAGE_1:
@@ -235,6 +255,7 @@ export const data = [
     DESCRIPTION: "Hermes Kelly 25 Black phw epsom.",
   },
   {
+    IMG_ID: "B21",
     LINK: "https://luxurysouq.com/hermes-kelly-32-sellier-blue-nuit-epsom-leather-gold-hardware-handbag/",
     TITLE:
       "Hermes Kelly 32 Sellier Blue Nuit Epsom Leather Gold Hardware Handbag",
@@ -248,6 +269,7 @@ export const data = [
       "Size 32 Sellier Bleu Electrique Epsom GHW comes with full set.",
   },
   {
+    IMG_ID: "B22",
     LINK: "https://luxurysouq.com/hermes-kelly-28-retourne-black-logo-leather-gold-hardware-handbag/",
     TITLE: "Hermes Kelly 28 Retourne Black Logo Leather Gold Hardware Handbag",
     IMAGE_1:
@@ -259,6 +281,7 @@ export const data = [
     DESCRIPTION: "Size 28. Gold hardware.",
   },
   {
+    IMG_ID: "B23",
     LINK: "https://luxurysouq.com/hermes-kelly-28-sellier-black-epsom-leather-gold-hardware-handbag/",
     TITLE: "Hermes Kelly 28 Sellier Black Epsom Leather Gold Hardware Handbag",
     IMAGE_1:
@@ -270,6 +293,7 @@ export const data = [
     DESCRIPTION: "Size 28. Gold hardware.",
   },
   {
+    IMG_ID: "B24",
     LINK: "https://luxurysouq.com/hermes-kelly-28-sellier-craie-epsom-leather-gold-hardware-handbag/",
     TITLE: "Hermes Kelly 28 Sellier Craie Epsom Leather Gold Hardware Handbag",
     IMAGE_1:
@@ -282,6 +306,7 @@ export const data = [
       "Size 28. Gold Hardware. This Kelly Sellier has tonal stitching, a front toggle closure, a clochette with lock and two keys, a single rolled handle and an optional shoulder strap. The interior is lined with craie chevre leather and has one zip pocket with an Hermes engraved pull and two open pockets on the opposite side.",
   },
   {
+    IMG_ID: "B25",
     LINK: "https://luxurysouq.com/hermes-25-retourne-black-togo-leather-gold-hardware-handbag/",
     TITLE: "Hermes Kelly 25 Retourne Black Togo Leather Gold Hardware Handbag",
     IMAGE_1:

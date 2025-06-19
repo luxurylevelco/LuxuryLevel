@@ -1,54 +1,36 @@
-// app/api/seed/route.ts
+// app/api/seed-watches/route.ts
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { data } from "@/lib/constants/watch-products";
+import fs from "fs/promises";
+import path from "path";
+import { findImagePath, uploadImageToR2 } from "@/lib/r2";
+
+// Fixed: Added 'public' to the path
+const WATCHES_DIR = path.join(process.cwd(), "public", "products", "watches");
 
 export async function POST() {
   try {
-    // // 1. Insert categories (only "watches")
-    // const categories = [
-    //   { name: "watches", description: "" },
-    //   { name: "jewelry", description: "" },
-    //   { name: "bags", description: "" },
-    // ];
-    // const { error: categoryError } = await supabase
-    //   .from("category")
-    //   .upsert(categories, { onConflict: "name" });
+    console.log(`Looking for watches in: ${WATCHES_DIR}`);
 
-    // if (categoryError) {
-    //   console.error("Error inserting categories:", categoryError);
-    //   return NextResponse.json(
-    //     { error: "Failed to seed categories", details: categoryError.message },
-    //     { status: 500 }
-    //   );
-    // }
+    const watchesDirExists = await fs
+      .access(WATCHES_DIR)
+      .then(() => true)
+      .catch(() => false);
+    if (!watchesDirExists) {
+      return NextResponse.json(
+        { error: `Watches directory not found: ${WATCHES_DIR}` },
+        { status: 400 }
+      );
+    }
 
-    // 2. Insert unique brands (batch insert)
-    // const brandSet = new Set(data.map((item) => item.BRAND));
-    // const brands = Array.from(brandSet).map((brand) => {
-    //   const brandObj = data.find((i) => i.BRAND === brand);
-    //   return {
-    //     name: brand,
-    //     logo_url: brandObj?.BRAND_IMAGE ?? null,
-    //     description: null,
-    //   };
-    // });
-    // const { error: brandError } = await supabase
-    //   .from("brand")
-    //   .upsert(brands, { onConflict: "name" });
+    const watchesFolders = await fs.readdir(WATCHES_DIR);
+    console.log("Available folders in watches directory:", watchesFolders);
 
-    // if (brandError) {
-    //   console.error("Error inserting brands:", brandError);
-    //   return NextResponse.json(
-    //     { error: "Failed to seed brands", details: brandError.message },
-    //     { status: 500 }
-    //   );
-    // }
-
-    // 3. Fetch brand and category IDs
     const { data: brandsData, error: brandsFetchError } = await supabase
       .from("brand")
       .select("id, name");
+
     const { data: categoryData, error: categoryFetchError } = await supabase
       .from("category")
       .select("id, name")
@@ -56,10 +38,6 @@ export async function POST() {
       .single();
 
     if (brandsFetchError || categoryFetchError || !categoryData) {
-      console.error(
-        "Error fetching IDs:",
-        brandsFetchError || categoryFetchError
-      );
       return NextResponse.json(
         {
           error: "Failed to fetch IDs",
@@ -71,23 +49,47 @@ export async function POST() {
       );
     }
 
-    const brandMap = new Map(brandsData?.map((b) => [b.name, b.id]));
+    const brandMap = new Map(brandsData.map((b) => [b.name, b.id]));
     const watchesCategoryId = categoryData.id;
 
-    // 4. Insert products (batch insert, all as "watches")
-    const products = data
-      .map((item) => {
+    const products = await Promise.all(
+      data.map(async (item, index) => {
+        console.log(`\n--- Processing item ${index + 1} ---`);
+        console.log(`IMG_ID: ${item.IMG_ID}, Brand: ${item.BRAND}`);
+
         const brandId = brandMap.get(item.BRAND);
         if (!brandId || !watchesCategoryId) {
-          console.warn(
-            `Skipping product ${item.ID}: missing brand or category`
+          console.log(
+            `Skipping item: brandId=${brandId}, watchesCategoryId=${watchesCategoryId}`
           );
           return null;
         }
 
-        // Clean PRICE
+        const folderPath = path.join(WATCHES_DIR, String(item.IMG_ID));
+        console.log(`Looking for images in: ${folderPath}`);
+
+        const imagePaths = await Promise.all([
+          findImagePath(folderPath, "1"),
+          findImagePath(folderPath, "2"),
+          findImagePath(folderPath, "3"),
+        ]);
+
+        console.log(`Found image paths:`, imagePaths);
+
+        const uploadedKeys = await Promise.all(
+          imagePaths.map((imgPath, idx) =>
+            imgPath
+              ? uploadImageToR2(
+                  imgPath,
+                  `watches/${item.IMG_ID}_${idx + 1}${path.extname(imgPath)}`
+                )
+              : null
+          )
+        );
+
+        console.log(`Uploaded keys:`, uploadedKeys);
+
         const price = parseFloat(String(item.PRICE).replace(/,/g, ""));
-        // Map STOCK to integer: "In Stock" -> 1, else -> 0
         const stock = item.STOCK === "In Stock" ? 1 : 0;
 
         return {
@@ -100,40 +102,43 @@ export async function POST() {
           price: price ? parseFloat(price.toFixed(2)) : null,
           brand_id: brandId,
           category_id: watchesCategoryId,
-          image_1: item.IMAGE_1 || null,
-          image_2: item.IMAGE_2 || null,
-          image_3: item.IMAGE_3 || null,
+          image_1: uploadedKeys[0],
+          image_2: uploadedKeys[1],
+          image_3: uploadedKeys[2],
         };
       })
-      .filter((p): p is NonNullable<typeof p> => p !== null);
+    );
 
-    if (products.length === 0) {
+    const filteredProducts = products.filter(
+      (p): p is NonNullable<typeof p> => p !== null
+    );
+
+    if (filteredProducts.length === 0) {
       return NextResponse.json(
         { error: "No valid products to seed" },
         { status: 400 }
       );
     }
 
-    // Insert in chunks
     const chunkSize = 500;
-    for (let i = 0; i < products.length; i += chunkSize) {
-      const chunk = products.slice(i, i + chunkSize);
+    for (let i = 0; i < filteredProducts.length; i += chunkSize) {
+      const chunk = filteredProducts.slice(i, i + chunkSize);
       const { error: productError } = await supabase
         .from("product")
         .insert(chunk);
 
       if (productError) {
-        console.error("Error inserting products:", productError);
         return NextResponse.json(
           { error: "Failed to seed products", details: productError.message },
           { status: 500 }
         );
       }
     }
+
     return NextResponse.json({
       status: "success",
       initialDataLength: data.length,
-      seededProducts: products.length,
+      seededProducts: filteredProducts.length,
     });
   } catch (err) {
     console.error("Seeding error:", err);

@@ -1,167 +1,9 @@
-// import { supabase } from "@/lib/supabase";
-// import { ProductResponse } from "@/lib/types";
-// import { NextRequest, NextResponse } from "next/server";
-
-// // Efficient recursive category ID traversal using a pre-fetched tree
-// async function getAllCategoryIds(rootId: number): Promise<number[]> {
-//   const { data: allCategories, error } = await supabase
-//     .from("category")
-//     .select("id, parent_id");
-
-//   if (error || !allCategories) {
-//     console.error("Error fetching category tree:", error);
-//     return [rootId];
-//   }
-
-//   const idSet = new Set<number>();
-//   const queue = [rootId];
-
-//   while (queue.length > 0) {
-//     const currentId = queue.shift()!;
-//     idSet.add(currentId);
-
-//     const children = allCategories.filter((c) => c.parent_id === currentId);
-//     for (const child of children) {
-//       if (!idSet.has(child.id)) {
-//         queue.push(child.id);
-//       }
-//     }
-//   }
-
-//   return Array.from(idSet);
-// }
-
-// export async function GET(
-//   req: NextRequest,
-//   { params }: { params: Promise<{ slug: string }> }
-// ) {
-//   const { slug: categoryName } = await params;
-//   const { searchParams } = new URL(req.url);
-
-//   const page = parseInt(searchParams.get("page") || "1", 10);
-//   const noOfItems = parseInt(searchParams.get("noOfItems") || "10", 10);
-//   const from = (page - 1) * noOfItems;
-//   const to = from + noOfItems - 1;
-
-//   const filterColor = searchParams.get("color");
-//   const filterGender = searchParams.get("gender");
-//   const filterName = searchParams.get("name");
-//   const filterBrand = searchParams.get("brand");
-
-//   // Step 1: Find the root category
-//   const { data: category, error: categoryError } = await supabase
-//     .from("category")
-//     .select("id")
-//     .ilike("name", `%${categoryName}%`)
-//     .single();
-
-//   if (categoryError || !category) {
-//     return NextResponse.json(
-//       { error: `${categoryName} category not found.` },
-//       { status: 404 }
-//     );
-//   }
-
-//   // Step 2: Get all related category IDs
-//   const categoryIds = await getAllCategoryIds(category.id);
-
-//   // Step 3: Handle brand filtering
-//   let brandIds: number[] = [];
-//   let subBrands: ProductResponse["subBrands"] = [];
-
-//   if (filterBrand) {
-//     const brandId = parseInt(filterBrand);
-//     if (isNaN(brandId)) {
-//       return NextResponse.json(
-//         { error: `Invalid brand ID: ${filterBrand}` },
-//         { status: 400 }
-//       );
-//     }
-
-//     const { data: brands, error: brandError } = await supabase
-//       .from("brand")
-//       .select("id, name, parent_id")
-//       .or(`id.eq.${brandId},parent_id.eq.${brandId}`);
-
-//     if (brandError || !brands?.length) {
-//       return NextResponse.json(
-//         { error: `Brand ${brandId} not found` },
-//         { status: 404 }
-//       );
-//     }
-
-//     const mainBrand = brands.find((b) => b.id === brandId);
-//     brandIds = brands.map((b) => b.id);
-
-//     if (mainBrand?.parent_id) {
-//       const { data: siblingBrands } = await supabase
-//         .from("brand")
-//         .select("id, name")
-//         .eq("parent_id", mainBrand.parent_id);
-//       subBrands = siblingBrands || [];
-//     } else {
-//       subBrands = brands.filter((b) => b.id !== mainBrand?.id);
-//     }
-//   }
-
-//   // Step 4: Build reusable query
-//   const buildQuery = (fields: string, count = false) => {
-//     let query = supabase
-//       .from("product")
-//       .select(fields, count ? { count: "exact", head: true } : {})
-//       .in("category_id", categoryIds);
-
-//     if (filterColor) query = query.ilike("color", `%${filterColor}%`);
-//     if (filterGender) query = query.eq("gender", filterGender);
-//     if (filterName) query = query.ilike("name", `%${filterName}%`);
-//     if (brandIds.length) query = query.in("brand_id", brandIds);
-
-//     return query;
-//   };
-
-//   // Step 5: Fetch in parallel
-//   const [countResponse, productResponse, colorResponse] = await Promise.all([
-//     buildQuery("*", true),
-//     buildQuery("id, name, price, image_1, image_2, image_3")
-//       .range(from, to)
-//       .order("created_at", { ascending: false }),
-//     buildQuery("color").not("color", "is", null),
-//   ]);
-
-//   const { count, error: countError } = countResponse;
-//   if (countError) {
-//     return NextResponse.json({ error: countError.message }, { status: 500 });
-//   }
-
-//   const { data: products, error: productError } = productResponse;
-//   if (productError) {
-//     return NextResponse.json({ error: productError.message }, { status: 500 });
-//   }
-
-//   const { data: colorData, error: colorError } = await colorResponse;
-//   if (colorError) {
-//     return NextResponse.json({ error: colorError.message }, { status: 500 });
-//   }
-
-//   const uniqueColors = Array.from(
-//     //eslint-disable-next-line
-//     new Set(colorData?.map((p: any) => p.color?.trim()).filter(Boolean) ?? [])
-//   );
-
-//   const totalPages = Math.ceil((count || 0) / noOfItems);
-
-//   return NextResponse.json({
-//     subBrands,
-//     colors: uniqueColors,
-//     products,
-//     page: {
-//       current: page,
-//       total: totalPages,
-//     },
-//   });
-// }
 import { supabase } from "@/lib/supabase";
+import { Product } from "@/lib/types";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextRequest, NextResponse } from "next/server";
+import { r2 as r2Client } from "@/lib/r2";
 
 export async function GET(
   req: NextRequest,
@@ -190,31 +32,61 @@ export async function GET(
     );
   }
 
-  // 2) Build brandIds + subBrands
+  // 2) Fetch subBrands + build brandIds[]
   let brandIds: number[] = [];
+  let subBrands: { id: number; name: string }[] = [];
 
   if (filterBrand) {
     const bid = parseInt(filterBrand, 10);
-    if (!isNaN(bid)) {
-      const { data: bs } = await supabase
+    if (isNaN(bid)) {
+      return NextResponse.json(
+        { error: `Invalid brand ID: ${filterBrand}` },
+        { status: 400 }
+      );
+    }
+
+    // 2a) Fetch main+child brands
+    const { data: brands, error: be } = await supabase
+      .from("brand")
+      .select("id, name, parent_id")
+      .or(`id.eq.${bid},parent_id.eq.${bid}`);
+    if (be) {
+      return NextResponse.json({ error: be.message }, { status: 500 });
+    }
+    if (!brands?.length) {
+      return NextResponse.json(
+        { error: `Brand ${bid} not found` },
+        { status: 404 }
+      );
+    }
+
+    brandIds = brands.map((b) => b.id);
+
+    // 2b) Pick sub-brands
+    const main = brands.find((b) => b.id === bid)!;
+    if (main.parent_id) {
+      const { data: sibs, error: se } = await supabase
         .from("brand")
-        .select("id")
-        .or(`id.eq.${bid},parent_id.eq.${bid}`);
-      brandIds = bs?.map((b) => b.id) || [];
+        .select("id, name")
+        .eq("parent_id", main.parent_id);
+      if (se) return NextResponse.json({ error: se.message }, { status: 500 });
+      subBrands = sibs!;
+    } else {
+      subBrands = brands.filter((b) => b.id !== main.id);
     }
   }
 
   // 3) RPC call
-  const { data: products, error: rpcErr } = await supabase.rpc(
+  const { data: rpcData, error: rpcErr } = await supabase.rpc(
     "get_filtered_products_with_category",
     {
-      root_category_id: category?.id ?? null,
-      filter_brand_ids: brandIds.length ? brandIds : null, // <— now an array
-      filter_color: filterColor || null,
-      filter_gender: filterGender || null,
-      filter_name: filterName || null,
-      page_number: page,
-      items_per_page: noOfItems,
+      p_root_category_id: category ? [category.id] : null, // Pass as array per function definition
+      p_filter_brand_ids: brandIds.length ? brandIds : null,
+      p_filter_color: filterColor || null,
+      p_filter_gender: filterGender || null,
+      p_filter_name: filterName || null,
+      p_page_number: page,
+      p_items_per_page: noOfItems,
     }
   );
 
@@ -222,5 +94,63 @@ export async function GET(
     return NextResponse.json({ error: rpcErr.message }, { status: 500 });
   }
 
-  return NextResponse.json(products);
+  // Log the raw RPC data to debug structure
+  console.log("Raw RPC Data:", JSON.stringify(rpcData, null, 2));
+
+  // 4) Generate signed URLs for images in products
+  if (rpcData && rpcData.products) {
+    const productsWithSignedUrls = await Promise.all(
+      rpcData.products.map(async (product: Product) => {
+        const signedUrls = await Promise.all([
+          product.image_1
+            ? getSignedUrl(
+                r2Client,
+                new GetObjectCommand({
+                  Bucket: process.env.R2_BUCKET_NAME,
+                  Key: product.image_1,
+                }),
+                { expiresIn: 3600 } // 1 hour expiration
+              )
+            : null,
+          product.image_2
+            ? getSignedUrl(
+                r2Client,
+                new GetObjectCommand({
+                  Bucket: process.env.R2_BUCKET_NAME,
+                  Key: product.image_2,
+                }),
+                { expiresIn: 3600 }
+              )
+            : null,
+          product.image_3
+            ? getSignedUrl(
+                r2Client,
+                new GetObjectCommand({
+                  Bucket: process.env.R2_BUCKET_NAME,
+                  Key: product.image_3,
+                }),
+                { expiresIn: 3600 }
+              )
+            : null,
+        ]);
+
+        return {
+          ...product,
+          image_1: signedUrls[0],
+          image_2: signedUrls[1],
+          image_3: signedUrls[2],
+        };
+      })
+    );
+
+    rpcData.products = productsWithSignedUrls;
+  }
+
+  // 5) Override subBrands with computed one
+  if (rpcData) {
+    rpcData.subBrands = subBrands;
+  }
+
+  // 6) Return the response
+  return NextResponse.json(rpcData || {});
 }
