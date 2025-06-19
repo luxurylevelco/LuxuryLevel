@@ -9,9 +9,12 @@
     "lint": "next lint",
     "seed-watches": "ts-node scripts/trigger-seed-watches.ts",
     "seed-jewelries": "ts-node scripts/trigger-seed-jewelries.ts",
-    "seed-bags": "ts-node scripts/trigger-seed-bags.ts"
+    "seed-bags": "ts-node scripts/trigger-seed-bags.ts",
+    "delete-r2-objects": "ts-node scripts/trigger-delete-all-objects-from-r2.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.826.0",
+    "@aws-sdk/s3-request-presigner": "^3.826.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.5",
     "ajv": "^8.17.1",

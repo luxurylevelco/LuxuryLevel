@@ -1,5 +1,9 @@
 import { supabase } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { r2 as r2Client } from "@/lib/r2";
+import { Product } from "@/lib/types";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -75,8 +79,56 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: rpcError.message }, { status: 500 });
   }
 
-  // rpcData already has: { subBrands, colors, products, page: { current, total } }
-  // but we want to override its subBrands with our computed one:
+  // 3) Generate signed URLs for images in products
+  if (rpcData.products) {
+    const productsWithSignedUrls = await Promise.all(
+      rpcData.products.map(async (product: Product) => {
+        const signedUrls = await Promise.all([
+          product.image_1
+            ? getSignedUrl(
+                r2Client,
+                new GetObjectCommand({
+                  Bucket: process.env.R2_BUCKET_NAME,
+                  Key: product.image_1,
+                }),
+                { expiresIn: 3600 } // 1 hour expiration
+              )
+            : null,
+          product.image_2
+            ? getSignedUrl(
+                r2Client,
+                new GetObjectCommand({
+                  Bucket: process.env.R2_BUCKET_NAME,
+                  Key: product.image_2,
+                }),
+                { expiresIn: 3600 }
+              )
+            : null,
+          product.image_3
+            ? getSignedUrl(
+                r2Client,
+                new GetObjectCommand({
+                  Bucket: process.env.R2_BUCKET_NAME,
+                  Key: product.image_3,
+                }),
+                { expiresIn: 3600 }
+              )
+            : null,
+        ]);
+
+        return {
+          ...product,
+          image_1: signedUrls[0],
+          image_2: signedUrls[1],
+          image_3: signedUrls[2],
+        };
+      })
+    );
+
+    rpcData.products = productsWithSignedUrls;
+  }
+
+  // 4) Override subBrands with computed one
   rpcData.subBrands = subBrands;
 
   return NextResponse.json(rpcData);

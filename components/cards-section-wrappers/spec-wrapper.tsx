@@ -13,22 +13,13 @@ export default async function CardsSectionWrapper({
     fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/products/${
         sub_category || tableName
-      }?${queryString}`,
-      {
-        next: { revalidate: 60 },
-      }
+      }?${queryString}`
     ),
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/categories/${tableName}/available-brands`,
-      {
-        next: { revalidate: 60 },
-      }
+      `${process.env.NEXT_PUBLIC_API_URL}/categories/${tableName}/available-brands`
     ),
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/categories/${tableName}/sub-categories`,
-      {
-        next: { revalidate: 60 },
-      }
+      `${process.env.NEXT_PUBLIC_API_URL}/categories/${tableName}/sub-categories`
     ),
   ]);
 

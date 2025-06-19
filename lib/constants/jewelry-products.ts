@@ -1,5 +1,6 @@
 export const data = [
   {
+    IMG_ID: "J1",
     LINK: "https://luxurysouq.com/messika-move-uno-04705-yg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Uno-04705-YG-2.jpg",
@@ -21,13 +22,14 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J2",
     LINK: "https://luxurysouq.com/diamond-bridge-halo-diamond-engagement-ring-in-14k-rose-gold/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/07/Oval-Diamond-Bridge-Halo-Diamond-Engagement-Ring.jpg",
     IMAGE_2: "",
     IMAGE_3: "",
     TITLE: "Diamond Bridge Halo Diamond Engagement Ring In 14K Rose Gold",
-    PRICE: "",
+    PRICE: null,
     REF_NO: "",
     STOCK: "",
     GENDER: "",
@@ -39,6 +41,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J3",
     LINK: "https://luxurysouq.com/messika-move-uno-04705-wg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Uno-04705-WG.jpg",
@@ -60,6 +63,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J4",
     LINK: "https://luxurysouq.com/messika-move-classic-03998-wg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Classic-03998-WG.jpg",
@@ -81,6 +85,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J5",
     LINK: "https://luxurysouq.com/messika-move-classic-03998-pg-55/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Classic-03998-PG-55-1.jpg",
@@ -102,6 +107,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J6",
     LINK: "https://luxurysouq.com/messika-move-romane-06516-yg-55/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Romane-06516-YG-55-2.jpg",
@@ -123,6 +129,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J7",
     LINK: "https://luxurysouq.com/messika-move-noa-pave-10102-yg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Noa-Pave-10102-YG-1.jpg",
@@ -144,6 +151,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J8",
     LINK: "https://luxurysouq.com/messika-move-romane-06516-pg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Romane-06516-PG.jpg",
@@ -165,6 +173,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J9",
     LINK: "https://luxurysouq.com/messika-move-noa-gm-10102-pg-52/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Noa-Gm-10102-PG-52-3.jpg",
@@ -186,6 +195,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J10",
     LINK: "https://luxurysouq.com/messika-paris-move-noa-pave-10102-wg-53/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Paris-Move-Noa-Pave-10102-WG-53-1.jpg",
@@ -208,6 +218,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J11",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-356445/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/11/Bvlgari-Divas-Dream-356445.jpg",
@@ -217,7 +228,7 @@ export const data = [
       "https://luxurysouq.com/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2023/11/Bvlgari-Divas-Dream-356445-2-300x300.jpg.webp",
     TITLE: "Bvlgari Divas Dream 356445 AN858645 18K RG & Pave Diamonds Ring",
     PRICE: 6400,
-    REF_NO: 356445,
+    REF_NO: "356445",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Red",
@@ -229,6 +240,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J12",
     LINK: "https://luxurysouq.com/bvlgari-serpenti-356754-an858752/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/11/Bvlgari-Serpenti-356754.jpg",
@@ -238,7 +250,7 @@ export const data = [
       "https://luxurysouq.com/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2023/11/Bvlgari-Serpenti-356754-1-300x300.jpg.webp",
     TITLE: "Bvlgari Serpenti 356754 AN858752 18K Pave Diamonds Ring",
     PRICE: 9999,
-    REF_NO: 356754,
+    REF_NO: "356754",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Green",
@@ -250,6 +262,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J13",
     LINK: "https://luxurysouq.com/bvlgari-serpenti-viper-356630-an858711/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/10/Bvlgari-Serpenti-Viper-356630-AN858711.jpg",
@@ -259,7 +272,7 @@ export const data = [
     TITLE:
       "Bvlgari Serpenti Viper 356630 AN858711 18k Rose Gold Onyx Diamond Pave",
     PRICE: 12640,
-    REF_NO: 356630,
+    REF_NO: "356630",
     STOCK: "Available on Backorder",
     GENDER: "Female",
     COLOR: "Rose Gold",
@@ -271,6 +284,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J14",
     LINK: "https://luxurysouq.com/bvlgari-serpenti-viper-356550-an858710/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/10/Bvlgari-Serpenti-Viper-356550-AN858710.jpg",
@@ -281,7 +295,7 @@ export const data = [
     TITLE:
       "Bvlgari Serpenti Viper 356550 AN858710 18k Onyx And Pave Diamonds Ring",
     PRICE: 9550,
-    REF_NO: 356550,
+    REF_NO: "356550",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -293,13 +307,14 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J15",
     LINK: "https://luxurysouq.com/bvlgari-bvlgari-gelati-an858657/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/10/Bvlgari-Bvlgari-Gelati-356229-AN858657.jpg",
     IMAGE_2: "",
     IMAGE_3: "",
     TITLE: "Bvlgari Bvlgari Gelati AN858657 18k Pink Opal And Diamonds Ring",
-    PRICE: "",
+    PRICE: null,
     REF_NO: "",
     STOCK: "",
     GENDER: "Female",
@@ -312,12 +327,13 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J16",
     LINK: "https://luxurysouq.com/solitaire-18k-white-gold/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/SOLITAIRE.jpg",
     IMAGE_2: "",
     IMAGE_3: "",
     TITLE: "Solitaire 18K White Gold",
-    PRICE: "",
+    PRICE: null,
     REF_NO: "",
     STOCK: "",
     GENDER: "",
@@ -329,6 +345,7 @@ export const data = [
     JEWELRY_CATEGORY: "RING",
   },
   {
+    IMG_ID: "J17",
     LINK: "https://luxurysouq.com/audemars-piguet-cufflinks-royal-oak-bm0645baousn024/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/07/BM0645.BAO_.US_.N024.jpg",
@@ -348,6 +365,7 @@ export const data = [
     JEWELRY_CATEGORY: "CUFFLINK",
   },
   {
+    IMG_ID: "J18",
     LINK: "https://luxurysouq.com/audemars-piguet-cufflinks-royal-oak-bm0737orousn000/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/07/BM0737.ORO_.US_.N000.jpg",
@@ -367,6 +385,7 @@ export const data = [
     JEWELRY_CATEGORY: "CUFFLINK",
   },
   {
+    IMG_ID: "J19",
     LINK: "https://luxurysouq.com/audemars-piguet-cufflinks-millenary-bm0678oruusn000/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/07/BM0678.ORU_.US_.N000.jpg",
@@ -386,6 +405,7 @@ export const data = [
     JEWELRY_CATEGORY: "CUFFLINK",
   },
   {
+    IMG_ID: "J20",
     LINK: "https://luxurysouq.com/audemars-piguet-cufflinks-millenary-bm0678bcuusn015/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/07/bm0678.bcu_.us_.n015.jpg",
@@ -405,6 +425,7 @@ export const data = [
     JEWELRY_CATEGORY: "CUFFLINK",
   },
   {
+    IMG_ID: "J21",
     LINK: "https://luxurysouq.com/audemars-piguet-cufflinks-royal-oak-bm0733bcuusz015/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/07/BM0733.bcu_.us_.z015.jpg",
@@ -424,6 +445,7 @@ export const data = [
     JEWELRY_CATEGORY: "CUFFLINK",
   },
   {
+    IMG_ID: "J22",
     LINK: "https://luxurysouq.com/audemars-piguet-cufflinks-royal-oak-bm0724oku05n029/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/07/BM0724.OKU_.05.N029.jpg",
@@ -443,6 +465,7 @@ export const data = [
     JEWELRY_CATEGORY: "CUFFLINK",
   },
   {
+    IMG_ID: "J23",
     LINK: "https://luxurysouq.com/messika-move-hoop-04407-yg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Hoop-04407-YG.jpg",
@@ -464,6 +487,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J24",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-earrings-in-18kt-yellow-gold-set-with-malachite-and-round-brilliant-cut-diamonds/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/358128.jpg",
     IMAGE_2: "",
@@ -471,7 +495,7 @@ export const data = [
     TITLE:
       "Bvlgari 'Diva'S Dream Earrings' In 18Kt Yellow Gold Set With Malachite And Round Brilliant-Cut Diamonds",
     PRICE: 8999,
-    REF_NO: 358128,
+    REF_NO: "358128",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -483,6 +507,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J25",
     LINK: "https://luxurysouq.com/messika-move-uno-mini-hoops-10050-wg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-UNO-Mini-Hoops-10050-WG.jpg",
@@ -504,13 +529,14 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J26",
     LINK: "https://luxurysouq.com/bvlgari-bvlgari-18kt-rose-gold-ladies-bracelet/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/352837-1.jpg",
     IMAGE_2: "",
     IMAGE_3: "",
     TITLE: "Bvlgari Bvlgari 18Kt Rose Gold Ladies' Bracelet",
     PRICE: 12900,
-    REF_NO: 352837,
+    REF_NO: "352837",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -522,6 +548,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J27",
     LINK: "https://luxurysouq.com/messika-pink-gold-diamond-bracelet-my-first-diamond/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-My-First-Diamond-07513-PG.jpg",
@@ -543,6 +570,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J28",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-earrings-in-18kt-rose-gold-set-with-mother-of-pearl-and-diamonds/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/350740.jpg",
     IMAGE_2: "",
@@ -550,7 +578,7 @@ export const data = [
     TITLE:
       "Bvlgari 'Diva'S Dream Earrings' In 18Kt Rose Gold Set With Mother-Of-Pearl And Diamonds",
     PRICE: 8550,
-    REF_NO: 350740,
+    REF_NO: "350740",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -562,6 +590,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J29",
     LINK: "https://luxurysouq.com/bvlgari-serpenti-viper-356172/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/10/Bvlgari-Serpenti-Viper-356172-OR858564.jpg",
@@ -570,7 +599,7 @@ export const data = [
     IMAGE_3: "",
     TITLE: "Bvlgari Serpenti Viper 356172 OR858564 18k Pave Diamonds Earrings",
     PRICE: 12880,
-    REF_NO: 356172,
+    REF_NO: "356172",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Silver",
@@ -582,14 +611,15 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J30",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-necklace-in-18kt-rose-gold-with-pink-pave-sapphires-and-diamond/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/355889.jpg",
     IMAGE_2: "",
     IMAGE_3: "",
     TITLE:
       "Bvlgari 'Diva'S Dream Necklace' In 18Kt Rose Gold With Pink Pavé Sapphires And Diamond",
-    PRICE: "",
-    REF_NO: 355889,
+    PRICE: null,
+    REF_NO: "355889",
     STOCK: "Available on Backorder",
     GENDER: "Female",
     COLOR: "Gold",
@@ -601,6 +631,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J31",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-350590/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/07/Bvlgari-Divas-Dream-350590.jpg",
@@ -610,7 +641,7 @@ export const data = [
       "https://luxurysouq.com/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2023/07/Bvlgari-Divas-Dream-350590-1-300x300.jpg.webp",
     TITLE: "Bvlgari Divas Dream 350590 Carnelian Red Bracelet",
     PRICE: 5480,
-    REF_NO: 350590,
+    REF_NO: "350590",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Red",
@@ -622,12 +653,13 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J32",
     LINK: "https://luxurysouq.com/18k-white-gold/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/br.jpg",
     IMAGE_2: "",
     IMAGE_3: "",
     TITLE: "Bridal Set 18K White Gold",
-    PRICE: "",
+    PRICE: null,
     REF_NO: "",
     STOCK: "",
     GENDER: "",
@@ -639,6 +671,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J33",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-bracelet-18kt-rose-gold-bangle-set-with-mother-of-pearl-and-carnelian-elements/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/356746.jpg",
     IMAGE_2: "",
@@ -646,7 +679,7 @@ export const data = [
     TITLE:
       "Bvlgari 'Diva'S Dream Bracelet' 18Kt Rose Gold Bangle Set With Mother-Of-Pearl And Carnelian Elements",
     PRICE: 12999,
-    REF_NO: 356746,
+    REF_NO: "356746",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -658,12 +691,13 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J34",
     LINK: "https://luxurysouq.com/bridal-diamond-set/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/br.jpg",
     IMAGE_2: "",
     IMAGE_3: "",
     TITLE: "Bridal Diamond Set",
-    PRICE: "",
+    PRICE: null,
     REF_NO: "",
     STOCK: "",
     GENDER: "",
@@ -675,6 +709,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J35",
     LINK: "https://luxurysouq.com/bvlgari-divas-350581/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/07/Bvlgari-Divas-350581.jpg",
@@ -684,7 +719,7 @@ export const data = [
     TITLE:
       "Bvlgari Divas 350581 Dream Necklace 18Kt Rose Gold With Diamond Pendant",
     PRICE: 7850,
-    REF_NO: 350581,
+    REF_NO: "350581",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -696,6 +731,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J36",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-necklace-in-18kt-rose-gold-with-turquoise-and-diamond-pendant/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/350584.jpg",
     IMAGE_2: "",
@@ -703,7 +739,7 @@ export const data = [
     TITLE:
       "Bvlgari 'Diva'S Dream Necklace' In 18Kt Rose Gold With Turquoise And Diamond Pendant",
     PRICE: 6900,
-    REF_NO: 350584,
+    REF_NO: "350584",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -715,6 +751,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J37",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-necklace-in-18kt-rose-gold-with-diamonds-and-carnelian-elements/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/356437.jpg",
     IMAGE_2: "",
@@ -722,7 +759,7 @@ export const data = [
     TITLE:
       "Bvlgari 'Diva'S Dream Necklace' In 18Kt Rose Gold With Diamonds And Carnelian Elements",
     PRICE: 13900,
-    REF_NO: 356437,
+    REF_NO: "356437",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -734,6 +771,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J38",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-necklace-in-18kt-rose-gold-with-mother-of-pearl-elements-and-diamonds/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/356452.jpg",
     IMAGE_2: "",
@@ -741,7 +779,7 @@ export const data = [
     TITLE:
       "Bvlgari 'Diva'S Dream Necklace' In 18Kt Rose Gold With Mother Of Pearl Elements And Diamonds.",
     PRICE: 12999,
-    REF_NO: 356452,
+    REF_NO: "356452",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -753,6 +791,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J39",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-necklace-in-18kt-yellow-gold-with-diamond-and-mother-of-pearl-element/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/357510.jpg",
     IMAGE_2: "",
@@ -760,7 +799,7 @@ export const data = [
     TITLE:
       "Bvlgari 'Diva'S Dream Necklace' In 18Kt Yellow Gold With Diamond And Mother-Of-Pearl Element",
     PRICE: 5999,
-    REF_NO: 357510,
+    REF_NO: "357510",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -772,13 +811,14 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J40",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-necklace-in-18kt-yellow-gold-with-diamonds/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/357511.jpg",
     IMAGE_2: "",
     IMAGE_3: "",
     TITLE: "Bvlgari 'Diva'S Dream Necklace' In 18Kt Yellow Gold With Diamonds",
     PRICE: 12900,
-    REF_NO: 357511,
+    REF_NO: "357511",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -790,6 +830,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J41",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-earrings-18kt-rose-gold-with-malachite-elements/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/356454.jpg",
     IMAGE_2: "",
@@ -797,7 +838,7 @@ export const data = [
     TITLE:
       "Bvlgari 'Diva'S Dream Earrings' 18Kt Rose Gold With Malachite Elements",
     PRICE: 8900,
-    REF_NO: 356454,
+    REF_NO: "356454",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -809,6 +850,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J42",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-earrings-in-18kt-rose-gold-set-with-mother-of-pearl-and-pave-diamonds/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/352600.jpg",
     IMAGE_2: "",
@@ -828,6 +870,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J43",
     LINK: "https://luxurysouq.com/bvlgari-divas-dream-earrings-in-18kt-yellow-gold-set-with-mother-of-pearl-elements-and-diamonds/",
     IMAGE_1: "https://luxurysouq.com/wp-content/uploads/2023/07/357513-1.jpg",
     IMAGE_2: "",
@@ -835,7 +878,7 @@ export const data = [
     TITLE:
       "Bvlgari 'Diva'S Dream Earrings' In 18Kt Yellow Gold Set With Mother-Of-Pearl Elements And Diamonds",
     PRICE: 8400,
-    REF_NO: 357513,
+    REF_NO: "357513",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Gold",
@@ -847,6 +890,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRIDAL",
   },
   {
+    IMG_ID: "J44",
     LINK: "https://luxurysouq.com/messika-my-first-diamond-pave-07535-rg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-My-First-Diamond-Pave-07535-RG-3.jpg",
@@ -868,6 +912,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J45",
     LINK: "https://luxurysouq.com/bvlgari-serpenti-viper-356521-br858709/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/10/Bvlgari-Serpenti-Viper-356521-BR858709.jpg",
@@ -877,7 +922,7 @@ export const data = [
     TITLE:
       "Bvlgari Serpenti Viper 356521 BR858709 18k Malachite Inserts Bracelet",
     PRICE: 15540,
-    REF_NO: 356521,
+    REF_NO: "356521",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Green",
@@ -889,6 +934,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J46",
     LINK: "https://luxurysouq.com/messika-pink-gold-diamond-bracelet-my-first-diamond/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-My-First-Diamond-07513-PG.jpg",
@@ -910,6 +956,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J47",
     LINK: "https://luxurysouq.com/bvlgari-dream-352606/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/07/Bvlgari-Dream-352606.jpg",
@@ -919,7 +966,7 @@ export const data = [
       "https://luxurysouq.com/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2023/07/Bvlgari-Dream-352606-3-300x300.jpg.webp",
     TITLE: "Bvlgari Dream 352606 MOP And Malachite Green Bracelet",
     PRICE: 13920,
-    REF_NO: 352606,
+    REF_NO: "352606",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Green",
@@ -931,6 +978,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J48",
     LINK: "https://luxurysouq.com/messika-move-thin-04068-rg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Thin-04068-RG-2.jpg",
@@ -952,6 +1000,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J49",
     LINK: "https://luxurysouq.com/messika-move-thin-04068-wg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Thin-04068-WG.jpg",
@@ -973,6 +1022,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J50",
     LINK: "https://luxurysouq.com/messika-move-thin-04068-yg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Thin-04068-YG.jpg",
@@ -994,6 +1044,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J51",
     LINK: "https://luxurysouq.com/messika-move-pave-thin-05032-pg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Pave-Thin-05032-PG.jpg",
@@ -1015,6 +1066,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J52",
     LINK: "https://luxurysouq.com/messika-move-noa-bangle-pm-10092-pg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Noa-Bangle-Pm-10092-PG.jpg",
@@ -1036,6 +1088,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J53",
     LINK: "https://luxurysouq.com/messika-move-noa-bangle-10092-wg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Noa-Bangle-10092-WG-.jpg",
@@ -1057,6 +1110,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J54",
     LINK: "https://luxurysouq.com/messika-move-noa-pave-06371-yg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Noa-Pave-06371-YG-1.jpg",
@@ -1078,6 +1132,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J55",
     LINK: "https://luxurysouq.com/messika-move-romane-06747-wg/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Romane-06747-Wg-2.jpg",
@@ -1099,6 +1154,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J56",
     LINK: "https://luxurysouq.com/messika-move-noa-06368-pg-m/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2024/01/Messika-Move-Noa-06368-PG-M-2.jpg",
@@ -1120,6 +1176,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J57",
     LINK: "https://luxurysouq.com/bvlgari-bracelet-356189/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/10/Bvlgari-bracelet-356189.jpg",
@@ -1129,7 +1186,7 @@ export const data = [
       "https://luxurysouq.com/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2023/10/Bvlgari-bracelet-356189-2-300x300.jpg.webp",
     TITLE: "Bvlgari bracelet 356189 18kt Rose Gold With Onyx And Pave Diamonds",
     PRICE: 8500,
-    REF_NO: 356189,
+    REF_NO: "356189",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Blue",
@@ -1141,6 +1198,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J58",
     LINK: "https://luxurysouq.com/bvlgari-flip-355274-bracelet/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/10/Bvlgari-Flip-355274.jpg",
@@ -1149,7 +1207,7 @@ export const data = [
     IMAGE_3: "",
     TITLE: "Bvlgari Flip 355274 Mop Onyx And Malachite",
     PRICE: 14999,
-    REF_NO: 355274,
+    REF_NO: "355274",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Green",
@@ -1161,6 +1219,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J59",
     LINK: "https://luxurysouq.com/bvlgari-flip-354734-bracelet/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/10/Bvlgari-Flip-354734.jpg",
@@ -1169,7 +1228,7 @@ export const data = [
     IMAGE_3: "",
     TITLE: "Bvlgari Flip 354734 Carnelian And Mop",
     PRICE: 14999,
-    REF_NO: 354734,
+    REF_NO: "354734",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Red",
@@ -1181,6 +1240,7 @@ export const data = [
     JEWELRY_CATEGORY: "BRACELET",
   },
   {
+    IMG_ID: "J60",
     LINK: "https://luxurysouq.com/bvlgari-double-faced-353056-br858008/",
     IMAGE_1:
       "https://luxurysouq.com/wp-content/uploads/2023/10/Bvlgari-Double-Faced-BR858008-353056.jpg",
@@ -1190,7 +1250,7 @@ export const data = [
       "https://luxurysouq.com/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2023/10/Bvlgari-Double-Faced-BR858008-353056-1-300x300.jpg.webp",
     TITLE: "Bvlgari Double Faced 353056 BR858008 With Carnelian And Mop",
     PRICE: 4999,
-    REF_NO: 353056,
+    REF_NO: "353056",
     STOCK: "In Stock",
     GENDER: "Female",
     COLOR: "Red",
@@ -1198,7 +1258,7 @@ export const data = [
     BRAND_IMAGE:
       "https://luxurysouq.com/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2023/07/bvlgari-watches.png.webp",
     DESCRIPTION:
-      "The Bvlgari Double Faced 353056 BR858008 Ladies Bracelet is a masterpiece of elegance and sophistication. This bracelet beautifully showcases the fusion of modern design with the rich heritage of Bvlgari. It's like having two bracelets in one, with captivating round inserts of mother-of-pearl and carnelian, each exuding its unique charm.\n\nRooted in Roman Tradition\n\nBvlgari, a brand with deep Roman roots, has crafted this bracelet as a testament to their cultural heritage. The Bvlgari Double Faced 353056 BR858008 Ladies Bracelet is a perfect blend of ancient traditions and contemporary style. The double logo design on the bracelet, inspired by inscriptions on ancient Roman coins, has made its mark in the world of jewelry. It's not just a piece of jewelry; it's a timeless symbol of Bvlgari's creativity.\n\nMaterial and Gemstones\n\nThis exquisite bracelet is crafted from 18 kt rose gold, giving it a luxurious and enduring appeal. The choice of rose gold complements the colorful gemstones beautifully. The bracelet features two stunning gemstones: mother of pearl and carnelian. The mother of pearl's lustrous white and the carnelian's deep red create a striking contrast that will catch everyone's eye.\n\nSizing Options\n\nThe Bvlgari Double Faced 353056 BR858008 Ladies Bracelet comes in two size options: Medium and Large. This ensures a comfortable fit for different wrist sizes. The dimensions of the bracelet range from 17 cm to 19 cm, allowing you to find the perfect size for you.\n\nVersatile and Timeless\n\nThis bracelet is a versatile piece that can be worn on various occasions. Whether it's a casual outing, a formal event, or a special celebration, the Bvlgari Double Faced 353056 BR858008 Ladies Bracelet adds a touch of elegance to any ensemble. Its timeless design means you'll treasure it for years to come.\n\nBracelet Specification\nRef: 353056\nMaterial​: Rose gold\nGemstone: Mother of Pearl, Carnelian\nColor​: Red, White\nSize: Medium, Large\nDimension: 17 cm – 19 cm",
+      "The Bvlgari Double Faced 353056 BR858008 Ladies Bracelet is a masterpiece of elegance and sophistication. This bracelet beautifully showcases the fusion of modern design with the rich heritage of Bvlgari. It's like having two bracelets in one, with captivating round inserts of mother-of-pearl and carnelian, each exuding its unique charm.\n\nRooted in Roman Tradition\n\nBvlgari, a brand with deep Roman roots, has crafted this bracelet as a testament to their cultural heritage. The Bvlgari Double Faced 353056 BR858008 Ladies Bracelet is a perfect blend of ancient traditions and contemporary style. The double logo design on the bracelet, inspired by inscriptions on ancient Roman coins, has made its mark in the world of jewelry. It's not just a piece of jewelry; it's a timeless symbol of Bvlgari's creativity.\n\nMaterial and Gemstones\n\nThis exquisite bracelet is crafted from 18 kt rose gold, giving it a luxurious and enduring appeal. The choice of rose gold complements the colorful gemstones beautifully. The bracelet features two stunning gemstones: mother of pearl and carnelian. The mother of pearl's lustrous white and the carnelian's deep red create a striking contrast that will catch everyone's eye.\n\nSizing Options\n\nThe Bvlgari Double Faced 353056 BR858008 Ladies Bracelet comes in two size options: Medium and Large. This ensures a comfortable fit for different wrist sizes. The dimensions of the bracelet range from 17 cm to 19 cm, allowing you to find the perfect size for you.\n\nVersatile and Timeless\n\nThis bracelet is a versatile piece that can be worn on various occasions. Whether it's a casual outing, a formal event, or a special celebration, the Bvlgari Double Faced 353056 BR858008 Ladies Bracelet adds a touch of elegance to any ensemble. Its timeless design means you'll treasure it for years to come.\n\nBracelet Specification\nRef: 353056\nMaterial?: Rose gold\nGemstone: Mother of Pearl, Carnelian\nColor?: Red, White\nSize: Medium, Large\nDimension: 17 cm – 19 cm",
     JEWELRY_CATEGORY: "BRACELET",
   },
 ];
