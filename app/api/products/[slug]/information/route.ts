@@ -1,5 +1,8 @@
+import { r2 } from "@/lib/r2";
 import { supabase } from "@/lib/supabase";
 import { Product, Brand } from "@/lib/types";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextRequest, NextResponse } from "next/server";
 
 // Recursively get the root brand
@@ -32,6 +35,46 @@ export async function GET(
       { error: productError?.message || `Product ${productId} not found.` },
       { status: 404 }
     );
+  }
+
+  // convert image keys to signed images urls
+  let productInfoWithSignedUrls = {};
+  if (product) {
+    const [img1, img2, img3] = await Promise.all([
+      product.image_1
+        ? getSignedUrl(
+            r2,
+            new GetObjectCommand({
+              Bucket: process.env.R2_BUCKET_NAME,
+              Key: product.image_1,
+            })
+          )
+        : null,
+      product.image_2
+        ? getSignedUrl(
+            r2,
+            new GetObjectCommand({
+              Bucket: process.env.R2_BUCKET_NAME,
+              Key: product.image_2,
+            })
+          )
+        : null,
+      product.image_3
+        ? getSignedUrl(
+            r2,
+            new GetObjectCommand({
+              Bucket: process.env.R2_BUCKET_NAME,
+              Key: product.image_3,
+            })
+          )
+        : null,
+    ]);
+    productInfoWithSignedUrls = {
+      ...product,
+      image_1: img1,
+      image_2: img2,
+      image_3: img3,
+    };
   }
 
   // Fetch all brands (so we can build relationships in-memory)
@@ -101,9 +144,52 @@ export async function GET(
     relatedProducts = fallback || [];
   }
 
+  if (relatedProducts) {
+    const productsWithSignedUrls = await Promise.all(
+      relatedProducts.map(async (product: Product) => {
+        const signedUrls = await Promise.all([
+          product.image_1
+            ? getSignedUrl(
+                r2,
+                new GetObjectCommand({
+                  Bucket: process.env.R2_BUCKET_NAME,
+                  Key: product.image_1,
+                })
+              )
+            : null,
+          product.image_2
+            ? getSignedUrl(
+                r2,
+                new GetObjectCommand({
+                  Bucket: process.env.R2_BUCKET_NAME,
+                  Key: product.image_2,
+                })
+              )
+            : null,
+          product.image_3
+            ? getSignedUrl(
+                r2,
+                new GetObjectCommand({
+                  Bucket: process.env.R2_BUCKET_NAME,
+                  Key: product.image_3,
+                })
+              )
+            : null,
+        ]);
+        return {
+          ...product,
+          image_1: signedUrls[0],
+          image_2: signedUrls[1],
+          image_3: signedUrls[2],
+        };
+      })
+    );
+    relatedProducts = productsWithSignedUrls;
+  }
+
   return NextResponse.json({
     brandInfo: rootBrand,
-    productInfo: product,
+    productInfo: productInfoWithSignedUrls,
     relatedProducts,
   });
 }
