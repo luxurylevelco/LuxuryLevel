@@ -29,7 +29,7 @@ function ZoomableImage({ src }: { src: string }) {
       className="relative  w-full  overflow-hidden  flex items-center justify-center"
     >
       <Image
-        src={src}
+        src={src || "/placeholder-image.webp"}
         alt="Zoomed Product Image"
         width={450}
         height={450}
