@@ -36,19 +36,29 @@ export default function CardsSection({
         <div className="w-full  grid grid-cols-2 md:grid-cols-3  xl:grid-cols-4  gap-2 md:gap-4">
           {products.length > 0 ? (
             <>
-              {products?.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  imgSrc={product.image_1 || "/placeholder-image.webp"}
-                  hoverImgSrc={
-                    product.image_3 || product.image_2 || product.image_1
-                  }
-                  productName={product.name}
-                  price={product.price ? String(product.price) : null}
-                  className="hover:border-gray-200 hover:border transition-all duration-200 hover:scale-105"
-                  href={`/products/${product.id}`}
-                />
-              ))}
+              {products?.map((product) => {
+                const imgSrc =
+                  product.image_1 ||
+                  product.image_2 ||
+                  product.image_3 ||
+                  "/placeholder-image.webp";
+                const hoverImgSrc =
+                  product.image_3 ||
+                  product.image_2 ||
+                  product.image_1 ||
+                  "/placeholder-image.webp";
+                return (
+                  <ProductCard
+                    key={product.id}
+                    imgSrc={imgSrc}
+                    hoverImgSrc={hoverImgSrc}
+                    productName={product.name}
+                    price={product.price ? String(product.price) : null}
+                    className="hover:border-gray-200 hover:border transition-all duration-200 hover:scale-105"
+                    href={`/products/${product.id}`}
+                  />
+                );
+              })}
             </>
           ) : (
             <>No Available Products</>
