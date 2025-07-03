@@ -105,6 +105,7 @@ export default function ProductInfo({
           {/* Thumbnails */}
           <div className="flex gap-2 ">
             {imageSources.map((src, index) => {
+              //check if src is null then return null
               if (!src) return null;
 
               return (
