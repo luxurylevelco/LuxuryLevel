@@ -22,19 +22,7 @@ const nextConfig: import("next").NextConfig = {
         pathname: "/**",
       },
     ],
-  },
-
-  //Redirect logic for testing
-  async redirects() {
-    return [
-      {
-        source: '/:path*',
-        destination: 'https://www.luxurylevelgroup.com/:path*',
-        permanent: true, // 301 redirect
-      },
-    ]
   }
-  
 };
 
 module.exports = nextConfig;
