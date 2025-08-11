@@ -23,6 +23,18 @@ const nextConfig: import("next").NextConfig = {
       },
     ],
   },
+
+  //Redirect logic for testing
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        destination: 'https://www.luxurylevelgroup.com/:path*',
+        permanent: true, // 301 redirect
+      },
+    ]
+  }
+  
 };
 
 module.exports = nextConfig;
