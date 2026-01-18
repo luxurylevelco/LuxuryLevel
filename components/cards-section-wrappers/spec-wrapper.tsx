@@ -23,33 +23,20 @@ export default async function CardsSectionWrapper({
     ),
   ]);
 
-  // Safely parse JSON only when response is OK and content-type is JSON
-  async function safeJson(res: Response) {
-    if (!res) return null;
-    const contentType = res.headers.get("content-type") || "";
-    if (!res.ok || !contentType.includes("application/json")) return null;
-    try {
-      return await res.json();
-    } catch (e) {
-      console.error("Failed to parse JSON response:", e);
-      return null;
-    }
-  }
-
   const [data, brandList, catList] = await Promise.all([
-    safeJson(dataRes),
-    safeJson(brandListRes),
-    safeJson(subCategoriesRes),
+    dataRes.json(),
+    brandListRes.json(),
+    subCategoriesRes.json(),
   ]);
 
   return (
     <CardsSection
-      products={data?.products || []}
-      subBrandsList={data?.subBrands || []}
-      pageInfo={data?.page ?? null}
-      brandsList={Array.isArray(brandList) ? brandList : []}
-      colorsList={data?.colors ?? null}
-      subCategoryList={Array.isArray(catList) ? catList : null}
+      products={data.products || []}
+      subBrandsList={data.subBrands || []}
+      pageInfo={data.page ?? null}
+      brandsList={brandList}
+      colorsList={data.colors ?? null}
+      subCategoryList={catList}
     />
   );
 }
