@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { uploadFileToR2 } from '@/lib/r2';
-import { revalidatePath } from 'next/cache';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -37,15 +36,13 @@ async function processAndUploadImage(url: string | null, refNo: string, index: n
   }
 }
 
-// Napansin mo yung Promise<{ id: string }>? Yan ang kailangan ng bagong Next.js!
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const resolvedParams = await params; // 👈 Hihintayin muna natin
-    const stagingId = resolvedParams.id; // 👈 Saka natin kukunin ang ID
+    const resolvedParams = await params;
+    const stagingId = resolvedParams.id; 
     console.log(`\n\n=========================================`);
     console.log(`[TRACKER 1] 🚀 API Called for Staging ID: ${stagingId}`);
 
-    // FAKE ADMIN MUNA
     const adminId = 'dev_admin'; 
     console.log(`[TRACKER 2] 🔓 Auth Bypassed. Admin is: ${adminId}`);
 
@@ -62,19 +59,54 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     console.log(`[TRACKER 4] 📦 Found Product: ${stagingData.scraped_name}`);
 
     const refNo = stagingData.scraped_ref_no || `prod_${stagingId}`;
-    const cat = stagingData.raw_category_name || 'products';
+    
+    // ==========================================
+    // 🧹 1. CATEGORY SANITIZER (Yung inayos natin na na-overwrite ng kaklase mo)
+    // ==========================================
+    const rawCat = (stagingData.raw_category_name || 'products').toLowerCase();
+    let standardCategory = stagingData.raw_category_name; 
+    
+    if (rawCat.includes('watch') || rawCat.includes('timepiece')) {
+      standardCategory = 'watches';
+    } 
+    else if (rawCat.includes('jewel') || rawCat.includes('ring') || rawCat.includes('bracelet') || rawCat.includes('cufflink') || rawCat.includes('necklace') || rawCat.includes('earring')) {
+      standardCategory = 'jewelry';
+    }
+    else if (rawCat.includes('bag')) { 
+      standardCategory = 'bags';
+    }
+    else if (rawCat === 'unknown' || rawCat.includes('hermes') || rawCat.includes('chanel') || rawCat.includes('channel')) {
+      // Safeguard kung sakaling brand ang inilagay ng scraper sa category field
+      standardCategory = 'bags'; 
+    }
 
-    const image_1 = await processAndUploadImage(stagingData.image_url, refNo, 1, cat);
-    const image_2 = await processAndUploadImage(stagingData.image_url_2, refNo, 2, cat);
-    const image_3 = await processAndUploadImage(stagingData.image_url_3, refNo, 3, cat);
+    // ==========================================
+    // 🧹 2. BRAND SANITIZER (Ang sagot sa nadobleng Hermes at Unknown)
+    // ==========================================
+    let rawBrand = stagingData.raw_brand_name || 'Unknown';
+    
+    // Tinatanggal nito ang mga accent marks (Hermès -> Hermes)
+    let standardBrand = rawBrand.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
-    console.log(`[TRACKER 5] 💾 Updating staging table with new R2 keys...`);
+    // Fix common typos or unwanted scraper values
+    if (standardBrand.toLowerCase() === 'channel') standardBrand = 'Chanel';
+    if (standardBrand.toLowerCase() === 'unknown') standardBrand = 'Unknown'; 
+
+    console.log(`[TRACKER 4.5] 🏷️ Normalized Cat: '${standardCategory}' | Brand: '${standardBrand}'`);
+
+    const image_1 = await processAndUploadImage(stagingData.image_url, refNo, 1, standardCategory);
+    const image_2 = await processAndUploadImage(stagingData.image_url_2, refNo, 2, standardCategory);
+    const image_3 = await processAndUploadImage(stagingData.image_url_3, refNo, 3, standardCategory);
+
+    console.log(`[TRACKER 5] 💾 Updating staging table with clean data...`);
     const { error: updateError } = await supabaseAdmin
       .from('staging_products')
       .update({
         image_url: image_1 || stagingData.image_url,
         image_url_2: image_2 || stagingData.image_url_2,
         image_url_3: image_3 || stagingData.image_url_3,
+        raw_category_name: standardCategory, // 👈 Pinilit na tamang Category
+        raw_brand_name: standardBrand        // 👈 Pinilit na tamang Brand (walang accent)
       })
       .eq('id', stagingId);
 
