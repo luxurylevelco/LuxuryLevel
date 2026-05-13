@@ -110,8 +110,46 @@ export async function compareDatabaseToReferenceSite(
   await saveReport("reference-listings.json", referenceListings);
   await saveReport("db-products.json", dbProducts);
   await saveReport("missing-in-db-listings.json", missingListings);
-  await saveReport("missing-in-db.json", missingInDb);
-  await saveReport("in-both.json", inBoth);
+  const normalizeToBagsCategoryFromText = (p: ScrapedProduct): string | null => {
+    const rawCategory = (p.raw_category_name ?? "").toLowerCase();
+    const name = (p.scraped_name ?? "").toLowerCase();
+    const description = (p.description ?? "").toLowerCase();
+
+    const haystack = `${rawCategory} ${name} ${description}`.trim();
+
+    const WATCH_EXCLUSION_KEYWORDS = [
+      "watch",
+      "timepiece",
+      "chronograph",
+      "movement",
+      "dial",
+    ];
+
+    // Disambiguate Chanel watch pages: Chanel might have watch items; exclude watch-like text.
+    const isChanel = rawCategory.includes("chanel") || name.includes("chanel");
+    const isWatchLike = WATCH_EXCLUSION_KEYWORDS.some((k) => haystack.includes(k));
+    if (isChanel && isWatchLike) return p.raw_category_name || "Unknown";
+
+    // Bag-like detection (covers "luxurybag" etc.)
+    const bagsLike =
+      /(^|\s)(bag|bags|handbag|handbags|luxury\s*handbag|luxurybag|purse|wallet|clutch|tote|satchel)\b/i.test(
+        haystack
+      ) || /bag/i.test(haystack);
+
+    return bagsLike ? "bags" : (p.raw_category_name ?? "Unknown");
+  };
+
+  const normalizedMissingInDb = missingInDb.map((p) => ({
+    ...p,
+    raw_category_name: normalizeToBagsCategoryFromText(p),
+  }));
+
+  await saveReport("missing-in-db.json", normalizedMissingInDb);
+  const normalizedInBoth = inBoth.map((p) => ({
+    ...p,
+    category_name: normalizeCategoryName(p.category_name || "") === "bags" ? "bags" : p.category_name,
+  }));
+  await saveReport("in-both.json", normalizedInBoth);
   await saveReport("only-in-db.json", onlyInDb);
   await saveReport("price-comparisons.json", priceComparisons);
   await saveReport("price-mismatches.json", priceMismatches);
@@ -246,8 +284,21 @@ function getCategoryKeywords(category: string): string[] {
   return [];
 }
 
+// Collapses category name variants into canonical ids used in reports.
 function normalizeCategoryName(value: string): string {
-  return value.toLowerCase().replace(/[^a-z]/g, "").replace("jewellery", "jewelry").trim();
+  const lowered = value.toLowerCase().trim();
+
+  // Bags normalization first (covers: bag, bags, handbag, handbags, luxury handbag, luxurybag, etc.)
+  const bagsLike = /(^|\s)(bag|bags|handbag|handbags|luxury\s*handbag|luxurybag|purse|wallet|clutch|tote|satchel)\b/i.test(
+    lowered
+  );
+  if (bagsLike) return "bags";
+
+  // Keep existing jewelry normalization behavior.
+  return lowered
+    .replace(/[^a-z]/g, "")
+    .replace("jewellery", "jewelry")
+    .trim();
 }
 
 function normalizeNameKey(name: string | null | undefined): string | null {

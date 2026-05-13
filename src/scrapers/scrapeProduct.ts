@@ -117,6 +117,22 @@ export async function scrapeProduct(
     baseProduct.color = findSpecValue(baseProduct.specifications, ["color", "dial color"]);
     baseProduct.gender = findSpecValue(baseProduct.specifications, ["gender", "sex"]);
 
+    // Hard override: if scraped name/description clearly indicates a bag, normalize category to "Bags"
+    // This fixes cases where the site posts "Channel" or other incorrect categories for bag pages (e.g. Chanel).
+    const nameLower = baseProduct.scraped_name.toLowerCase();
+    const descLower = (baseProduct.description || "").toLowerCase();
+    const rawCategoryLower = (baseProduct.raw_category_name || "").toLowerCase();
+
+    const watchLikeKeywords = ["watch", "timepiece", "chronograph", "movement", "dial"];
+    const isWatchLike = watchLikeKeywords.some((k) => `${nameLower} ${descLower} ${rawCategoryLower}`.includes(k));
+
+    const bagLikeKeywordsRegex = /(\bluxury\s*handbag\b|\bluxurybag\b|\bhandbag(s)?\b|\bbag(s)?\b|\bpurse\b|\bwallet\b|\bclutch\b|\btote\b|\bsatchel\b)/i;
+    const isBagLike = bagLikeKeywordsRegex.test(`${nameLower} ${descLower} ${rawCategoryLower}`);
+
+    if (isBagLike && !isWatchLike) {
+      baseProduct.raw_category_name = "Bags";
+    }
+
     const refFromSpecs = findSpecValue(baseProduct.specifications, [
       "reference",
       "reference no",
@@ -381,9 +397,20 @@ function pickCategory(candidates: Array<string | null>, brand: string | null): s
     if (brandLower && candidateLower === brandLower) {
       continue;
     }
-    if (candidateLower === "bags" || candidateLower === "bag") {
+    // Force canonical "Bags" when candidate is anything bag-like
+    // (covers: handbag, hand bag, handbags, luxury handbag, bag-like variants)
+    if (
+      candidateLower === "bags" ||
+      candidateLower === "bag" ||
+      candidateLower.includes("handbag") ||
+      candidateLower.includes("hand bags") ||
+      candidateLower.includes("handbags") ||
+      candidateLower.includes("luxurybag") ||
+      candidateLower.includes("luxury handbag")
+    ) {
       return "Bags";
     }
+
     return candidate.trim();
   }
   return null;

@@ -95,6 +95,70 @@ function buildStagingRef(product: ScrapedProduct): string | null {
   return candidate && candidate.length > 0 ? candidate : null;
 }
 
+// Regex helpers for bag normalization (uniform "bags" category in staging)
+const BAG_KEYWORDS = [
+  "bag",
+  "handbag",
+  "purse",
+  "wallet",
+  "clutch",
+  "sling bag",
+  "tote",
+  "satchel",
+];
+const WATCH_EXCLUSION_KEYWORDS = [
+  "watch",
+  "timepiece",
+  "chronograph",
+  "movement",
+  "strap",
+  "dial",
+];
+
+function normalizeToBagsCategory(input: {
+  rawCategoryName: string | null;
+  scrapedName: string;
+  description: string | null;
+  rawBrandName: string | null;
+}): string {
+  const rawCategory = (input.rawCategoryName || "").toLowerCase();
+  const name = (input.scrapedName || "").toLowerCase();
+  const description = (input.description || "").toLowerCase();
+  const brand = (input.rawBrandName || "").toLowerCase();
+
+  const haystack = `${rawCategory} ${name} ${description}`.trim();
+
+  // If it's clearly watch-related (esp Chanel watch pages), don't treat as bags.
+  const isWatchLike = WATCH_EXCLUSION_KEYWORDS.some((k) => haystack.includes(k));
+  const isChanel = brand.includes("chanel") || rawCategory.includes("chanel") || name.includes("chanel");
+
+  // Your request: Chanel might have a watch; description should help disambiguate.
+  if (isChanel && isWatchLike) {
+    return normalizeField(input.rawCategoryName) || "Unknown";
+  }
+
+  // Detect "bag" even inside words like "luxurybag" / "luxury bag"
+  const hasBagKeyword =
+    BAG_KEYWORDS.some((k) => {
+      if (k === "bag") return /\bbag\b/.test(haystack) || haystack.includes("luxurybag");
+      return haystack.includes(k);
+    }) ||
+    // Explicit "bag" substring fallback (to catch luxurybag etc.)
+    /bag/i.test(haystack);
+
+  if (!hasBagKeyword) {
+    return normalizeField(input.rawCategoryName) || "Unknown";
+  }
+
+  // If it contains bag keywords but also watch keywords, prefer exclusion.
+  // (This catches edge cases like "Chanel ... watch ... bag" listings.)
+  if (isWatchLike && (isChanel || haystack.includes("chanel"))) {
+    return normalizeField(input.rawCategoryName) || "Unknown";
+  }
+
+  return "bags";
+}
+
 function buildStagingRows(products: ScrapedProduct[]): StagingRow[] {
   const rows: StagingRow[] = [];
   const seenRefs = new Set<string>();
@@ -112,7 +176,14 @@ function buildStagingRows(products: ScrapedProduct[]): StagingRow[] {
 
     const name = normalizeField(product.scraped_name) || ref;
     const brand = normalizeField(product.raw_brand_name) || "Unknown";
-    const category = normalizeField(product.raw_category_name) || "Unknown";
+    const rawCategory = normalizeField(product.raw_category_name);
+
+    const category = normalizeToBagsCategory({
+      rawCategoryName: rawCategory,
+      scrapedName: name,
+      description: product.description,
+      rawBrandName: brand,
+    });
 
     rows.push({
       scraped_ref_no: ref,
@@ -135,6 +206,7 @@ function buildStagingRows(products: ScrapedProduct[]): StagingRow[] {
   return rows;
 }
 // BAGONG FUNCTION PARA SA MGA I-A-ARCHIVE NA PRODUCTS
+// BAGONG FUNCTION PARA SA MGA I-A-ARCHIVE NA PRODUCTS
 export async function insertMissingFromReferenceToStaging(localOrphans: any[]): Promise<void> {
   if (localOrphans.length === 0) {
     logger.info("No missing (orphan) products to insert into staging.");
@@ -142,22 +214,35 @@ export async function insertMissingFromReferenceToStaging(localOrphans: any[]): 
   }
 
   // I-map ang local database items papunta sa StagingRow format
-  const rows: StagingRow[] = localOrphans.map(product => ({
-    scraped_ref_no: product.ref_no,
-    scraped_name: product.name,
-    scraped_price: null, // 🚨 IMPORTANTE: Gawing null para pumasok sa "To Archive" tab
-    raw_brand_name: product.brand?.name || product.brand || "Unknown",
-    raw_category_name: product.category?.name || product.category || "Unknown",
-    sync_status: "missing", // 🚨 IMPORTANTE: Set status to 'missing'
-    scraped_at: new Date().toISOString(),
-    error_message: null,
-    image_url: null,
-    image_url_2: null,
-    image_url_3: null,
-    description: null,
-    color: null,
-    gender: null,
-  }));
+  const rows: StagingRow[] = localOrphans.map((product) => {
+    const brand: string | null = product.brand?.name || product.brand || "Unknown";
+    const rawCategory: string | null = product.category?.name || product.category || "Unknown";
+    const scrapedName: string = product.name || "";
+
+    const normalizedCategory = normalizeToBagsCategory({
+      rawCategoryName: rawCategory,
+      scrapedName,
+      description: null,
+      rawBrandName: brand,
+    });
+
+    return {
+      scraped_ref_no: product.ref_no,
+      scraped_name: scrapedName,
+      scraped_price: null, // 🚨 IMPORTANTE: Gawing null para pumasok sa "To Archive" tab
+      raw_brand_name: brand,
+      raw_category_name: normalizedCategory,
+      sync_status: "missing", // 🚨 IMPORTANTE: Set status to 'missing'
+      scraped_at: new Date().toISOString(),
+      error_message: null,
+      image_url: null,
+      image_url_2: null,
+      image_url_3: null,
+      description: null,
+      color: null,
+      gender: null,
+    };
+  });
 
   const { error } = await supabase
     .from("staging_products")
@@ -169,26 +254,40 @@ export async function insertMissingFromReferenceToStaging(localOrphans: any[]): 
 
   logger.info(`Inserted ${rows.length} missing products (for archiving) into staging.`);
 }
+
 // 🚀 BAGONG FUNCTION PARA SA PRICE UPDATES
 export async function insertPriceUpdatesToStaging(mismatches: any[]): Promise<void> {
   if (mismatches.length === 0) return;
 
-  const rows: StagingRow[] = mismatches.map(mismatch => ({
-    scraped_ref_no: mismatch.ref_no,
-    scraped_name: mismatch.name,
-    scraped_price: mismatch.reference_price, // 👈 IMPORTANTE: Ipapasa natin yung BAGONG presyo galing sa website
-    raw_brand_name: "Unknown",
-    raw_category_name: mismatch.category_name || "Unknown",
-    sync_status: "pending", // 👈 'pending' para basahin ng dashboard at ma-compare
-    scraped_at: new Date().toISOString(),
-    error_message: null,
-    image_url: null,
-    image_url_2: null,
-    image_url_3: null,
-    description: null,
-    color: null,
-    gender: null,
-  }));
+  const rows: StagingRow[] = mismatches.map((mismatch) => {
+    const scrapedName: string = mismatch.name || "";
+    const rawCategory: string | null = mismatch.category_name || "Unknown";
+    const brand: string | null = "Unknown";
+
+    const normalizedCategory = normalizeToBagsCategory({
+      rawCategoryName: rawCategory,
+      scrapedName,
+      description: null,
+      rawBrandName: brand,
+    });
+
+    return {
+      scraped_ref_no: mismatch.ref_no,
+      scraped_name: scrapedName,
+      scraped_price: mismatch.reference_price, // 👈 IMPORTANTE: Ipapasa natin yung BAGONG presyo galing sa website
+      raw_brand_name: brand,
+      raw_category_name: normalizedCategory,
+      sync_status: "pending", // 👈 'pending' para basahin ng dashboard at ma-compare
+      scraped_at: new Date().toISOString(),
+      error_message: null,
+      image_url: null,
+      image_url_2: null,
+      image_url_3: null,
+      description: null,
+      color: null,
+      gender: null,
+    };
+  });
 
   const { error } = await supabase
     .from("staging_products")
