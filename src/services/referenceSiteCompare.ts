@@ -233,7 +233,33 @@ async function scrapeReferenceSite(
       limit: options.limit,
       category,
     });
+
     await page.close();
+
+    // Backfill: listing-card price selectors can be brittle; if we couldn't get a numeric price,
+    // re-scrape price from the product page.
+    const missingPriceListings = listings.filter((l) => l.scraped_price === null && Boolean(l.product_url));
+    if (missingPriceListings.length > 0) {
+      logger.info(`Backfilling ${missingPriceListings.length} product prices from product pages...`);
+      const missingUrls = missingPriceListings.map((l) => l.product_url).filter((u): u is string => Boolean(u));
+
+      const scraped = await scrapeProductUrls(missingUrls, {
+        headless: options.headless,
+        debug: options.debug,
+        concurrency: Math.max(1, options.concurrency),
+        limit: options.limit,
+      });
+
+      const byUrl = new Map(scraped.map((p) => [p.product_url, p]));
+      for (const listing of missingPriceListings) {
+        const product = byUrl.get(listing.product_url);
+        if (!product) continue;
+
+        listing.scraped_price = product.scraped_price;
+        listing.currency = product.currency;
+      }
+    }
+
     allProducts.push(...listings);
   }
 

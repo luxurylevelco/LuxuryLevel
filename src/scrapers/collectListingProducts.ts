@@ -120,9 +120,20 @@ export async function collectListingProducts(
                 container?.querySelector(".product-name") ||
                 link.querySelector("h2, h3");
 
+              const listingCard =
+                link.closest("li.product, .product, .products > .product, .products li, [class*='product-'], [class*='products']") ||
+                container;
+
               const priceEl =
-                container?.querySelector(".price, .woocommerce-Price-amount, .amount, bdi, span.woocommerce-Price-amount, .product-details .price") ||
-                link.querySelector(".price, .woocommerce-Price-amount, .amount, bdi");
+                listingCard?.querySelector(
+                  ".woocommerce-loop-product__title + .price, .woocommerce-loop-product__price, .price," +
+                    " .woocommerce-Price-amount, .woocommerce-Price-amount bdi, .amount, bdi, " +
+                    " span.woocommerce-Price-amount, .product-details .price," +
+                    " .price del, .price ins"
+                ) ||
+                link.querySelector(
+                  ".price, .woocommerce-Price-amount, .amount, bdi, .woocommerce-loop-product__price"
+                );
 
               // 🚀 FIX: Idinagdag ang .add_to_cart_button dahil standard WooCommerce class ito
               const addToCart = container?.querySelector("a[href*='add-to-cart'], button[name='add-to-cart'], .add_to_cart_button") as
@@ -186,7 +197,8 @@ export async function collectListingProducts(
         normalizedRef = extractBagRefFromName(displayName);
       }
 
-      const price = extractPrice(item.priceText);
+      const priceText = item.priceText?.trim() || null;
+      const price = extractPrice(priceText);
       products.set(item.href, {
         product_url: item.href,
         scraped_name: displayName,

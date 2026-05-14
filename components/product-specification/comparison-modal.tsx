@@ -82,7 +82,7 @@ const ProductCard = memo(function ProductCard({ product, inComparison, canAdd, o
 
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <p className="text-sm font-bold text-slate-900 mr-1">
-              AED {product.price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+              AED {(product.sale_price ?? product.price)?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
             </p>
             {product.brand?.name && (
               <span className="px-2 py-0.5 bg-slate-900 text-white rounded text-[10px] font-semibold uppercase tracking-wider truncate max-w-[100px]">

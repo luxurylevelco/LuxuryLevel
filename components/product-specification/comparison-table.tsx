@@ -113,7 +113,7 @@ export default function ComparisonTable({ products }: ComparisonTableProps) {
 
                     <div className="mb-4">
                       <p className="text-sm font-bold text-slate-900 tracking-tight">
-                        AED {product.price?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
+                        AED {(product.sale_price ?? product.price)?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
                       </p>
                     </div>
 
