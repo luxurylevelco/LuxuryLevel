@@ -106,9 +106,11 @@ async function loadReferenceProducts(referenceFile?: string): Promise<ScrapedPro
 
 export async function loadDbProductSummaries(): Promise<DbProductSummary[]> {
   const categories = await loadCategoryMap();
+  const brands = await loadBrandMap(); // 🚀 Kukunin na natin ang brands!
+
   const { data, error } = await supabase
     .from("product")
-    .select("ref_no,name,category_id,price,sale_price")
+    .select("ref_no,name,category_id,brand_id,price,sale_price") // 🚀 Idinagdag ang brand_id
     .order("id", { ascending: true });
 
   if (error) {
@@ -119,13 +121,20 @@ export async function loadDbProductSummaries(): Promise<DbProductSummary[]> {
   return (data || []).map((row) => {
     const refNo = typeof row.ref_no === "string" ? row.ref_no : null;
     const normalized = refNo ? normalizeRef(refNo) : null;
+    
     const categoryId = typeof row.category_id === "number" ? row.category_id : null;
     const category = categoryId ? categories.get(categoryId) || null : null;
+
+    // 🚀 Idinagdag ang logic para i-map ang brand_id sa totoong brand name
+    const brandId = typeof row.brand_id === "number" ? row.brand_id : null;
+    const brand = brandId ? brands.get(brandId) || null : null;
+
     return {
       ref_no: refNo,
       normalized_ref_no: normalized,
       name: row.name,
       category_name: category,
+      brand_name: brand, // 🚀 Ipapasa na natin yung totoong brand name!
       product_url: null,
       price: typeof row.price === "number" ? row.price : null,
       sale_price: typeof row.sale_price === "number" ? row.sale_price : null,
@@ -151,5 +160,25 @@ async function loadCategoryMap(): Promise<Map<number, string>> {
     }
   });
 
+  return map;
+}
+
+// 🚀 BAGONG FUNCTION PARA KUNIN ANG MGA BRANDS SA DATABASE
+async function loadBrandMap(): Promise<Map<number, string>> {
+  const { data, error } = await supabase
+    .from("brand")
+    .select("id,name");
+
+  if (error) {
+    logger.error(`Failed to load brands from DB: ${error.message}`);
+    return new Map();
+  }
+
+  const map = new Map<number, string>();
+  (data || []).forEach((row) => {
+    if (typeof row.id === "number" && typeof row.name === "string") {
+      map.set(row.id, row.name);
+    }
+  });
   return map;
 }

@@ -33,6 +33,7 @@ export interface PriceMismatch {
   reference_price: number;
   product_url: string | null;
   category_name: string | null;
+  brand_name?: string | null;
 }
 
 export interface PriceComparison {
@@ -360,6 +361,7 @@ function findPriceMismatches(
         reference_price: listing.scraped_price,
         product_url: listing.product_url || null,
         category_name: product.category_name,
+        brand_name: product.brand_name, // 👈 IPAPASA NA NATIN ANG TOTOONG BRAND!
       });
     }
   }

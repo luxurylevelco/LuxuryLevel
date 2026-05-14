@@ -256,13 +256,16 @@ export async function insertMissingFromReferenceToStaging(localOrphans: any[]): 
 }
 
 // 🚀 BAGONG FUNCTION PARA SA PRICE UPDATES
+// 🚀 PALITAN ANG BUONG FUNCTION NA ITO SA stagingInsert.ts
 export async function insertPriceUpdatesToStaging(mismatches: any[]): Promise<void> {
   if (mismatches.length === 0) return;
 
   const rows: StagingRow[] = mismatches.map((mismatch) => {
     const scrapedName: string = mismatch.name || "";
     const rawCategory: string | null = mismatch.category_name || "Unknown";
-    const brand: string | null = "Unknown";
+    
+    // 🎯 THE FIX: Kukunin na natin ang totoong brand mula sa DB!
+    const brand: string | null = mismatch.brand_name || "Unknown";
 
     const normalizedCategory = normalizeToBagsCategory({
       rawCategoryName: rawCategory,
@@ -274,10 +277,10 @@ export async function insertPriceUpdatesToStaging(mismatches: any[]): Promise<vo
     return {
       scraped_ref_no: mismatch.ref_no,
       scraped_name: scrapedName,
-      scraped_price: mismatch.reference_price, // 👈 IMPORTANTE: Ipapasa natin yung BAGONG presyo galing sa website
-      raw_brand_name: brand,
+      scraped_price: mismatch.reference_price, 
+      raw_brand_name: brand, // 👈 Hindi na ito magiging "Unknown"!
       raw_category_name: normalizedCategory,
-      sync_status: "pending", // 👈 'pending' para basahin ng dashboard at ma-compare
+      sync_status: "pending", 
       scraped_at: new Date().toISOString(),
       error_message: null,
       image_url: null,
