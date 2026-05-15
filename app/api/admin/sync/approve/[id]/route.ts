@@ -38,6 +38,10 @@ async function processAndUploadImage(url: string | null, refNo: string, index: n
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // 🚀 THE FIX 1: Kunin ang body para makuha ang mappedBrand (kung may pinili sa modal)
+    const body = await request.json().catch(() => ({}));
+    const mappedBrand = body.mappedBrand;
+
     const resolvedParams = await params;
     const stagingId = resolvedParams.id; 
     console.log(`\n\n=========================================`);
@@ -61,36 +65,59 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const refNo = stagingData.scraped_ref_no || `prod_${stagingId}`;
     
     // ==========================================
-    // 🧹 1. CATEGORY SANITIZER (Yung inayos natin na na-overwrite ng kaklase mo)
+    // 🧹 1. CATEGORY SANITIZER (Fixed to respect subcategories)
     // ==========================================
     const rawCat = (stagingData.raw_category_name || 'products').toLowerCase();
     let standardCategory = stagingData.raw_category_name; 
     
-    if (rawCat.includes('watch') || rawCat.includes('timepiece')) {
+    if (['ring', 'bracelet', 'cufflink', 'bridal'].includes(rawCat)) {
+      standardCategory = rawCat.toUpperCase();
+    }
+    else if (rawCat.includes('watch') || rawCat.includes('timepiece')) {
       standardCategory = 'watches';
     } 
-    else if (rawCat.includes('jewel') || rawCat.includes('ring') || rawCat.includes('bracelet') || rawCat.includes('cufflink') || rawCat.includes('necklace') || rawCat.includes('earring')) {
+    else if (rawCat.includes('jewel')) {
       standardCategory = 'jewelry';
     }
     else if (rawCat.includes('bag')) { 
       standardCategory = 'bags';
     }
     else if (rawCat === 'unknown' || rawCat.includes('hermes') || rawCat.includes('chanel') || rawCat.includes('channel')) {
-      // Safeguard kung sakaling brand ang inilagay ng scraper sa category field
       standardCategory = 'bags'; 
     }
 
     // ==========================================
-    // 🧹 2. BRAND SANITIZER (Ang sagot sa nadobleng Hermes at Unknown)
+    // 🧹 2. BRAND SANITIZER (Tumatanggap na ng manual mapping)
     // ==========================================
-    let rawBrand = stagingData.raw_brand_name || 'Unknown';
+    // 🚀 THE FIX 2: Kung may mappedBrand galing sa modal, yun ang gamitin. Kung wala, fallback sa na-scrape.
+    let rawBrand = mappedBrand || stagingData.raw_brand_name || 'Unbranded';
     
-    // Tinatanggal nito ang mga accent marks (Hermès -> Hermes)
+    // Tinatanggal ang mga accent marks (Hermès -> Hermes)
     let standardBrand = rawBrand.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-
-    // Fix common typos or unwanted scraper values
-    if (standardBrand.toLowerCase() === 'channel') standardBrand = 'Chanel';
-    if (standardBrand.toLowerCase() === 'unknown') standardBrand = 'Unknown'; 
+    const lowerBrand = standardBrand.toLowerCase();
+    
+    // Listahan ng mga invalid scraper guesses
+    const weirdBrands = ['2', '1', '3', 'round', 'rd', 'unknown', 'n/a', 'solitaire', 'pear', 'emerald'];
+    
+    // Fallback logic kung walang pinili manually sa modal
+    if (!mappedBrand) {
+      if (weirdBrands.includes(lowerBrand)) {
+        standardBrand = 'Unbranded'; 
+      } else {
+        // Alias dictionary (Auto-correction para sa typos)
+        const brandAliases: { [key: string]: string } = {
+          'bvlgari': 'Bulgari',
+          'channel': 'Chanel',
+          'patek': 'Patek Philippe',
+          'ap': 'Audemars Piguet',
+          'vc': 'Vacheron Constantin'
+        };
+        
+        if (brandAliases[lowerBrand]) {
+          standardBrand = brandAliases[lowerBrand];
+        }
+      }
+    }
 
     console.log(`[TRACKER 4.5] 🏷️ Normalized Cat: '${standardCategory}' | Brand: '${standardBrand}'`);
 
@@ -105,8 +132,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         image_url: image_1 || stagingData.image_url,
         image_url_2: image_2 || stagingData.image_url_2,
         image_url_3: image_3 || stagingData.image_url_3,
-        raw_category_name: standardCategory, // 👈 Pinilit na tamang Category
-        raw_brand_name: standardBrand        // 👈 Pinilit na tamang Brand (walang accent)
+        raw_category_name: standardCategory, 
+        raw_brand_name: standardBrand        // 👈 Safe na ang ipapasang brand dito!
       })
       .eq('id', stagingId);
 

@@ -39,7 +39,9 @@ export default function ProductDetailsModal({
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
-  const [subcategories, setSubcategories] = useState<any[]>([]);
+  
+  // 🚀 THE FIX 1: Gumawa ng state para sa Parent Category
+  const [selectedParentId, setSelectedParentId] = useState<number | null>(null);
   
   const [formData, setFormData] = useState<EditFormData>({
     name: '',
@@ -54,6 +56,12 @@ export default function ProductDetailsModal({
     saleStartDate: '',
     saleEndDate: '',
   });
+
+  // 🚀 THE FIX 2: Dynamic na pag-filter ng Parent at Subcategories
+  const parentCategories = categories.filter(cat => cat.parent_id === null);
+  const availableSubCategories = selectedParentId 
+    ? categories.filter(cat => cat.parent_id === selectedParentId) 
+    : [];
 
   useEffect(() => {
     if (product) {
@@ -71,40 +79,28 @@ export default function ProductDetailsModal({
         saleEndDate: product.sale_end_date?.split('T')[0] || '',
       });
       
-      // Set subcategories if category selected
+      // 🚀 THE FIX 3: Alamin kung ang existing category ay parent o anak
+      let currentParentId = null;
       if (product.category_id) {
-        const parent = categories.find(c => c.id === product.category_id);
-        if (parent?.subcategories) {
-          setSubcategories(parent.subcategories);
+        const cat = categories.find(c => c.id === product.category_id);
+        if (cat) {
+          // Kung may parent_id siya (hal. RING), yung parent niya ang ise-select sa unang dropdown
+          // Kung wala (hal. BAGS), siya mismo yung parent
+          currentParentId = cat.parent_id ? cat.parent_id : cat.id;
         }
       }
+      setSelectedParentId(currentParentId);
     }
   }, [product, categories]);
-
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const categoryId = e.target.value;
-    setFormData(prev => ({ ...prev, categoryId }));
-
-    if (categoryId) {
-      const parentCat = categories.find(c => c.id === parseInt(categoryId));
-      setSubcategories(parentCat?.subcategories || []);
-    } else {
-      setSubcategories([]);
-    }
-  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    if (name === 'categoryId') {
-      handleCategoryChange(e as any);
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSave = async () => {
@@ -140,7 +136,6 @@ export default function ProductDetailsModal({
 
   if (!isOpen || !product) return null;
 
-  // Calculate discount percentage if sale price exists
   const discountPercent = formData.salePrice && formData.price
     ? Math.round(((parseFloat(formData.price) - parseFloat(formData.salePrice)) / parseFloat(formData.price)) * 100)
     : 0;
@@ -256,7 +251,7 @@ export default function ProductDetailsModal({
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Product Name */}
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block text-xs font-bold text-slate-600 uppercase tracking-widest mb-2.5">
                       Product Name *
                     </label>
@@ -310,15 +305,19 @@ export default function ProductDetailsModal({
                     </select>
                   </div>
 
-                  {/* Category */}
+                  {/* 🚀 THE FIX 4: PARENT CATEGORY DROPDOWN */}
                   <div>
                     <label className="block text-xs font-bold text-slate-600 uppercase tracking-widest mb-2.5">
-                      Category
+                      Main Category
                     </label>
                     <select
-                      name="categoryId"
-                      value={formData.categoryId}
-                      onChange={handleCategoryChange}
+                      value={selectedParentId || ''}
+                      onChange={(e) => {
+                        const pId = e.target.value ? parseInt(e.target.value) : null;
+                        setSelectedParentId(pId);
+                        // Isang default save para kung walang subcategory, yung parent ang mase-save
+                        setFormData(prev => ({ ...prev, categoryId: pId ? pId.toString() : '' }));
+                      }}
                       disabled={!isEditing}
                       className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none bg-right bg-no-repeat"
                       style={{
@@ -327,13 +326,40 @@ export default function ProductDetailsModal({
                       }}
                     >
                       <option value="">Select Category</option>
-                      {categories.map(cat => (
+                      {parentCategories.map(cat => (
                         <option key={cat.id} value={cat.id}>
-                          {cat.name}
+                          {cat.name.toUpperCase()}
                         </option>
                       ))}
                     </select>
                   </div>
+
+                  {/* 🚀 THE FIX 5: SUB-CATEGORY DROPDOWN (Lalabas lang kung may anak ang piniling Parent!) */}
+                  {availableSubCategories.length > 0 && (
+                    <div className="animate-in fade-in slide-in-from-top-2">
+                      <label className="block text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2.5">
+                        Specific Type
+                      </label>
+                      <select
+                        name="categoryId"
+                        value={formData.categoryId}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        className="w-full px-4 py-2.5 bg-indigo-50/50 border border-indigo-200 rounded-lg text-sm font-medium text-indigo-900 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none bg-right bg-no-repeat"
+                        style={{
+                          backgroundImage: !isEditing ? 'none' : 'url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22%3E%3Cpath fill=%22%23444%22 d=%22M0 0l6 8 6-8z%22/%3E%3C/svg%3E")',
+                          paddingRight: isEditing ? '36px' : undefined
+                        }}
+                      >
+                        <option value={selectedParentId?.toString()}>-- Select Specific Subcategory --</option>
+                        {availableSubCategories.map(cat => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
 

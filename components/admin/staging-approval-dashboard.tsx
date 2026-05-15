@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import {
   Check,
@@ -16,7 +16,10 @@ import {
   Layers,
   Filter,
   ChevronDown,
-  ListChecks
+  ListChecks,
+  Search,
+  AlertCircle,
+  ExternalLink
 } from 'lucide-react';
 
 interface StagingProduct {
@@ -59,12 +62,29 @@ export default function StagingApprovalDashboard() {
   
   const [brandFilter, setBrandFilter] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>(''); 
+  
   const [brandOptions, setBrandOptions] = useState<string[]>([]);
   const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
   
   const [filter, setFilter] = useState<'new' | 'updates' | 'archive' | 'all'>('new');
   const [stats, setStats] = useState({ total: 0, newProducts: 0, priceUpdates: 0, toArchive: 0 });
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // 🚀 BRAND VALIDATION STATES
+  const [dbBrands, setDbBrands] = useState<{id: number, name: string}[]>([]);
+  const [brandValidationModal, setBrandValidationModal] = useState<{
+    isOpen: boolean;
+    stagingIds: number[];
+    rawBrands: string[];
+    isBulk: boolean;
+  }>({ isOpen: false, stagingIds: [], rawBrands: [], isBulk: false });
+  
+  const [selectedMappedBrand, setSelectedMappedBrand] = useState<string>('');
+  
+  // 🚀 CUSTOM SEARCHABLE DROPDOWN STATES
+  const [isBrandDropdownOpen, setIsBrandDropdownOpen] = useState(false);
+  const [brandSearchQuery, setBrandSearchQuery] = useState('');
 
   useEffect(() => {
     if (message) {
@@ -77,6 +97,11 @@ export default function StagingApprovalDashboard() {
     setLoading(true);
     try {
       const supabase = getSupabaseClient();
+      
+      // 🚀 FETCH BRANDS & SORT ALPHABETICALLY
+      const { data: realBrands } = await supabase.from('brand').select('id, name').order('name', { ascending: true });
+      setDbBrands(realBrands || []);
+
       const { data: stagingData, error: stagingError } = await supabase
         .from('staging_products')
         .select('*')
@@ -106,9 +131,10 @@ export default function StagingApprovalDashboard() {
 
       const enrichedData: StagingProduct[] = stagingData.map(staging => {
         const local = localProducts?.find(p => p.ref_no === staging.scraped_ref_no);
-        const isArchive = local && (!staging.scraped_price || staging.sync_status === 'missing');
-        const isPriceChange = local && !isArchive && Number(local.price) !== Number(staging.scraped_price);
-        const isNew = !local;
+        
+        const isArchive = staging.sync_status === 'missing';
+        const isNew = !local && !isArchive;
+        const isPriceChange = local && !isArchive && staging.scraped_price !== null && Number(local.price) !== Number(staging.scraped_price);
 
         if (isNew) newCount++;
         else if (isArchive) archiveCount++;
@@ -127,9 +153,17 @@ export default function StagingApprovalDashboard() {
       let filteredData = enrichedData;
       if (brandFilter) filteredData = filteredData.filter(p => p.raw_brand_name === brandFilter);
       if (categoryFilter) filteredData = filteredData.filter(p => p.raw_category_name === categoryFilter);
-      if (filter === 'new') filteredData = enrichedData.filter(p => !p.local_product);
+      if (filter === 'new') filteredData = enrichedData.filter(p => !p.local_product && !p.is_archive);
       else if (filter === 'updates') filteredData = enrichedData.filter(p => p.is_price_change);
       else if (filter === 'archive') filteredData = enrichedData.filter(p => p.is_archive);
+
+      if (searchTerm) {
+        const lowerQuery = searchTerm.toLowerCase();
+        filteredData = filteredData.filter(p => 
+          (p.scraped_name && p.scraped_name.toLowerCase().includes(lowerQuery)) ||
+          (p.scraped_ref_no && p.scraped_ref_no.toLowerCase().includes(lowerQuery))
+        );
+      }
 
       setStagingProducts(filteredData);
       setStats({ total: stagingData.length, newProducts: newCount, priceUpdates: updateCount, toArchive: archiveCount });
@@ -145,18 +179,65 @@ export default function StagingApprovalDashboard() {
   useEffect(() => {
     if (!allStagingProducts.length) return;
     let filtered = allStagingProducts;
-    if (filter === 'new') filtered = allStagingProducts.filter(p => !p.local_product);
+    
+    if (filter === 'new') filtered = allStagingProducts.filter(p => !p.local_product && !p.is_archive);
     else if (filter === 'updates') filtered = allStagingProducts.filter(p => p.is_price_change);
     else if (filter === 'archive') filtered = allStagingProducts.filter(p => p.is_archive);
 
     if (brandFilter) filtered = filtered.filter(p => p.raw_brand_name === brandFilter);
     if (categoryFilter) filtered = filtered.filter(p => p.raw_category_name === categoryFilter);
 
-    setStagingProducts(filtered);
-  }, [brandFilter, categoryFilter, filter, allStagingProducts]);
+    if (searchTerm) {
+      const lowerQuery = searchTerm.toLowerCase();
+      filtered = filtered.filter(p => 
+        (p.scraped_name && p.scraped_name.toLowerCase().includes(lowerQuery)) ||
+        (p.scraped_ref_no && p.scraped_ref_no.toLowerCase().includes(lowerQuery))
+      );
+    }
 
-  const approveIdsSequential = async (ids: number[]) => {
-    if (!ids.length) return { success: 0, failed: ids.length };
+    setStagingProducts(filtered);
+  }, [brandFilter, categoryFilter, filter, allStagingProducts, searchTerm]);
+
+  const validateAndApprove = (ids: number[]) => {
+    const missingBrands = new Set<string>();
+
+    ids.forEach(id => {
+      const product = stagingProducts.find(p => p.id === id);
+      if (product) {
+        const bName = (product.raw_brand_name || '').trim();
+        const brandExists = dbBrands.some(b => b.name.toLowerCase() === bName.toLowerCase());
+        const isUnbranded = bName.toLowerCase() === 'unbranded' || bName === '';
+        
+        if (!brandExists && !isUnbranded) {
+          missingBrands.add(bName);
+        }
+      }
+    });
+
+    if (missingBrands.size > 0) {
+      setBrandValidationModal({
+        isOpen: true,
+        stagingIds: ids,
+        rawBrands: Array.from(missingBrands),
+        isBulk: ids.length > 1
+      });
+      return;
+    }
+
+    proceedWithApproval(ids);
+  };
+
+  const proceedWithApproval = async (ids: number[], mappedBrandName?: string) => {
+    setBrandValidationModal({ isOpen: false, stagingIds: [], rawBrands: [], isBulk: false }); 
+    setSelectedMappedBrand('');
+    setIsBrandDropdownOpen(false);
+    setBrandSearchQuery('');
+    
+    if (!ids.length) {
+      setMessage({ type: 'error', text: `No valid products selected to approve.` });
+      return;
+    }
+
     setBatchApproving(true);
     const supabase = getSupabaseClient();
     const { data: { session } } = await supabase.auth.getSession();
@@ -164,20 +245,32 @@ export default function StagingApprovalDashboard() {
     let success = 0; let failed = 0;
     
     for (const id of ids) {
+      const payload = { 
+        notes: 'Approved via Dashboard', 
+        ...(mappedBrandName && { mappedBrand: mappedBrandName }) 
+      };
+
       try {
         const res = await fetch(`/api/admin/sync/approve/${id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ notes: 'Batch approved via Dashboard' })
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (res.ok && data?.success) success++; else failed++;
       } catch (e) { failed++; }
     }
+    
     setBatchApproving(false);
+    setSelectedIds([]);
+    setIsSelectionMode(false);
+    setMessage({ type: failed ? 'error' : 'success', text: `Approved ${success} items${failed ? `, ${failed} failed` : ''}` });
     await fetchStagingProducts();
-    return { success, failed };
   };
+
+  const handleApprove = (stagingId: number) => validateAndApprove([stagingId]);
+  const handleApproveSelected = () => validateAndApprove(selectedIds);
+  const handleApproveAllVisible = () => validateAndApprove(stagingProducts.map(p => p.id));
 
   const rejectIdsSequential = async (ids: number[]) => {
     if (!ids.length) return { success: 0, failed: ids.length };
@@ -201,31 +294,6 @@ export default function StagingApprovalDashboard() {
     setBatchRejecting(false);
     await fetchStagingProducts();
     return { success, failed };
-  };
-
-  const handleApprove = async (stagingId: number) => {
-    setApproving(stagingId);
-    const { success } = await approveIdsSequential([stagingId]);
-    if (success) setMessage({ type: 'success', text: `Product successfully synced!` });
-    else setMessage({ type: 'error', text: `Failed to approve product.` });
-    setApproving(null);
-  };
-
-  const handleApproveSelected = async () => {
-    if (!selectedIds.length) return;
-    const { success, failed } = await approveIdsSequential(selectedIds);
-    setSelectedIds([]);
-    setIsSelectionMode(false);
-    setMessage({ type: failed ? 'error' : 'success', text: `Approved ${success} items${failed ? `, ${failed} failed` : ''}` });
-  };
-
-  const handleApproveAllVisible = async () => {
-    const ids = stagingProducts.map(p => p.id);
-    if (!ids.length) return;
-    const { success, failed } = await approveIdsSequential(ids);
-    setSelectedIds([]);
-    setIsSelectionMode(false);
-    setMessage({ type: failed ? 'error' : 'success', text: `Approved ${success} items${failed ? `, ${failed} failed` : ''}` });
   };
 
   const handleReject = async (stagingId: number) => {
@@ -289,6 +357,22 @@ export default function StagingApprovalDashboard() {
 
   const visibleAllSelected = stagingProducts.length > 0 && stagingProducts.every(p => selectedIds.includes(p.id));
 
+  const validBulkIds = brandValidationModal.isOpen && brandValidationModal.isBulk 
+    ? brandValidationModal.stagingIds.filter(id => {
+        const product = stagingProducts.find(p => p.id === id);
+        if (!product) return false;
+        const bName = (product.raw_brand_name || '').trim();
+        const brandExists = dbBrands.some(b => b.name.toLowerCase() === bName.toLowerCase());
+        const isUnbranded = bName.toLowerCase() === 'unbranded' || bName === '';
+        return brandExists || isUnbranded;
+      })
+    : [];
+
+  // 🚀 FILTER BRANDS FOR CUSTOM DROPDOWN
+  const filteredBrands = dbBrands.filter(b => 
+    b.name.toLowerCase().includes(brandSearchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 pb-12 font-sans">
       <div className={`fixed top-6 right-6 z-50 transition-all duration-500 transform ${message ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0 pointer-events-none'}`}>
@@ -300,6 +384,153 @@ export default function StagingApprovalDashboard() {
         )}
       </div>
 
+      {/* 🚀 BRAND VALIDATION MODAL UI */}
+      {brandValidationModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-visible animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
+                <AlertCircle size={20} strokeWidth={2.5} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Unrecognized Brands Found</h3>
+                <p className="text-sm text-slate-500">Manual review required</p>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-visible">
+              {brandValidationModal.isBulk ? (
+                <>
+                  <p className="text-sm text-slate-700">
+                    You selected multiple items, but some of them contain brands that do not exist in your database:
+                  </p>
+                  <div className="flex flex-wrap gap-2 my-2">
+                    {brandValidationModal.rawBrands.map(b => (
+                      <span key={b} className="bg-rose-50 text-rose-700 border border-rose-200 px-3 py-1 rounded-md text-xs font-bold shadow-sm">
+                        {b}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-sm text-slate-700">
+                    You can skip the unrecognized items for now and <strong>Approve Valid Only</strong>, or create the missing brands first.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-slate-700">
+                    The scraped brand <span className="font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded shadow-sm">"{brandValidationModal.rawBrands[0]}"</span> does not exist in your database.
+                  </p>
+                  
+                  <div className="space-y-2 mt-4 relative">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                      Map to existing brand
+                    </label>
+                    
+                    {/* 🚀 CUSTOM SEARCHABLE DROPDOWN */}
+                    <div className="relative">
+                      <div 
+                        className={`w-full px-4 py-3 bg-white border rounded-xl text-sm flex justify-between items-center cursor-pointer transition-colors shadow-sm ${isBrandDropdownOpen ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-slate-200 hover:bg-slate-50'}`}
+                        onClick={() => setIsBrandDropdownOpen(!isBrandDropdownOpen)}
+                      >
+                        <span className={selectedMappedBrand ? "text-slate-900 font-medium" : "text-slate-400"}>
+                          {selectedMappedBrand || "-- Select an existing brand --"}
+                        </span>
+                        <ChevronDown size={16} className={`text-slate-400 transition-transform duration-200 ${isBrandDropdownOpen ? 'rotate-180' : ''}`} />
+                      </div>
+
+                      {isBrandDropdownOpen && (
+                        <div className="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-xl flex flex-col overflow-hidden">
+                          <div className="p-2 border-b border-slate-100 bg-slate-50/50">
+                            <div className="relative">
+                              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                              <input 
+                                type="text" 
+                                placeholder="Search brand..." 
+                                value={brandSearchQuery}
+                                onChange={(e) => setBrandSearchQuery(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-shadow"
+                                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking input
+                              />
+                            </div>
+                          </div>
+                          <div className="overflow-y-auto max-h-52 py-1">
+                            <div 
+                              className="px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer font-medium transition-colors"
+                              onClick={() => { setSelectedMappedBrand('Unbranded'); setIsBrandDropdownOpen(false); setBrandSearchQuery(''); }}
+                            >
+                              Unbranded
+                            </div>
+                            {filteredBrands.map(b => (
+                              <div 
+                                key={b.id}
+                                className="px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer transition-colors"
+                                onClick={() => { setSelectedMappedBrand(b.name); setIsBrandDropdownOpen(false); setBrandSearchQuery(''); }}
+                              >
+                                {b.name}
+                              </div>
+                            ))}
+                            {filteredBrands.length === 0 && (
+                              <div className="px-4 py-4 text-sm text-slate-400 text-center italic">No brands found matching "{brandSearchQuery}"</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="p-5 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <button
+                onClick={() => {
+                  setBrandValidationModal({ isOpen: false, stagingIds: [], rawBrands: [], isBulk: false });
+                  setSelectedMappedBrand('');
+                  setIsBrandDropdownOpen(false);
+                  setBrandSearchQuery('');
+                }}
+                className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-200 hover:text-slate-900 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <a 
+                  href="/admin/brands/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-100 rounded-lg transition-colors shadow-sm"
+                >
+                  Create Brand <ExternalLink size={14} />
+                </a>
+
+                {brandValidationModal.isBulk ? (
+                  <button
+                    onClick={() => proceedWithApproval(validBulkIds)}
+                    disabled={validBulkIds.length === 0} 
+                    className="flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {validBulkIds.length > 0 
+                      ? `Approve Valid Only (${validBulkIds.length})` 
+                      : 'No Valid Items'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => proceedWithApproval(brandValidationModal.stagingIds, selectedMappedBrand)}
+                    disabled={!selectedMappedBrand}
+                    className="flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Map & Approve
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- DASHBOARD UI REMAINS THE SAME BELOW THIS POINT --- */}
       <div className="max-w-[1400px] mx-auto px-6 pt-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
           <div>
@@ -337,6 +568,20 @@ export default function StagingApprovalDashboard() {
 
         <div className="flex flex-col lg:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6">
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            
+            <div className="relative w-full sm:w-64 lg:w-80 group">
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+              <input
+                type="text"
+                placeholder="Search product or SKU..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 hover:bg-slate-100 transition-all text-slate-700 placeholder:text-slate-400 placeholder:font-normal"
+              />
+            </div>
+
+            <div className="hidden sm:block w-px h-6 bg-slate-200 mx-1"></div>
+
             <div className="flex items-center gap-2 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-500">
               <Filter size={16} />
               <span className="text-sm font-medium">Filters</span>
@@ -433,15 +678,12 @@ export default function StagingApprovalDashboard() {
                     
                     <th className={`px-4 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center ${!isSelectionMode ? 'pl-8' : ''}`}>Product Info</th>
                     
-                    {/* DYNAMIC COLUMNS (Hide on Archive tab) */}
-                    {filter !== 'archive' && (
-                      <th className="px-4 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Category</th>
-                    )}
+                    <th className="px-4 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Category</th>
+                    
                     {filter !== 'archive' && (
                       <th className="px-4 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Status</th>
                     )}
                     
-                    {/* DYNAMIC PRICE CHANGE HEADER */}
                     <th className="px-4 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
                       {filter === 'archive' ? 'Status' : filter === 'updates' ? 'Price Change' : 'Price'}
                     </th>
@@ -472,16 +714,13 @@ export default function StagingApprovalDashboard() {
                         </div>
                       </td>
 
-                      {/* DYNAMIC CELLS (Hide on Archive tab) */}
-                      {filter !== 'archive' && (
-                        <td className="px-4 py-4">
-                          <div className="flex items-center justify-center">
-                            <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-semibold uppercase tracking-wider">
-                              {product.raw_category_name || 'Uncategorized'}
-                            </span>
-                          </div>
-                        </td>
-                      )}
+                      <td className="px-4 py-4">
+                        <div className="flex items-center justify-center">
+                          <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-semibold uppercase tracking-wider">
+                            {product.raw_category_name || 'Uncategorized'}
+                          </span>
+                        </div>
+                      </td>
 
                       {filter !== 'archive' && (
                         <td className="px-4 py-4">
@@ -497,7 +736,6 @@ export default function StagingApprovalDashboard() {
                         </td>
                       )}
 
-                      {/* ALWAYS VISIBLE PRICE/STATUS CELL */}
                       <td className="px-4 py-4">
                         <div className="flex flex-col items-center justify-center gap-1">
                           {product.is_archive ? (

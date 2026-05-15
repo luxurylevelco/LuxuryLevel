@@ -3,6 +3,7 @@ import { ScrapedProduct } from "../types/product";
 import { extractRefFromSlug, extractRefFromText, normalizeRef } from "../utils/normalize";
 import { logger } from "../utils/logger";
 
+
 interface StagingRow {
   scraped_ref_no: string;
   scraped_name: string;
@@ -128,35 +129,42 @@ function normalizeToBagsCategory(input: {
 
   const haystack = `${rawCategory} ${name} ${description}`.trim();
 
-  // If it's clearly watch-related (esp Chanel watch pages), don't treat as bags.
+  // 💍 1. BRIDAL CATCH-ALL (Uunahin natin ito bago ang Ring!)
+  // Gagamit tayo ng Regex para eksaktong words lang.
+  if (/(^|\s)(bridal|necklace|necklaces|earring|earrings|pendant|pendants)\b/i.test(haystack)) {
+    return "BRIDAL";
+  }
+
+  // 🚀 2. SPECIFIC JEWELRY SUBCATEGORIES
+  // \b ibig sabihin "word boundary". Hindi niya papansinin ang "earring" o "spring".
+  if (/(^|\s)ring(s)?\b/i.test(haystack)) return "RING";
+  if (/(^|\s)bracelet(s)?\b/i.test(haystack)) return "BRACELET";
+  if (/(^|\s)cufflink(s)?\b/i.test(haystack)) return "CUFFLINK";
+
+  // ⌚ 3. WATCHES DETECTION
   const isWatchLike = WATCH_EXCLUSION_KEYWORDS.some((k) => haystack.includes(k));
   const isChanel = brand.includes("chanel") || rawCategory.includes("chanel") || name.includes("chanel");
 
-  // Your request: Chanel might have a watch; description should help disambiguate.
   if (isChanel && isWatchLike) {
     return normalizeField(input.rawCategoryName) || "Unknown";
   }
 
-  // Detect "bag" even inside words like "luxurybag" / "luxury bag"
+  // 👜 4. BAGS DETECTION
   const hasBagKeyword =
     BAG_KEYWORDS.some((k) => {
       if (k === "bag") return /\bbag\b/.test(haystack) || haystack.includes("luxurybag");
       return haystack.includes(k);
-    }) ||
-    // Explicit "bag" substring fallback (to catch luxurybag etc.)
-    /bag/i.test(haystack);
+    }) || /bag/i.test(haystack);
 
-  if (!hasBagKeyword) {
-    return normalizeField(input.rawCategoryName) || "Unknown";
+  if (hasBagKeyword) {
+    if (isWatchLike && (isChanel || haystack.includes("chanel"))) {
+      return normalizeField(input.rawCategoryName) || "Unknown";
+    }
+    return "bags";
   }
 
-  // If it contains bag keywords but also watch keywords, prefer exclusion.
-  // (This catches edge cases like "Chanel ... watch ... bag" listings.)
-  if (isWatchLike && (isChanel || haystack.includes("chanel"))) {
-    return normalizeField(input.rawCategoryName) || "Unknown";
-  }
-
-  return "bags";
+  // 5. DEFAULT FALLBACK
+  return normalizeField(input.rawCategoryName) || "Unknown";
 }
 
 function buildStagingRows(products: ScrapedProduct[]): StagingRow[] {
@@ -206,17 +214,18 @@ function buildStagingRows(products: ScrapedProduct[]): StagingRow[] {
   return rows;
 }
 // BAGONG FUNCTION PARA SA MGA I-A-ARCHIVE NA PRODUCTS
-// BAGONG FUNCTION PARA SA MGA I-A-ARCHIVE NA PRODUCTS
 export async function insertMissingFromReferenceToStaging(localOrphans: any[]): Promise<void> {
   if (localOrphans.length === 0) {
     logger.info("No missing (orphan) products to insert into staging.");
     return;
   }
 
-  // I-map ang local database items papunta sa StagingRow format
-  const rows: StagingRow[] = localOrphans.map((product) => {
-    const brand: string | null = product.brand?.name || product.brand || "Unknown";
-    const rawCategory: string | null = product.category?.name || product.category || "Unknown";
+  // 🚀 THE FIX: Gagamit tayo ng Map para walang duplicates na magpapa-crash sa Supabase
+  const uniqueRowsMap = new Map();
+
+  localOrphans.forEach((product) => {
+    const brand: string | null = product.brand?.name || product.brand_name || "Unknown";
+    const rawCategory: string | null = product.category?.name || product.category_name || "Unknown";
     const scrapedName: string = product.name || "";
 
     const normalizedCategory = normalizeToBagsCategory({
@@ -226,8 +235,14 @@ export async function insertMissingFromReferenceToStaging(localOrphans: any[]): 
       rawBrandName: brand,
     });
 
-    return {
-      scraped_ref_no: product.ref_no,
+    // 🛡️ SAFE FALLBACK: Kung walang ref_no ang jewelry, gagawa tayo ng unique ID gamit ang pangalan niya
+    const safeRefNo = product.ref_no 
+      || product.normalized_ref_no 
+      || `ORPHAN-${scrapedName.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '')}`;
+
+    // 📦 Ilalagay sa Map. Kung may kaparehas siyang safeRefNo, o-overwrite lang niya para isa lang ang papasa
+    uniqueRowsMap.set(safeRefNo, {
+      scraped_ref_no: safeRefNo,
       scraped_name: scrapedName,
       scraped_price: null, // 🚨 IMPORTANTE: Gawing null para pumasok sa "To Archive" tab
       raw_brand_name: brand,
@@ -241,18 +256,21 @@ export async function insertMissingFromReferenceToStaging(localOrphans: any[]): 
       description: null,
       color: null,
       gender: null,
-    };
+    });
   });
+
+  // 🧹 I-convert pabalik sa array yung mga malilinis at unique na rows
+  const uniqueRows = Array.from(uniqueRowsMap.values());
 
   const { error } = await supabase
     .from("staging_products")
-    .upsert(rows, { onConflict: "scraped_ref_no" });
+    .upsert(uniqueRows, { onConflict: "scraped_ref_no" });
 
   if (error) {
     throw new Error(`Orphan staging insert failed: ${error.message}`);
   }
 
-  logger.info(`Inserted ${rows.length} missing products (for archiving) into staging.`);
+  logger.info(`Inserted ${uniqueRows.length} unique missing products (for archiving) into staging.`);
 }
 
 // 🚀 BAGONG FUNCTION PARA SA PRICE UPDATES
