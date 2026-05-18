@@ -57,6 +57,10 @@ export default function StagingApprovalDashboard() {
   const [batchApproving, setBatchApproving] = useState(false);
   const [batchRejecting, setBatchRejecting] = useState(false);
   
+  // 🚀 SCRAPER STATES
+  const [isScraping, setIsScraping] = useState(false);
+  const [scrapeCategory, setScrapeCategory] = useState('watches');
+  
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   
@@ -176,27 +180,81 @@ export default function StagingApprovalDashboard() {
 
   useEffect(() => { fetchStagingProducts(); }, [filter]);
 
+// 🚀 DYNAMIC STATS & FILTERING EFFECT
   useEffect(() => {
-    if (!allStagingProducts.length) return;
-    let filtered = allStagingProducts;
+    if (!allStagingProducts.length) {
+      setStats({ total: 0, newProducts: 0, priceUpdates: 0, toArchive: 0 });
+      setStagingProducts([]);
+      return;
+    }
+
+    // 1. I-apply muna ang GLOBAL Filters (Brand, Category, Search)
+    let baseFiltered = allStagingProducts;
+
+    if (brandFilter) baseFiltered = baseFiltered.filter(p => p.raw_brand_name === brandFilter);
+    if (categoryFilter) baseFiltered = baseFiltered.filter(p => p.raw_category_name === categoryFilter);
     
-    if (filter === 'new') filtered = allStagingProducts.filter(p => !p.local_product && !p.is_archive);
-    else if (filter === 'updates') filtered = allStagingProducts.filter(p => p.is_price_change);
-    else if (filter === 'archive') filtered = allStagingProducts.filter(p => p.is_archive);
-
-    if (brandFilter) filtered = filtered.filter(p => p.raw_brand_name === brandFilter);
-    if (categoryFilter) filtered = filtered.filter(p => p.raw_category_name === categoryFilter);
-
     if (searchTerm) {
       const lowerQuery = searchTerm.toLowerCase();
-      filtered = filtered.filter(p => 
+      baseFiltered = baseFiltered.filter(p => 
         (p.scraped_name && p.scraped_name.toLowerCase().includes(lowerQuery)) ||
         (p.scraped_ref_no && p.scraped_ref_no.toLowerCase().includes(lowerQuery))
       );
     }
 
-    setStagingProducts(filtered);
+    // 2. 🚀 I-recalculate ang STATS base sa natirang items!
+    let newCount = 0;
+    let updateCount = 0;
+    let archiveCount = 0;
+
+    baseFiltered.forEach(p => {
+      if (p.is_archive) archiveCount++;
+      else if (p.is_price_change) updateCount++;
+      else if (!p.local_product) newCount++;
+    });
+
+    setStats({ 
+      total: baseFiltered.length, 
+      newProducts: newCount, 
+      priceUpdates: updateCount, 
+      toArchive: archiveCount 
+    });
+
+    // 3. I-apply ang TAB Filter (New, Updates, Archive) para sa ipapakita sa Table
+    let finalFiltered = baseFiltered;
+    if (filter === 'new') finalFiltered = baseFiltered.filter(p => !p.local_product && !p.is_archive);
+    else if (filter === 'updates') finalFiltered = baseFiltered.filter(p => p.is_price_change);
+    else if (filter === 'archive') finalFiltered = baseFiltered.filter(p => p.is_archive);
+
+    setStagingProducts(finalFiltered);
   }, [brandFilter, categoryFilter, filter, allStagingProducts, searchTerm]);
+  // 🚀 LIVE SCRAPER HANDLER
+  const handleRunScraper = async () => {
+    if (!confirm(`Are you sure you want to scrape ${scrapeCategory.toUpperCase()} from LuxurySouq?`)) return;
+    
+    setIsScraping(true);
+    setMessage(null);
+    
+    try {
+      const res = await fetch('/api/admin/scraper/run', { 
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ category: scrapeCategory })
+      });
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        setMessage({ type: 'success', text: data.message });
+        await fetchStagingProducts();
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to run scraper.' });
+      }
+    } catch (e) {
+      setMessage({ type: 'error', text: 'A network error occurred while scraping.' });
+    } finally {
+      setIsScraping(false);
+    }
+  };
 
   const validateAndApprove = (ids: number[]) => {
     const missingBrands = new Set<string>();
@@ -449,7 +507,7 @@ export default function StagingApprovalDashboard() {
                                 value={brandSearchQuery}
                                 onChange={(e) => setBrandSearchQuery(e.target.value)}
                                 className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-shadow"
-                                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking input
+                                onClick={(e) => e.stopPropagation()} 
                               />
                             </div>
                           </div>
@@ -476,7 +534,6 @@ export default function StagingApprovalDashboard() {
                         </div>
                       )}
                     </div>
-
                   </div>
                 </>
               )}
@@ -530,17 +587,43 @@ export default function StagingApprovalDashboard() {
         </div>
       )}
 
-      {/* --- DASHBOARD UI REMAINS THE SAME BELOW THIS POINT --- */}
       <div className="max-w-[1400px] mx-auto px-6 pt-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900">Catalog Sync</h1>
             <p className="text-sm text-slate-500 mt-1 font-medium">Review and approve updates from your latest scrape.</p>
           </div>
-          <button onClick={fetchStagingProducts} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm group">
-            <RefreshCw size={16} className={`group-hover:rotate-180 transition-transform duration-500 ${loading ? 'animate-spin' : ''}`} /> 
-            Refresh Data
-          </button>
+          
+          <div className="flex flex-wrap items-center gap-3">
+            {/* 🚀 DROP DOWN + RUN SCRAPER COMBO */}
+            <div className="flex items-center bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+               <select 
+                 value={scrapeCategory}
+                 onChange={(e) => setScrapeCategory(e.target.value)}
+                 disabled={isScraping}
+                 className="appearance-none bg-transparent px-4 py-2.5 text-sm font-medium text-slate-700 outline-none cursor-pointer border-r border-slate-200 hover:bg-slate-50 transition-colors"
+               >
+                 <option value="watches">Watches</option>
+                 <option value="jewellery">Jewellery</option>
+                 <option value="bags">Bags</option>
+                 <option value="all">All Categories</option>
+               </select>
+
+              <button 
+                onClick={handleRunScraper} 
+                disabled={isScraping}
+                className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {isScraping ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                {isScraping ? 'Scraping...' : 'Run Scraper'}
+              </button>
+            </div>
+
+            <button onClick={fetchStagingProducts} className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm group">
+              <RefreshCw size={16} className={`group-hover:rotate-180 transition-transform duration-500 ${loading ? 'animate-spin' : ''}`} /> 
+              Refresh View
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
