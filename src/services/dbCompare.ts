@@ -25,6 +25,16 @@ export interface DbCompareResult {
   onlyInDb: DbProductSummary[]; // 🚀 IDINAGDAG: Mga products na nasa DB pero nawawala sa reference
 }
 
+function normalizeNameKey(name: string | null | undefined): string | null {
+  if (!name) return null;
+  const normalized = name.toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function isMeaningfulName(name: string | null): name is string {
+  return Boolean(name && name.length >= 6);
+}
+
 export async function compareDatabaseToReference(
   referenceFile?: string
 ): Promise<DbCompareResult> {
@@ -48,17 +58,33 @@ export async function compareDatabaseToReference(
       .map((product) => product.normalized_ref_no)
       .filter((ref): ref is string => Boolean(ref))
   );
+  const dbNameSet = new Set(
+    dbProducts
+      .map((product) => normalizeNameKey(product.name))
+      .filter((name): name is string => isMeaningfulName(name))
+  );
+  const referenceNameSet = new Set(
+    referenceProducts
+      .map((product) => normalizeNameKey(product.scraped_name))
+      .filter((name): name is string => isMeaningfulName(name))
+  );
 
   // 1. Missing from DB (Mga bago na kailangang i-add)
   const missingFromDb = referenceProducts.filter((product) => {
-    if (!product.normalized_ref_no) return false;
-    return !dbRefSet.has(product.normalized_ref_no);
+    const ref = product.normalized_ref_no;
+    const nameKey = normalizeNameKey(product.scraped_name);
+    if (ref && dbRefSet.has(ref)) return false;
+    if (nameKey && dbNameSet.size > 0 && dbNameSet.has(nameKey)) return false;
+    return Boolean(ref || nameKey);
   });
 
   // 2. 🚀 ONLY IN DB (Mga "Orphans" na nawawala na sa reference site)
   const onlyInDb = dbProducts.filter((product) => {
-    if (!product.normalized_ref_no) return false;
-    return !referenceSet.has(product.normalized_ref_no);
+    const ref = product.normalized_ref_no;
+    const nameKey = normalizeNameKey(product.name);
+    if (ref && referenceSet.has(ref)) return false;
+    if (nameKey && referenceNameSet.size > 0 && referenceNameSet.has(nameKey)) return false;
+    return Boolean(ref || nameKey);
   });
 
   await saveReport("db-products.json", dbProducts);

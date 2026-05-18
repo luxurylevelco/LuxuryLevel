@@ -58,7 +58,7 @@ const blockedSlugs = new Set([
   "faq",
   "warranty-and-repair-policy",
   "hermes",
-  "channel",
+  "chanel",
 ]);
 
 export async function collectListingProducts(
