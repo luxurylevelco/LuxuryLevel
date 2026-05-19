@@ -228,6 +228,7 @@ export default function StagingApprovalDashboard() {
 
     setStagingProducts(finalFiltered);
   }, [brandFilter, categoryFilter, filter, allStagingProducts, searchTerm]);
+
   // 🚀 LIVE SCRAPER HANDLER
   const handleRunScraper = async () => {
     if (!confirm(`Are you sure you want to scrape ${scrapeCategory.toUpperCase()} from LuxurySouq?`)) return;
@@ -292,7 +293,7 @@ export default function StagingApprovalDashboard() {
     setBrandSearchQuery('');
     
     if (!ids.length) {
-      setMessage({ type: 'error', text: `No valid products selected to approve.` });
+      setMessage({ type: 'error', text: `No valid products selected.` });
       return;
     }
 
@@ -322,13 +323,54 @@ export default function StagingApprovalDashboard() {
     setBatchApproving(false);
     setSelectedIds([]);
     setIsSelectionMode(false);
-    setMessage({ type: failed ? 'error' : 'success', text: `Approved ${success} items${failed ? `, ${failed} failed` : ''}` });
+    setMessage({ type: failed ? 'error' : 'success', text: `Action completed for ${success} items${failed ? `, ${failed} failed` : ''}` });
     await fetchStagingProducts();
   };
 
   const handleApprove = (stagingId: number) => validateAndApprove([stagingId]);
   const handleApproveSelected = () => validateAndApprove(selectedIds);
   const handleApproveAllVisible = () => validateAndApprove(stagingProducts.map(p => p.id));
+
+  // 🚀 BATCH ARCHIVE / DELETE FUNCTIONS
+  const archiveIdsSequential = async (ids: number[]) => {
+    if (!ids.length) return { success: 0, failed: ids.length };
+    setBatchApproving(true);
+    const supabase = getSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token || '';
+    let success = 0; let failed = 0;
+    
+    for (const id of ids) {
+      try {
+        const res = await fetch(`/api/admin/sync/archive/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok && data?.success) success++; else failed++;
+      } catch (e) { failed++; }
+    }
+    setBatchApproving(false);
+    await fetchStagingProducts();
+    return { success, failed };
+  };
+
+  const handleArchiveSelected = async () => {
+    if (!selectedIds.length) return;
+    if (!confirm(`Delete ${selectedIds.length} selected items from live store?`)) return;
+    const { success, failed } = await archiveIdsSequential(selectedIds);
+    setSelectedIds([]);
+    setIsSelectionMode(false);
+    setMessage({ type: failed ? 'error' : 'success', text: `Deleted ${success} items${failed ? `, ${failed} failed` : ''}` });
+  };
+
+  const handleArchiveAllVisible = async () => {
+    const ids = stagingProducts.map(p => p.id);
+    if (!ids.length) return;
+    if (!confirm(`Delete all ${ids.length} visible items from live store?`)) return;
+    const { success, failed } = await archiveIdsSequential(ids);
+    setMessage({ type: failed ? 'error' : 'success', text: `Deleted ${success} items${failed ? `, ${failed} failed` : ''}` });
+  };
 
   const rejectIdsSequential = async (ids: number[]) => {
     if (!ids.length) return { success: 0, failed: ids.length };
@@ -712,10 +754,23 @@ export default function StagingApprovalDashboard() {
                     {selectedIds.length} Selected
                   </span>
                 )}
-                <button onClick={handleApproveSelected} disabled={!selectedIds.length || batchApproving} className="px-4 py-2.5 text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">
-                  Approve
-                </button>
-                <button onClick={handleIgnoreSelected} disabled={!selectedIds.length || batchRejecting} className="px-4 py-2.5 text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-white border border-slate-200 text-rose-600 hover:bg-rose-50">
+                
+                {/* 🚀 DYNAMIC ACTION BUTTONS FOR SELECTION */}
+                {filter === 'archive' ? (
+                  <button onClick={handleArchiveSelected} disabled={!selectedIds.length || batchApproving} className="px-4 py-2.5 text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-rose-600 text-white hover:bg-rose-700 shadow-sm">
+                    Delete
+                  </button>
+                ) : filter === 'updates' ? (
+                  <button onClick={handleApproveSelected} disabled={!selectedIds.length || batchApproving} className="px-4 py-2.5 text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-amber-500 text-white hover:bg-amber-600 shadow-sm">
+                    Update
+                  </button>
+                ) : (
+                  <button onClick={handleApproveSelected} disabled={!selectedIds.length || batchApproving} className="px-4 py-2.5 text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">
+                    Approve
+                  </button>
+                )}
+
+                <button onClick={handleIgnoreSelected} disabled={!selectedIds.length || batchRejecting} className="px-4 py-2.5 text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-rose-600">
                   Ignore
                 </button>
               </div>
@@ -724,9 +779,20 @@ export default function StagingApprovalDashboard() {
             {!isSelectionMode && (
               <>
                 <div className="w-px h-6 bg-slate-200 mx-1"></div>
-                <button onClick={handleApproveAllVisible} disabled={!stagingProducts.length || batchApproving} className="px-4 py-2.5 text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-slate-900 text-white hover:bg-slate-800 shadow-sm hover:shadow">
-                  Approve All Visible
-                </button>
+                {/* 🚀 DYNAMIC ACTION BUTTONS FOR ALL VISIBLE */}
+                {filter === 'archive' ? (
+                  <button onClick={handleArchiveAllVisible} disabled={!stagingProducts.length || batchApproving} className="px-4 py-2.5 text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-rose-600 text-white hover:bg-rose-700 shadow-sm hover:shadow">
+                    Delete All Visible
+                  </button>
+                ) : filter === 'updates' ? (
+                  <button onClick={handleApproveAllVisible} disabled={!stagingProducts.length || batchApproving} className="px-4 py-2.5 text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-slate-900 text-white hover:bg-slate-800 shadow-sm hover:shadow">
+                    Update All Visible
+                  </button>
+                ) : (
+                  <button onClick={handleApproveAllVisible} disabled={!stagingProducts.length || batchApproving} className="px-4 py-2.5 text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-slate-900 text-white hover:bg-slate-800 shadow-sm hover:shadow">
+                    Approve All Visible
+                  </button>
+                )}
               </>
             )}
           </div>

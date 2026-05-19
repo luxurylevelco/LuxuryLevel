@@ -27,7 +27,10 @@ function isSameProduct(dbProduct: any, scrapedProduct: any): boolean {
   if (dbName && listName) {
     if (dbName === listName) return true;
     if (dbName.length > 12 && listName.length > 12) {
-      if (dbName.includes(listName) || listName.includes(dbName)) return true;
+      const lenDiff = Math.abs(dbName.length - listName.length);
+      if (lenDiff <= 5) {
+        if (dbName.includes(listName) || listName.includes(dbName)) return true;
+      }
     }
   }
 
@@ -38,27 +41,13 @@ const normalizeKey = (value: string) =>
   value.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
 
 const jewelryTypeKeywords = [
-  'ring',
-  'bracelet',
-  'cufflink',
-  'bridal',
-  'necklace',
-  'earring',
-  'earrings',
-  'bangle',
-  'pendant',
-  'brooch',
-  'anklet',
-  'chain',
-  'choker',
+  'ring', 'bracelet', 'cufflink', 'bridal', 'necklace', 
+  'earring', 'earrings', 'bangle', 'pendant', 'brooch', 
+  'anklet', 'chain', 'choker',
 ];
 
 const watchTypeKeywords = [
-  'watch',
-  'watches',
-  'timepiece',
-  'timepieces',
-  'chronograph',
+  'watch', 'watches', 'timepiece', 'timepieces', 'chronograph',
 ];
 
 const isJewelryTypeCategory = (value: string) => {
@@ -92,18 +81,6 @@ const stripHtml = (value: string): string => {
     .trim();
 };
 
-const extractAttributeValues = (values: any[]): string[] => {
-  return values
-    .map((value) => {
-      if (typeof value === 'string') return value;
-      if (typeof value?.name === 'string') return value.name;
-      if (typeof value?.value === 'string') return value.value;
-      return '';
-    })
-    .map((value) => value.trim())
-    .filter(Boolean);
-};
-
 const getAttributeValue = (attributes: any[] | undefined, targets: string[]): string | null => {
   if (!attributes || attributes.length === 0) return null;
   const lowerTargets = targets.map((target) => target.toLowerCase());
@@ -113,32 +90,11 @@ const getAttributeValue = (attributes: any[] | undefined, targets: string[]): st
     return lowerTargets.includes(name) || (taxonomy && lowerTargets.includes(taxonomy));
   });
   if (!match) return null;
-  const terms = Array.isArray(match.terms) ? extractAttributeValues(match.terms) : [];
+  const terms = Array.isArray(match.terms) ? match.terms.map((term: any) => term?.name).filter(Boolean) : [];
   if (terms.length > 0) return terms.join(', ');
-  const options = Array.isArray(match.options) ? extractAttributeValues(match.options) : [];
+  const options = Array.isArray(match.options) ? match.options.map((option: any) => `${option}`).filter(Boolean) : [];
   if (options.length > 0) return options.join(', ');
   if (typeof match.value === 'string') return match.value;
-  return null;
-};
-
-const extractColorFromText = (text: string | null): string | null => {
-  if (!text) return null;
-  const match = text.match(/\b(colou?r)\s*[:\-]\s*([a-z0-9\/\s]{2,40})/i);
-  if (!match) return null;
-  const candidate = match[2].trim();
-  return candidate.length > 0 ? candidate : null;
-};
-
-const extractBrandFromName = (name: string): string | null => {
-  const tokens = name.split(/\s+/).map((token) => token.trim()).filter(Boolean);
-  for (const token of tokens) {
-    const normalized = normalizeKey(token);
-    if (!normalized) continue;
-    if (normalized === 'paylater' || normalized === 'pay' || normalized === 'later') {
-      continue;
-    }
-    return token;
-  }
   return null;
 };
 
@@ -191,93 +147,35 @@ export async function POST(request: NextRequest) {
     // ==========================================
     // 🌐 3. FETCH FROM REFERENCE SITE
     // ==========================================
-    const fetchCategoryIds = async (slugs: string[]): Promise<number[]> => {
-      const uniqueSlugs = Array.from(new Set(slugs.filter(Boolean)));
-      const ids: number[] = [];
-      for (const slug of uniqueSlugs) {
-        const catRes = await fetch(`https://luxurysouq.com/wp-json/wp/v2/product_cat?slug=${slug}`);
-        if (!catRes.ok) continue;
-        const catData = await catRes.json();
-        if (Array.isArray(catData)) {
-          for (const entry of catData) {
-            if (entry && typeof entry.id === 'number') ids.push(entry.id);
-          }
-        }
-      }
-      return Array.from(new Set(ids));
-    };
-
-    let categoryIds: number[] = [];
+    let categoryIdQuery = '';
     if (categoryToScrape !== 'all') {
-      const slugs = categoryToScrape === 'jewelry'
-        ? [
-            'jewellery',
-            'jewelry',
-            'ring',
-            'rings',
-            'bracelet',
-            'bracelets',
-            'necklace',
-            'necklaces',
-            'earring',
-            'earrings',
-            'bridal',
-            'cufflink',
-            'cufflinks',
-            'bangle',
-            'bangles',
-            'pendant',
-            'pendants',
-            'brooch',
-            'brooches',
-          ]
-        : [categoryToScrape];
-      categoryIds = await fetchCategoryIds(slugs);
+      const slug = categoryToScrape === 'jewelry' ? 'jewellery' : categoryToScrape;
+      const catRes = await fetch(`https://luxurysouq.com/wp-json/wp/v2/product_cat?slug=${slug}`);
+      if (catRes.ok) {
+        const catData = await catRes.json();
+        if (catData && catData.length > 0) categoryIdQuery = `&category=${catData[0].id}`;
+      }
     }
 
-    const allScrapedProducts: any[] = [];
-    const scrapedIds = new Set<number>();
-
-    const addScrapedProducts = (products: any[]) => {
-      if (!Array.isArray(products)) return;
-      for (const product of products) {
-        const id = typeof product?.id === 'number' ? product.id : null;
-        if (id !== null) {
-          if (scrapedIds.has(id)) continue;
-          scrapedIds.add(id);
-        }
-        allScrapedProducts.push(product);
-      }
-    };
-
-    const fetchPagesForCategory = async (categoryId?: number) => {
-      let page = 1;
-      let hasMore = true;
-      while (hasMore) {
-        const categoryQuery = categoryId ? `&category=${categoryId}` : '';
-        const url = `https://luxurysouq.com/wp-json/wc/store/products?page=${page}&per_page=50${categoryQuery}`;
-        const response = await fetch(url, {
-          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Accept': 'application/json' }
-        });
-
-        if (!response.ok) break;
-        const products = await response.json();
-
-        if (!Array.isArray(products) || products.length === 0) {
-          hasMore = false;
-        } else {
-          addScrapedProducts(products);
-          page++;
-        }
-      }
-    };
+    let allScrapedProducts: any[] = [];
+    let page = 1;
+    let hasMore = true;
 
     console.log(`🌐 Fetching products from reference site...`);
-    if (categoryToScrape === 'all' || categoryIds.length === 0) {
-      await fetchPagesForCategory();
-    } else {
-      for (const categoryId of categoryIds) {
-        await fetchPagesForCategory(categoryId);
+    while (hasMore) {
+      const url = `https://luxurysouq.com/wp-json/wc/store/products?page=${page}&per_page=50${categoryIdQuery}`;
+      const response = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Accept': 'application/json' }
+      });
+
+      if (!response.ok) break;
+      const products = await response.json();
+      
+      if (!Array.isArray(products) || products.length === 0) {
+        hasMore = false;
+      } else {
+        allScrapedProducts.push(...products);
+        page++;
       }
     }
 
@@ -293,11 +191,8 @@ export async function POST(request: NextRequest) {
 
     for (const scraped of allScrapedProducts) {
       const matchingDb = relevantDbProducts.find(dbP => isSameProduct(dbP, scraped));
-      
-      // Fixed Price parsing
       const finalPrice = parseFloat(scraped.prices?.price || '0');
 
-      // 🧠 SMART CATEGORY EXTRACTOR (Includes Subcategories)
       let catName = categoryToScrape === 'all' ? 'Unknown' : categoryToScrape;
       
       const categoryNames = scraped.categories?.map((c: any) => c.name).join(' ') || '';
@@ -305,39 +200,22 @@ export async function POST(request: NextRequest) {
         scraped.attributes
           ?.map((a: any) => `${a.name} ${(a.terms || []).map((t: any) => t.name).join(' ')}`)
           .join(' ') || '';
-      // Combine name, categories, and attributes to search for keywords
+          
       const searchSpace = `${scraped.name} ${categoryNames} ${attributeNames}`.toLowerCase();
-      const normalizedSearchSpace = normalizeKey(searchSpace);
-      if (normalizedSearchSpace.includes('paylater')) {
-        continue;
-      }
 
-      if (searchSpace.includes('ring')) catName = 'RING';
+      // 🔥 FIX: HIERARCHY UPDATE 🔥
+      // Uunahin natin ang Watches at Bags para kapag may "Oyster Bracelet" ang relo, 'watch' pa rin ang lalabas!
+      if (searchSpace.includes('watch') || searchSpace.includes('timepiece') || searchSpace.includes('chronograph')) catName = 'watches';
+      else if (searchSpace.includes('bag') || searchSpace.includes('tote') || searchSpace.includes('clutch') || searchSpace.includes('handbag') || searchSpace.includes('purse')) catName = 'bags';
+      else if (searchSpace.includes('ring')) catName = 'RING';
       else if (searchSpace.includes('bracelet')) catName = 'BRACELET';
       else if (searchSpace.includes('cufflink')) catName = 'CUFFLINK';
       else if (searchSpace.includes('bridal') || searchSpace.includes('necklace')) catName = 'BRIDAL';
       else if (searchSpace.includes('earring') || searchSpace.includes('earrings')) catName = 'EARRINGS';
-      else if (searchSpace.includes('watch') || searchSpace.includes('timepiece')) catName = 'watches';
-      else if (searchSpace.includes('bag') || searchSpace.includes('tote') || searchSpace.includes('clutch') || searchSpace.includes('handbag')) catName = 'bags';
 
       const rawDescription = scraped.short_description || scraped.description || null;
       const description = rawDescription ? normalizeTextValue(stripHtml(rawDescription)) : null;
-      const colorFromAttributes = normalizeTextValue(
-        getAttributeValue(scraped.attributes, [
-          'color',
-          'colour',
-          'dial color',
-          'dial colour',
-          'case color',
-          'case colour',
-          'strap color',
-          'strap colour',
-          'band color',
-          'band colour',
-        ])
-      );
-      const colorFromDescription = extractColorFromText(description);
-      const color = colorFromAttributes || colorFromDescription;
+      const color = normalizeTextValue(getAttributeValue(scraped.attributes, ['color', 'colour']));
       let gender = normalizeTextValue(getAttributeValue(scraped.attributes, ['gender', 'sex']));
       if (!gender) {
         const categoryLabels = scraped.categories?.map((c: any) => `${c?.name || ''}`.toLowerCase()) || [];
@@ -352,28 +230,16 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // 🧠 SMART BRAND EXTRACTOR (Filters jewelry subcategories)
       let brandName = 'Unbranded';
-      const attrBrandRaw = scraped.attributes?.find((a: any) => a.name.toLowerCase() === 'brand')?.terms?.[0]?.name;
-      const attrBrand = attrBrandRaw && normalizeKey(attrBrandRaw) !== 'paylater' ? attrBrandRaw : null;
+      const attrBrand = scraped.attributes?.find((a: any) => a.name.toLowerCase() === 'brand')?.terms?.[0]?.name;
       
       if (attrBrand) {
         brandName = attrBrand;
       } else {
-        // LuxurySouq puts brands in categories. We ignore generic and jewelry-type words to find the brand.
         const genericCats = new Set([
-          'bags',
-          'watches',
-          'jewelry',
-          'jewellery',
-          'accessories',
-          'men',
-          'women',
-          'mens',
-          'womens',
-          'ladies',
-          'paylater',
-          'uncategorized',
+          'bags', 'watches', 'jewelry', 'jewellery', 'accessories',
+          'men', 'women', 'mens', 'womens', 'ladies', 'uncategorized',
+          'paylater', 'pay-later', 'pay later'
         ]);
         const normalizedCatName = normalizeKey(catName);
         const isJewelryProduct =
@@ -386,6 +252,7 @@ export async function POST(request: NextRequest) {
           const normalized = normalizeKey(name);
           if (!normalized) return false;
           if (genericCats.has(normalized)) return false;
+          if (normalized.includes('paylater')) return false; 
           if (normalizedCatName && normalized === normalizedCatName) return false;
           if (isJewelryProduct && isJewelryTypeCategory(name)) return false;
           if (isWatchTypeCategory(name)) return false;
@@ -393,23 +260,22 @@ export async function POST(request: NextRequest) {
         });
         
         if (brandCategory) {
-          brandName = brandCategory.name; // e.g. "Hermes" or "Rolex"
+          brandName = brandCategory.name;
         } else {
-          // Absolute fallback: First word of the product name
-          brandName = extractBrandFromName(scraped.name) || scraped.name.split(' ')[0];
+          brandName = scraped.name.split(' ')[0];
         }
       }
 
-      if (normalizeKey(brandName) === 'paylater') {
-        brandName = extractBrandFromName(scraped.name) || 'Unbranded';
+      if (normalizeKey(brandName).includes('paylater')) {
+         brandName = scraped.name.split(' ')[0];
       }
 
       const baseStagingData = {
         scraped_ref_no: scraped.sku || `ORPHAN-${scraped.id}`, 
         scraped_name: scraped.name,
         scraped_price: finalPrice,
-        raw_brand_name: brandName,    // 👈 Ito ay Hermes na!
-        raw_category_name: catName,   // 👈 Ito ay bags/ring/bracelet na!
+        raw_brand_name: brandName,    
+        raw_category_name: catName,   
         image_url: scraped.images?.[0]?.src || null,
         image_url_2: scraped.images?.[1]?.src || null,
         image_url_3: scraped.images?.[2]?.src || null,
@@ -434,7 +300,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // B. Check for Orphans
     for (const dbProduct of relevantDbProducts) {
       const isStillInReference = allScrapedProducts.some(scraped => isSameProduct(dbProduct, scraped));
       
@@ -458,9 +323,15 @@ export async function POST(request: NextRequest) {
     // 💾 5. SAVE TO STAGING TABLE
     // ==========================================
     if (stagingPayload.length > 0) {
+      const uniquePayloadMap = new Map();
+      for (const item of stagingPayload) {
+        uniquePayloadMap.set(item.scraped_ref_no, item);
+      }
+      const uniquePayload = Array.from(uniquePayloadMap.values());
+
       const { error: insertError } = await supabaseAdmin
         .from('staging_products')
-        .upsert(stagingPayload, { 
+        .upsert(uniquePayload, { 
           onConflict: 'scraped_ref_no', 
           ignoreDuplicates: false 
         });
