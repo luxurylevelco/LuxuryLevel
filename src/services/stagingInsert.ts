@@ -2,6 +2,7 @@ import { supabase } from "../../lib/supabase";
 import { ScrapedProduct } from "../types/product";
 import { extractRefFromSlug, extractRefFromText, normalizeRef } from "../utils/normalize";
 import { logger } from "../utils/logger";
+import { BrandIndexEntry, buildBrandIndex, matchBrandFromCandidates } from "../../lib/brand-matcher";
 
 
 interface StagingRow {
@@ -21,13 +22,38 @@ interface StagingRow {
   gender: string | null;
 }
 
+let brandIndexPromise: Promise<BrandIndexEntry[]> | null = null;
+
+async function getBrandIndex(): Promise<BrandIndexEntry[]> {
+  if (!brandIndexPromise) {
+    brandIndexPromise = (async () => {
+      const { data, error } = await supabase
+        .from("brand")
+        .select("name");
+
+      if (error) {
+        throw new Error(`Brand fetch failed: ${error.message}`);
+      }
+
+      const names = (data || [])
+        .map((row) => row.name)
+        .filter((name): name is string => Boolean(name));
+
+      return buildBrandIndex(names);
+    })();
+  }
+
+  return brandIndexPromise;
+}
+
 export async function insertMissingInDbToStaging(products: ScrapedProduct[]): Promise<void> {
   if (products.length === 0) {
     logger.info("No missing products to insert into staging.");
     return;
   }
 
-  const rows = buildStagingRows(products);
+  const brandIndex = await getBrandIndex();
+  const rows = await buildStagingRows(products, brandIndex);
 
   if (rows.length === 0) {
     logger.warn("No valid staging rows to insert.");
@@ -51,7 +77,8 @@ export async function insertScrapedProductsToStaging(products: ScrapedProduct[])
     return;
   }
 
-  const rows = buildStagingRows(products);
+  const brandIndex = await getBrandIndex();
+  const rows = await buildStagingRows(products, brandIndex);
   if (rows.length === 0) {
     logger.warn("No valid staging rows to insert.");
     return;
@@ -68,11 +95,22 @@ export async function insertScrapedProductsToStaging(products: ScrapedProduct[])
   logger.info(`Inserted ${rows.length} scraped products into staging.`);
 }
 
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&#0*38;|&amp;/gi, "&")
+    .replace(/&#0*39;|&apos;/gi, "'")
+    .replace(/&quot;/gi, '"')
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&nbsp;/gi, " ");
+}
+
 function normalizeField(value: string | null): string | null {
   if (!value) {
     return null;
   }
-  const normalized = value.replace(/\s+/g, " ").trim();
+  const decoded = decodeHtmlEntities(value);
+  const normalized = decoded.replace(/\s+/g, " ").trim();
   return normalized.length > 0 ? normalized : null;
 }
 
@@ -167,7 +205,10 @@ function normalizeToBagsCategory(input: {
   return normalizeField(input.rawCategoryName) || "Unknown";
 }
 
-function buildStagingRows(products: ScrapedProduct[]): StagingRow[] {
+async function buildStagingRows(
+  products: ScrapedProduct[],
+  brandIndex: BrandIndexEntry[]
+): Promise<StagingRow[]> {
   const rows: StagingRow[] = [];
   const seenRefs = new Set<string>();
   for (const product of products) {
@@ -183,7 +224,11 @@ function buildStagingRows(products: ScrapedProduct[]): StagingRow[] {
     seenRefs.add(ref);
 
     const name = normalizeField(product.scraped_name) || ref;
-    const brand = normalizeField(product.raw_brand_name) || "Unknown";
+    const matchedBrand = matchBrandFromCandidates(brandIndex, [
+      product.raw_brand_name,
+      product.scraped_name,
+    ]);
+    const brand = matchedBrand || normalizeField(product.raw_brand_name) || "Unknown";
     const rawCategory = normalizeField(product.raw_category_name);
 
     const category = normalizeToBagsCategory({

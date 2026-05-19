@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { verifyAdminFromRequest } from "@/lib/admin-auth";
+import { deleteObjectsFromR2 } from "@/lib/r2";
 
 export async function DELETE(
   req: NextRequest,
@@ -18,6 +19,21 @@ export async function DELETE(
     // 2. Await the params before reading the ID
     const resolvedParams = await params;
     const productId = parseInt(resolvedParams.id);
+
+    const { data: product, error: fetchError } = await supabase
+      .from("product")
+      .select("image_1, image_2, image_3")
+      .eq("id", productId)
+      .single();
+
+    if (fetchError || !product) {
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      );
+    }
+
+    await deleteObjectsFromR2([product.image_1, product.image_2, product.image_3]);
 
     const { error } = await supabase
       .from("product")

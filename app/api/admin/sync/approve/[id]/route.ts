@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { uploadFileToR2 } from '@/lib/r2';
+import { buildBrandIndex, matchBrandFromCandidates } from '@/lib/brand-matcher';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -83,6 +84,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       standardCategory = 'bags'; 
     }
 
+    const { data: brandRows, error: brandError } = await supabaseAdmin
+      .from('brand')
+      .select('name');
+
+    if (brandError) throw new Error(`Brand fetch error: ${brandError.message}`);
+
+    const brandIndex = buildBrandIndex((brandRows || []).map((row) => row.name));
+
     // ==========================================
     // 🧠 2. SMART BRAND SANITIZER (Case Insensitive + Aliases)
     // ==========================================
@@ -90,11 +99,21 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     let standardBrand = 'Unbranded';
     const lowerRaw = rawBrand.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
+    const matchedBrand = matchBrandFromCandidates(brandIndex, [
+      mappedBrand,
+      stagingData.raw_brand_name,
+      stagingData.scraped_name,
+    ]);
+
+    if (matchedBrand) {
+      standardBrand = matchedBrand;
+    }
+
     // 🚫 A. Harangin ang mga "Fake Brands" (Non-brands)
     const garbageWords = ['cosmograph', 'cufflink', 'cufflinks', 'bracelet', 'ring', 'necklace', 'earring', 'bridal', 'paylater', 'unknown', 'n/a', '1', '2', '3'];
     const isGarbage = garbageWords.some(gw => lowerRaw === gw || (lowerRaw.includes(gw) && lowerRaw.length < 15));
 
-    if (!isGarbage && lowerRaw !== 'unbranded') {
+    if (!matchedBrand && !isGarbage && lowerRaw !== 'unbranded') {
       
         // 🏆 B. Master List of Real Brands (Mula sa Screenshots mo: LuxurySouq + Level)
         const officialBrands = [

@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { buildBrandIndex, matchBrandFromCandidates } from '@/lib/brand-matcher';
 import {
   Check,
   X,
@@ -35,6 +36,12 @@ interface StagingProduct {
   local_product?: { id: number; price: number } | null;
   is_price_change?: boolean;
   is_archive?: boolean;
+}
+
+interface LocalProductRef {
+  id: number;
+  ref_no: string;
+  price: number;
 }
 
 let supabaseClient: ReturnType<typeof createClient> | null = null;
@@ -90,6 +97,47 @@ export default function StagingApprovalDashboard() {
   const [isBrandDropdownOpen, setIsBrandDropdownOpen] = useState(false);
   const [brandSearchQuery, setBrandSearchQuery] = useState('');
 
+  const brandIndex = useMemo(() => {
+    return buildBrandIndex(dbBrands.map((brand) => brand.name));
+  }, [dbBrands]);
+
+  const resolveBrandMatch = (product: StagingProduct | undefined | null) => {
+    if (!product) return null;
+    return matchBrandFromCandidates(brandIndex, [
+      product.raw_brand_name,
+      product.scraped_name,
+    ]);
+  };
+
+  const getDisplayBrand = (product: StagingProduct | undefined | null) => {
+    return resolveBrandMatch(product) || product?.raw_brand_name || 'Unknown';
+  };
+
+  const normalizeBrandKey = (value: string | null | undefined) => {
+    if (!value) return '';
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/&/g, ' and ')
+      .replace(/["'.]/g, '')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const matchesBrandFilter = (product: StagingProduct, filterValue: string | null) => {
+    if (!filterValue) return true;
+    const target = normalizeBrandKey(filterValue);
+    if (!target) return true;
+
+    const resolved = normalizeBrandKey(getDisplayBrand(product));
+    const raw = normalizeBrandKey(product.raw_brand_name);
+    const name = normalizeBrandKey(product.scraped_name);
+
+    return resolved === target || raw === target || name.includes(target);
+  };
+
   useEffect(() => {
     if (message) {
       const timer = setTimeout(() => setMessage(null), 4000);
@@ -123,18 +171,22 @@ export default function StagingApprovalDashboard() {
         return;
       }
 
-      const refNos = stagingData.map(p => p.scraped_ref_no).filter(Boolean);
+      const stagingRows = (stagingData || []) as StagingProduct[];
+
+      const refNos = stagingRows.map(p => p.scraped_ref_no).filter(Boolean);
       const { data: localProducts } = await supabase
         .from('product')
         .select('id, ref_no, price')
         .in('ref_no', refNos);
 
+      const localProductRows = (localProducts || []) as LocalProductRef[];
+
       let newCount = 0;
       let updateCount = 0;
       let archiveCount = 0;
 
-      const enrichedData: StagingProduct[] = stagingData.map(staging => {
-        const local = localProducts?.find(p => p.ref_no === staging.scraped_ref_no);
+      const enrichedData: StagingProduct[] = stagingRows.map(staging => {
+        const local = localProductRows.find(p => p.ref_no === staging.scraped_ref_no);
         
         const isArchive = staging.sync_status === 'missing';
         const isNew = !local && !isArchive;
@@ -147,7 +199,16 @@ export default function StagingApprovalDashboard() {
         return { ...staging, local_product: local || null, is_price_change: isPriceChange, is_archive: isArchive };
       });
 
-      const brands = Array.from(new Set(stagingData.map((s: any) => s.raw_brand_name).filter(Boolean)));
+      const brands = Array.from(
+        new Set(
+          enrichedData
+            .map((item) => getDisplayBrand(item))
+            .filter((brand) => {
+              if (!brand) return false;
+              return normalizeBrandKey(brand) !== 'unknown';
+            })
+        )
+      );
       const cats = Array.from(new Set(stagingData.map((s: any) => s.raw_category_name).filter(Boolean)));
 
       setBrandOptions(brands);
@@ -155,7 +216,7 @@ export default function StagingApprovalDashboard() {
       setAllStagingProducts(enrichedData);
 
       let filteredData = enrichedData;
-      if (brandFilter) filteredData = filteredData.filter(p => p.raw_brand_name === brandFilter);
+      if (brandFilter) filteredData = filteredData.filter(p => matchesBrandFilter(p, brandFilter));
       if (categoryFilter) filteredData = filteredData.filter(p => p.raw_category_name === categoryFilter);
       if (filter === 'new') filteredData = enrichedData.filter(p => !p.local_product && !p.is_archive);
       else if (filter === 'updates') filteredData = enrichedData.filter(p => p.is_price_change);
@@ -170,7 +231,7 @@ export default function StagingApprovalDashboard() {
       }
 
       setStagingProducts(filteredData);
-      setStats({ total: stagingData.length, newProducts: newCount, priceUpdates: updateCount, toArchive: archiveCount });
+      setStats({ total: stagingRows.length, newProducts: newCount, priceUpdates: updateCount, toArchive: archiveCount });
     } catch (error: any) {
       setMessage({ type: 'error', text: error?.message || 'Failed to load data.' });
     } finally {
@@ -191,7 +252,7 @@ export default function StagingApprovalDashboard() {
     // 1. I-apply muna ang GLOBAL Filters (Brand, Category, Search)
     let baseFiltered = allStagingProducts;
 
-    if (brandFilter) baseFiltered = baseFiltered.filter(p => p.raw_brand_name === brandFilter);
+    if (brandFilter) baseFiltered = baseFiltered.filter(p => matchesBrandFilter(p, brandFilter));
     if (categoryFilter) baseFiltered = baseFiltered.filter(p => p.raw_category_name === categoryFilter);
     
     if (searchTerm) {
@@ -261,10 +322,11 @@ export default function StagingApprovalDashboard() {
     const missingBrands = new Set<string>();
 
     ids.forEach(id => {
-      const product = stagingProducts.find(p => p.id === id);
+      const product = allStagingProducts.find(p => p.id === id) || stagingProducts.find(p => p.id === id);
       if (product) {
         const bName = (product.raw_brand_name || '').trim();
-        const brandExists = dbBrands.some(b => b.name.toLowerCase() === bName.toLowerCase());
+        const matchedBrand = resolveBrandMatch(product);
+        const brandExists = Boolean(matchedBrand) || dbBrands.some(b => b.name.toLowerCase() === bName.toLowerCase());
         const isUnbranded = bName.toLowerCase() === 'unbranded' || bName === '';
         
         if (!brandExists && !isUnbranded) {
@@ -304,9 +366,12 @@ export default function StagingApprovalDashboard() {
     let success = 0; let failed = 0;
     
     for (const id of ids) {
+      const product = allStagingProducts.find(p => p.id === id) || stagingProducts.find(p => p.id === id);
+      const matchedBrand = resolveBrandMatch(product);
       const payload = { 
         notes: 'Approved via Dashboard', 
-        ...(mappedBrandName && { mappedBrand: mappedBrandName }) 
+        ...(mappedBrandName && { mappedBrand: mappedBrandName }),
+        ...(!mappedBrandName && matchedBrand && { mappedBrand: matchedBrand })
       };
 
       try {
@@ -459,10 +524,11 @@ export default function StagingApprovalDashboard() {
 
   const validBulkIds = brandValidationModal.isOpen && brandValidationModal.isBulk 
     ? brandValidationModal.stagingIds.filter(id => {
-        const product = stagingProducts.find(p => p.id === id);
+        const product = allStagingProducts.find(p => p.id === id) || stagingProducts.find(p => p.id === id);
         if (!product) return false;
         const bName = (product.raw_brand_name || '').trim();
-        const brandExists = dbBrands.some(b => b.name.toLowerCase() === bName.toLowerCase());
+        const matchedBrand = resolveBrandMatch(product);
+        const brandExists = Boolean(matchedBrand) || dbBrands.some(b => b.name.toLowerCase() === bName.toLowerCase());
         const isUnbranded = bName.toLowerCase() === 'unbranded' || bName === '';
         return brandExists || isUnbranded;
       })

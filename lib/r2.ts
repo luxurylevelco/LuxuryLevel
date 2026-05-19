@@ -1,5 +1,5 @@
 // lib/r2.ts
-import { S3Client } from "@aws-sdk/client-s3";
+import { S3Client, DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 
 export const r2 = new S3Client({
   region: "auto", // Cloudflare R2 uses "auto" as region
@@ -12,7 +12,6 @@ export const r2 = new S3Client({
   forcePathStyle: true,
 });
 
-import { PutObjectCommand } from "@aws-sdk/client-s3";
 import fs from "fs/promises";
 import path from "path";
 
@@ -106,4 +105,45 @@ export async function findImagePath(
     console.error(`Error reading folder ${folderPath}:`, error);
     return null;
   }
+}
+
+export function normalizeR2Key(input?: string | null): string | null {
+  if (!input) return null;
+
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+
+  try {
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+      const url = new URL(trimmed);
+      return url.pathname.replace(/^\//, "");
+    }
+  } catch {
+    // Fall through to return the raw key for non-URL strings.
+  }
+
+  return trimmed.replace(/^\//, "");
+}
+
+export async function deleteObjectsFromR2(keys: Array<string | null | undefined>): Promise<void> {
+  if (!BUCKET_NAME) {
+    throw new Error("R2_BUCKET_NAME is not configured");
+  }
+
+  const uniqueKeys = Array.from(
+    new Set(keys.map((key) => normalizeR2Key(key)).filter((key): key is string => Boolean(key)))
+  );
+
+  if (uniqueKeys.length === 0) return;
+
+  await Promise.all(
+    uniqueKeys.map((key) =>
+      r2.send(
+        new DeleteObjectCommand({
+          Bucket: BUCKET_NAME,
+          Key: key,
+        })
+      )
+    )
+  );
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { deleteObjectsFromR2 } from '@/lib/r2';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,6 +25,22 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // 2. 🚨 HARD DELETE sa Live Product table!
     if (stagingData.scraped_ref_no) {
+      const { data: productData, error: productFetchError } = await supabaseAdmin
+        .from('product')
+        .select('image_1, image_2, image_3')
+        .eq('ref_no', stagingData.scraped_ref_no)
+        .maybeSingle();
+
+      if (productFetchError) throw new Error(`Failed to fetch live product: ${productFetchError.message}`);
+
+      if (productData) {
+        await deleteObjectsFromR2([
+          productData.image_1,
+          productData.image_2,
+          productData.image_3
+        ]);
+      }
+
       const { error: deleteLiveError } = await supabaseAdmin
         .from('product')
         .delete()
