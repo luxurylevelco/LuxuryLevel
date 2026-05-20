@@ -7,38 +7,115 @@ const supabaseAdmin = createClient(
 );
 
 // ==========================================
-// 🧠 1. ANG SMART MATCHER MO 
+// 🧠 1. HELPER FUNCTIONS & DECODERS
 // ==========================================
+const normalizeKey = (value: string) =>
+  value.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+
 function normalizeNameKey(name: string | null | undefined): string | null {
   if (!name) return null;
-  return name.toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+  return name
+    .normalize("NFD") 
+    .replace(/[\u0300-\u036f]/g, "") 
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
 }
 
+const decodeHtmlEntities = (value: string | null | undefined): string => {
+  if (!value) return '';
+  return value
+    .replace(/&#8211;|&ndash;/gi, '-')
+    .replace(/&#8212;|&mdash;/gi, '-')
+    .replace(/&#8216;|&#8217;|&lsquo;|&rsquo;/gi, "'")
+    .replace(/&#8220;|&#8221;|&ldquo;|&rdquo;/gi, '"')
+    .replace(/&#038;|&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&nbsp;|&#160;/gi, ' ')
+    .replace(/[\u00A0\u200B\u200C\u200D\uFEFF]/g, ' ') 
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const getAttributeValue = (attributes: any[] | undefined, targets: string[]): string | null => {
+  if (!attributes || attributes.length === 0) return null;
+  const lowerTargets = targets.map((target) => target.toLowerCase());
+  const match = attributes.find((attr) => {
+    const name = (attr?.name || '').toLowerCase();
+    const taxonomy = (attr?.taxonomy || '').toLowerCase().replace(/^pa_/, '');
+    return lowerTargets.includes(name) || (taxonomy && lowerTargets.includes(taxonomy));
+  });
+  if (!match) return null;
+  const terms = Array.isArray(match.terms) ? match.terms.map((term: any) => term?.name).filter(Boolean) : [];
+  if (terms.length > 0) return terms.join(', ');
+  const options = Array.isArray(match.options) ? match.options.map((option: any) => `${option}`).filter(Boolean) : [];
+  if (options.length > 0) return options.join(', ');
+  if (typeof match.value === 'string') return match.value;
+  return null;
+};
+
+const stripHtml = (value: string): string => {
+  const noHtml = value
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<\/?[^>]+>/g, ' ');
+  return decodeHtmlEntities(noHtml); 
+};
+
+// ==========================================
+// 🧠 2. ANG SMART MATCHER MO (STRICT SKU FOR WATCHES)
+// ==========================================
 function isSameProduct(dbProduct: any, scrapedProduct: any): boolean {
-  if (dbProduct.ref_no && scrapedProduct.sku) {
-    const dbRef = normalizeKey(dbProduct.ref_no);
-    const scrapedRef = normalizeKey(scrapedProduct.sku);
-    if (dbRef && scrapedRef && dbRef === scrapedRef) return true;
+  let scrapedSku = scrapedProduct.sku;
+  if (!scrapedSku) {
+    scrapedSku = getAttributeValue(scrapedProduct.attributes, ['ref. no', 'ref no', 'reference', 'sku']);
   }
 
-  const dbName = normalizeNameKey(dbProduct.name) || "";
-  const listName = normalizeNameKey(scrapedProduct.name) || "";
+  const dbRef = dbProduct.ref_no ? normalizeKey(dbProduct.ref_no) : null;
+  const scrapedRef = scrapedSku ? normalizeKey(scrapedSku) : null;
 
-  if (dbName && listName) {
-    if (dbName === listName) return true;
-    if (dbName.length > 12 && listName.length > 12) {
-      const lenDiff = Math.abs(dbName.length - listName.length);
-      if (lenDiff <= 5) {
-        if (dbName.includes(listName) || listName.includes(dbName)) return true;
+  // Alamin kung relo ba ang pino-process natin base sa Database Category
+  const dbCat = (dbProduct.category?.name || '').toLowerCase();
+  const isWatchCategory = dbCat.includes('watch') || dbCat.includes('timepiece');
+
+  // 🔥 1. EXACT SKU / REF CHECK 🔥
+  if (dbRef && scrapedRef) {
+    if (dbRef === scrapedRef) return true;
+    
+    // 👉 STRICT WATCH RULE: Kung relo ito at parehong may SKU pero magkaiba, FAIL AGAD!
+    // Ii-skip na natin ang name check para hindi mapagkamalang pareho.
+    if (isWatchCategory) return false;
+  }
+
+  // 2. NAME MATCHING FALLBACK (Kapag walang SKU yung isa, o kung hindi relo)
+  const cleanDbName = decodeHtmlEntities(dbProduct.name);
+  const cleanScrapedName = decodeHtmlEntities(scrapedProduct.name);
+
+  const dbNameStr = normalizeNameKey(cleanDbName) || "";
+  const listNameStr = normalizeNameKey(cleanScrapedName) || "";
+
+  // CROSS-REFERENCE CHECK: Hinahanap yung SKU sa loob ng Title
+  if (dbRef && dbRef.length > 4 && listNameStr.includes(dbRef)) return true;
+  if (scrapedRef && scrapedRef.length > 4 && dbNameStr.includes(scrapedRef)) return true;
+
+  if (dbNameStr && listNameStr) {
+    if (dbNameStr === listNameStr) return true;
+    
+    if (dbNameStr.includes(listNameStr) || listNameStr.includes(dbNameStr)) {
+      if (dbNameStr.length < 15 || listNameStr.length < 15) {
+        const lenDiff = Math.abs(dbNameStr.length - listNameStr.length);
+        if (lenDiff <= 5) return true;
+        return false;
       }
+      return true; 
     }
   }
 
   return false;
 }
-
-const normalizeKey = (value: string) =>
-  value.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
 
 const jewelryTypeKeywords = [
   'ring', 'bracelet', 'cufflink', 'bridal', 'necklace', 
@@ -66,38 +143,6 @@ const normalizeTextValue = (value: string | null | undefined): string | null => 
   return normalized.length > 0 ? normalized : null;
 };
 
-const stripHtml = (value: string): string => {
-  return value
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<\/?[^>]+>/g, ' ')
-    .replace(/&nbsp;|&#160;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;|&apos;/gi, "'")
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/\s+/g, ' ')
-    .trim();
-};
-
-const getAttributeValue = (attributes: any[] | undefined, targets: string[]): string | null => {
-  if (!attributes || attributes.length === 0) return null;
-  const lowerTargets = targets.map((target) => target.toLowerCase());
-  const match = attributes.find((attr) => {
-    const name = (attr?.name || '').toLowerCase();
-    const taxonomy = (attr?.taxonomy || '').toLowerCase().replace(/^pa_/, '');
-    return lowerTargets.includes(name) || (taxonomy && lowerTargets.includes(taxonomy));
-  });
-  if (!match) return null;
-  const terms = Array.isArray(match.terms) ? match.terms.map((term: any) => term?.name).filter(Boolean) : [];
-  if (terms.length > 0) return terms.join(', ');
-  const options = Array.isArray(match.options) ? match.options.map((option: any) => `${option}`).filter(Boolean) : [];
-  if (options.length > 0) return options.join(', ');
-  if (typeof match.value === 'string') return match.value;
-  return null;
-};
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
@@ -107,24 +152,40 @@ export async function POST(request: NextRequest) {
     console.log(`🚀 Starting SMART COMPARISON Scraper for: ${categoryToScrape.toUpperCase()}`);
 
     // ==========================================
-    // 🗄️ 2. FETCH EXISTING DB PRODUCTS
+    // 🗄️ 3. FETCH EXISTING DB PRODUCTS
     // ==========================================
     console.log(`🔍 Fetching existing local database products...`);
     
-    const { data: rawProducts, error: dbError } = await supabaseAdmin
-      .from('product')
-      .select('id, ref_no, name, price, sale_price, category_id, description, color, gender');
-      
-    if (dbError) throw new Error(`DB Error: ${dbError.message}`);
+    let allDbProductsRaw: any[] = [];
+    let start = 0;
+    let step = 1000;
+    let hasMoreDb = true;
 
-    const { data: rawCategories } = await supabaseAdmin
-      .from('category')
-      .select('id, name');
+    while (hasMoreDb) {
+      const { data, error } = await supabaseAdmin
+        .from('product')
+        .select('id, ref_no, name, price, sale_price, category_id, brand_id, description, color, gender')
+        .range(start, start + step - 1);
 
-    const dbProducts = (rawProducts || []).map(p => ({
+      if (error) throw new Error(`DB Error: ${error.message}`);
+      if (data && data.length > 0) {
+        allDbProductsRaw.push(...data);
+        start += step;
+      } else {
+        hasMoreDb = false;
+      }
+    }
+
+    const { data: rawCategories } = await supabaseAdmin.from('category').select('id, name');
+    const { data: rawBrands } = await supabaseAdmin.from('brand').select('id, name');
+
+    const dbProducts = allDbProductsRaw.map(p => ({
       ...p,
       category: {
         name: rawCategories?.find(c => c.id === p.category_id)?.name || 'Unknown'
+      },
+      brand: {
+        name: rawBrands?.find(b => b.id === p.brand_id)?.name || 'Unknown'
       }
     }));
 
@@ -145,7 +206,7 @@ export async function POST(request: NextRequest) {
         });
 
     // ==========================================
-    // 🌐 3. FETCH FROM REFERENCE SITE
+    // 🌐 4. FETCH FROM REFERENCE SITE
     // ==========================================
     let categoryIdQuery = '';
     if (categoryToScrape !== 'all') {
@@ -184,12 +245,15 @@ export async function POST(request: NextRequest) {
     }
 
     // ==========================================
-    // ⚖️ 4. THE COMPARISON & EXTRACTION LOGIC
+    // ⚖️ 5. THE COMPARISON & EXTRACTION LOGIC
     // ==========================================
     const stagingPayload: any[] = [];
     let newCount = 0, updateCount = 0, orphanCount = 0;
 
     for (const scraped of allScrapedProducts) {
+      
+      scraped.name = decodeHtmlEntities(scraped.name);
+      
       const matchingDb = relevantDbProducts.find(dbP => isSameProduct(dbP, scraped));
       const finalPrice = parseFloat(scraped.prices?.price || '0');
 
@@ -203,8 +267,6 @@ export async function POST(request: NextRequest) {
           
       const searchSpace = `${scraped.name} ${categoryNames} ${attributeNames}`.toLowerCase();
 
-      // 🔥 FIX: HIERARCHY UPDATE 🔥
-      // Uunahin natin ang Watches at Bags para kapag may "Oyster Bracelet" ang relo, 'watch' pa rin ang lalabas!
       if (searchSpace.includes('watch') || searchSpace.includes('timepiece') || searchSpace.includes('chronograph')) catName = 'watches';
       else if (searchSpace.includes('bag') || searchSpace.includes('tote') || searchSpace.includes('clutch') || searchSpace.includes('handbag') || searchSpace.includes('purse')) catName = 'bags';
       else if (searchSpace.includes('ring')) catName = 'RING';
@@ -234,7 +296,7 @@ export async function POST(request: NextRequest) {
       const attrBrand = scraped.attributes?.find((a: any) => a.name.toLowerCase() === 'brand')?.terms?.[0]?.name;
       
       if (attrBrand) {
-        brandName = attrBrand;
+        brandName = decodeHtmlEntities(attrBrand); 
       } else {
         const genericCats = new Set([
           'bags', 'watches', 'jewelry', 'jewellery', 'accessories',
@@ -260,7 +322,7 @@ export async function POST(request: NextRequest) {
         });
         
         if (brandCategory) {
-          brandName = brandCategory.name;
+          brandName = decodeHtmlEntities(brandCategory.name);
         } else {
           brandName = scraped.name.split(' ')[0];
         }
@@ -306,9 +368,9 @@ export async function POST(request: NextRequest) {
       if (!isStillInReference) {
         stagingPayload.push({
           scraped_ref_no: dbProduct.ref_no || `DB-ORPHAN-${dbProduct.id}`,
-          scraped_name: dbProduct.name,
+          scraped_name: decodeHtmlEntities(dbProduct.name), 
           scraped_price: null, 
-          raw_brand_name: 'Unknown',
+          raw_brand_name: dbProduct.brand?.name || 'Unknown',
           raw_category_name: dbProduct.category?.name || 'Unknown',
           sync_status: 'missing',
           description: normalizeTextValue(dbProduct.description),
@@ -320,7 +382,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ==========================================
-    // 💾 5. SAVE TO STAGING TABLE
+    // 💾 6. SAVE TO STAGING TABLE
     // ==========================================
     if (stagingPayload.length > 0) {
       const uniquePayloadMap = new Map();

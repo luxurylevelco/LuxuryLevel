@@ -71,7 +71,11 @@ export default function StagingApprovalDashboard() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   
-  const [brandFilter, setBrandFilter] = useState<string | null>(null);
+  // 🔥 MULTI-SELECT BRAND FILTER STATES 🔥
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [isBrandFilterOpen, setIsBrandFilterOpen] = useState(false);
+  const brandFilterRef = useRef<HTMLDivElement>(null);
+
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>(''); 
   
@@ -126,17 +130,30 @@ export default function StagingApprovalDashboard() {
       .trim();
   };
 
-  const matchesBrandFilter = (product: StagingProduct, filterValue: string | null) => {
-    if (!filterValue) return true;
-    const target = normalizeBrandKey(filterValue);
-    if (!target) return true;
-
+  const matchesBrandFilter = (product: StagingProduct, selectedBrandsArr: string[]) => {
+    if (!selectedBrandsArr || selectedBrandsArr.length === 0) return true;
+    
     const resolved = normalizeBrandKey(getDisplayBrand(product));
     const raw = normalizeBrandKey(product.raw_brand_name);
     const name = normalizeBrandKey(product.scraped_name);
 
-    return resolved === target || raw === target || name.includes(target);
+    return selectedBrandsArr.some(filterValue => {
+      const target = normalizeBrandKey(filterValue);
+      if (!target) return true;
+      return resolved === target || raw === target || name.includes(target);
+    });
   };
+
+  // Close brand filter when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (brandFilterRef.current && !brandFilterRef.current.contains(event.target as Node)) {
+        setIsBrandFilterOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (message) {
@@ -150,7 +167,6 @@ export default function StagingApprovalDashboard() {
     try {
       const supabase = getSupabaseClient();
       
-      // 🚀 FETCH BRANDS & SORT ALPHABETICALLY
       const { data: realBrands } = await supabase.from('brand').select('id, name').order('name', { ascending: true });
       setDbBrands(realBrands || []);
 
@@ -199,6 +215,7 @@ export default function StagingApprovalDashboard() {
         return { ...staging, local_product: local || null, is_price_change: isPriceChange, is_archive: isArchive };
       });
 
+      // 🔥 ALPHABETICAL BRAND OPTIONS 🔥
       const brands = Array.from(
         new Set(
           enrichedData
@@ -208,7 +225,8 @@ export default function StagingApprovalDashboard() {
               return normalizeBrandKey(brand) !== 'unknown';
             })
         )
-      );
+      ).sort((a, b) => a.localeCompare(b)); // Ito ang nagpapa-alphabetical sa listahan
+
       const cats = Array.from(new Set(stagingData.map((s: any) => s.raw_category_name).filter(Boolean)));
 
       setBrandOptions(brands);
@@ -216,7 +234,7 @@ export default function StagingApprovalDashboard() {
       setAllStagingProducts(enrichedData);
 
       let filteredData = enrichedData;
-      if (brandFilter) filteredData = filteredData.filter(p => matchesBrandFilter(p, brandFilter));
+      if (selectedBrands.length > 0) filteredData = filteredData.filter(p => matchesBrandFilter(p, selectedBrands));
       if (categoryFilter) filteredData = filteredData.filter(p => p.raw_category_name === categoryFilter);
       if (filter === 'new') filteredData = enrichedData.filter(p => !p.local_product && !p.is_archive);
       else if (filter === 'updates') filteredData = enrichedData.filter(p => p.is_price_change);
@@ -241,7 +259,7 @@ export default function StagingApprovalDashboard() {
 
   useEffect(() => { fetchStagingProducts(); }, [filter]);
 
-// 🚀 DYNAMIC STATS & FILTERING EFFECT
+  // 🚀 DYNAMIC STATS & FILTERING EFFECT
   useEffect(() => {
     if (!allStagingProducts.length) {
       setStats({ total: 0, newProducts: 0, priceUpdates: 0, toArchive: 0 });
@@ -249,10 +267,9 @@ export default function StagingApprovalDashboard() {
       return;
     }
 
-    // 1. I-apply muna ang GLOBAL Filters (Brand, Category, Search)
     let baseFiltered = allStagingProducts;
 
-    if (brandFilter) baseFiltered = baseFiltered.filter(p => matchesBrandFilter(p, brandFilter));
+    if (selectedBrands.length > 0) baseFiltered = baseFiltered.filter(p => matchesBrandFilter(p, selectedBrands));
     if (categoryFilter) baseFiltered = baseFiltered.filter(p => p.raw_category_name === categoryFilter);
     
     if (searchTerm) {
@@ -263,7 +280,6 @@ export default function StagingApprovalDashboard() {
       );
     }
 
-    // 2. 🚀 I-recalculate ang STATS base sa natirang items!
     let newCount = 0;
     let updateCount = 0;
     let archiveCount = 0;
@@ -281,16 +297,14 @@ export default function StagingApprovalDashboard() {
       toArchive: archiveCount 
     });
 
-    // 3. I-apply ang TAB Filter (New, Updates, Archive) para sa ipapakita sa Table
     let finalFiltered = baseFiltered;
     if (filter === 'new') finalFiltered = baseFiltered.filter(p => !p.local_product && !p.is_archive);
     else if (filter === 'updates') finalFiltered = baseFiltered.filter(p => p.is_price_change);
     else if (filter === 'archive') finalFiltered = baseFiltered.filter(p => p.is_archive);
 
     setStagingProducts(finalFiltered);
-  }, [brandFilter, categoryFilter, filter, allStagingProducts, searchTerm]);
+  }, [selectedBrands, categoryFilter, filter, allStagingProducts, searchTerm]);
 
-  // 🚀 LIVE SCRAPER HANDLER
   const handleRunScraper = async () => {
     if (!confirm(`Are you sure you want to scrape ${scrapeCategory.toUpperCase()} from LuxurySouq?`)) return;
     
@@ -396,7 +410,6 @@ export default function StagingApprovalDashboard() {
   const handleApproveSelected = () => validateAndApprove(selectedIds);
   const handleApproveAllVisible = () => validateAndApprove(stagingProducts.map(p => p.id));
 
-  // 🚀 BATCH ARCHIVE / DELETE FUNCTIONS
   const archiveIdsSequential = async (ids: number[]) => {
     if (!ids.length) return { success: 0, failed: ids.length };
     setBatchApproving(true);
@@ -534,10 +547,21 @@ export default function StagingApprovalDashboard() {
       })
     : [];
 
-  // 🚀 FILTER BRANDS FOR CUSTOM DROPDOWN
   const filteredBrands = dbBrands.filter(b => 
     b.name.toLowerCase().includes(brandSearchQuery.toLowerCase())
   );
+
+  // 🔥 ACTION HANDLERS FOR BRAND FILTER 🔥
+  const toggleBrandFilter = (brand: string) => {
+    setSelectedBrands(prev => 
+      prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
+    );
+  };
+
+  const clearBrandFilter = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedBrands([]);
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 pb-12 font-sans">
@@ -550,7 +574,6 @@ export default function StagingApprovalDashboard() {
         )}
       </div>
 
-      {/* 🚀 BRAND VALIDATION MODAL UI */}
       {brandValidationModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-visible animate-in fade-in zoom-in-95 duration-200">
@@ -592,7 +615,6 @@ export default function StagingApprovalDashboard() {
                       Map to existing brand
                     </label>
                     
-                    {/* 🚀 CUSTOM SEARCHABLE DROPDOWN */}
                     <div className="relative">
                       <div 
                         className={`w-full px-4 py-3 bg-white border rounded-xl text-sm flex justify-between items-center cursor-pointer transition-colors shadow-sm ${isBrandDropdownOpen ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-slate-200 hover:bg-slate-50'}`}
@@ -703,7 +725,6 @@ export default function StagingApprovalDashboard() {
           </div>
           
           <div className="flex flex-wrap items-center gap-3">
-            {/* 🚀 DROP DOWN + RUN SCRAPER COMBO */}
             <div className="flex items-center bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
                <select 
                  value={scrapeCategory}
@@ -778,16 +799,53 @@ export default function StagingApprovalDashboard() {
               <span className="text-sm font-medium">Filters</span>
             </div>
             
-            <div className="relative inline-flex items-center">
-              <select
-                value={brandFilter || ''}
-                onChange={(e) => setBrandFilter(e.target.value || null)}
-                className="appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-lg pl-4 pr-10 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 hover:bg-slate-50 transition-all cursor-pointer shadow-sm w-40"
+            {/* 🔥 WORKING MULTI-SELECT BRAND FILTER UI 🔥 */}
+            <div className="relative inline-flex items-center" ref={brandFilterRef}>
+              <div 
+                className={`bg-white border text-sm font-medium rounded-lg pl-4 pr-10 py-2.5 cursor-pointer shadow-sm w-44 md:w-56 flex items-center justify-between transition-all ${isBrandFilterOpen ? 'border-indigo-500 ring-2 ring-indigo-500/20 text-slate-900' : 'border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+                onClick={() => setIsBrandFilterOpen(!isBrandFilterOpen)}
               >
-                <option value="">All Brands</option>
-                {brandOptions.map(b => <option key={b} value={b}>{b}</option>)}
-              </select>
-              <ChevronDown size={16} className="absolute right-3 text-slate-400 pointer-events-none" />
+                <div className="truncate pr-2">
+                  {selectedBrands.length === 0 
+                    ? "All Brands" 
+                    : selectedBrands.length === 1 
+                      ? selectedBrands[0] 
+                      : `${selectedBrands.length} Brands Selected`}
+                </div>
+                
+                {selectedBrands.length > 0 ? (
+                  <div 
+                    onClick={clearBrandFilter} 
+                    className="absolute right-8 text-slate-400 hover:text-rose-500 transition-colors p-1"
+                  >
+                    <X size={14} />
+                  </div>
+                ) : null}
+                <ChevronDown size={16} className={`absolute right-3 text-slate-400 pointer-events-none transition-transform duration-200 ${isBrandFilterOpen ? 'rotate-180' : ''}`} />
+              </div>
+
+              {isBrandFilterOpen && (
+                <div className="absolute top-full mt-2 left-0 z-40 w-56 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="max-h-60 overflow-y-auto py-1 hide-scrollbar">
+                    {brandOptions.length === 0 ? (
+                       <div className="px-4 py-3 text-sm text-slate-400 text-center italic">No brands available</div>
+                    ) : (
+                      brandOptions.map(b => (
+                        <div 
+                          key={b} 
+                          onClick={() => toggleBrandFilter(b)}
+                          className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 cursor-pointer transition-colors group"
+                        >
+                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedBrands.includes(b) ? 'bg-indigo-600 border-indigo-600' : 'border-slate-300 group-hover:border-indigo-400'}`}>
+                            {selectedBrands.includes(b) && <Check size={12} className="text-white" strokeWidth={3} />}
+                          </div>
+                          <span className={`text-sm ${selectedBrands.includes(b) ? 'font-semibold text-slate-900' : 'font-medium text-slate-600'}`}>{b}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="relative inline-flex items-center">
