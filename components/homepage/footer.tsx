@@ -114,12 +114,12 @@ export default function Footer() {
             <p>
               Email:
               <a
-                href="mailto:habibghanaei@luxurylevelco.com"
+                href="mailto:diane@luxurylevelco.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline hover:text-blue-600 transition-colors"
               >
-                habibghanaei@luxurylevelco.com
+                diane@luxurylevelco.com
               </a>{" "}
               <br />
               <a
