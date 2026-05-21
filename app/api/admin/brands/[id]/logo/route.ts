@@ -1,10 +1,3 @@
-/**
- * API: Upload Brand Logo
- * POST /api/admin/brands/:id/logo
- * 
- * Uploads a brand logo to R2 and updates the brand's logo_url
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminToken } from '@/lib/admin-auth';
 import { uploadFileToR2 } from '@/lib/r2';
