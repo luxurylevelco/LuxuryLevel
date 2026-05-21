@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminToken } from '@/lib/admin-auth';
 import { uploadFileToR2 } from '@/lib/r2';
 import { createClient } from '@supabase/supabase-js';
-import { Database } from '@/lib/types';
 
-const supabase = createClient<Database>(
+// Removed the 'Database' type import to fix the build error
+const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
