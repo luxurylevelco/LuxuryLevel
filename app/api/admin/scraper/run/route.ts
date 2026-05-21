@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { buildBrandIndex, matchBrandFromCandidates } from '@/lib/brand-matcher';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,14 +15,10 @@ const normalizeKey = (value: string) =>
 
 function normalizeNameKey(name: string | null | undefined): string | null {
   if (!name) return null;
-  return name
-    .normalize("NFD") 
-    .replace(/[\u0300-\u036f]/g, "") 
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "")
-    .trim();
+  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "").trim();
 }
 
+// 🔥 POWERFUL DECODER (Naglilinis ng &#8217; at Invisible Spaces)
 const decodeHtmlEntities = (value: string | null | undefined): string => {
   if (!value) return '';
   return value
@@ -29,15 +26,45 @@ const decodeHtmlEntities = (value: string | null | undefined): string => {
     .replace(/&#8212;|&mdash;/gi, '-')
     .replace(/&#8216;|&#8217;|&lsquo;|&rsquo;/gi, "'")
     .replace(/&#8220;|&#8221;|&ldquo;|&rdquo;/gi, '"')
-    .replace(/&#038;|&amp;/gi, '&')
+    .replace(/&#0*38;|&amp;/gi, '&')
+    .replace(/&#0*39;|&apos;/gi, "'")
     .replace(/&quot;/gi, '"')
-    .replace(/&#39;|&apos;/gi, "'")
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>')
     .replace(/&nbsp;|&#160;/gi, ' ')
     .replace(/[\u00A0\u200B\u200C\u200D\uFEFF]/g, ' ') 
     .replace(/\s+/g, ' ')
     .trim();
+};
+
+const tokenizeName = (value: string | null | undefined): string[] => {
+  if (!value) return [];
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(/\s+/).filter((token) => token.length > 2);
+};
+
+const extractRefTokens = (value: string | null | undefined): string[] => {
+  if (!value) return [];
+  const matches = value.toUpperCase().match(/[A-Z0-9]{6,}/g) || [];
+  const filtered = matches.filter((token) => /\d/.test(token));
+  return Array.from(new Set(filtered.map((token) => normalizeKey(token))));
+};
+
+const isBrandCompatible = (dbBrand: string | null | undefined, scrapedBrandKey: string) => {
+  if (!scrapedBrandKey) return true;
+  const dbKey = dbBrand ? normalizeKey(dbBrand) : '';
+  if (!dbKey) return true;
+  return dbKey === scrapedBrandKey || dbKey.includes(scrapedBrandKey) || scrapedBrandKey.includes(dbKey);
+};
+
+const isLooseNameMatch = (a: string[], b: string[]) => {
+  if (a.length === 0 || b.length === 0) return false;
+  const aSet = new Set(a);
+  let overlap = 0;
+  for (const token of b) {
+    if (aSet.has(token)) overlap++;
+  }
+  const minLen = Math.min(a.length, b.length);
+  return overlap >= 2 && overlap / minLen >= 0.6;
 };
 
 const getAttributeValue = (attributes: any[] | undefined, targets: string[]): string | null => {
@@ -65,67 +92,31 @@ const stripHtml = (value: string): string => {
   return decodeHtmlEntities(noHtml); 
 };
 
-// ==========================================
-// 🧠 2. ANG SMART MATCHER MO (STRICT SKU FOR WATCHES)
-// ==========================================
-function isSameProduct(dbProduct: any, scrapedProduct: any): boolean {
+// ORPHAN CHECKER
+function isSameProductStrict(dbProduct: any, scrapedProduct: any): boolean {
   let scrapedSku = scrapedProduct.sku;
   if (!scrapedSku) {
     scrapedSku = getAttributeValue(scrapedProduct.attributes, ['ref. no', 'ref no', 'reference', 'sku']);
   }
 
-  const dbRef = dbProduct.ref_no ? normalizeKey(dbProduct.ref_no) : null;
-  const scrapedRef = scrapedSku ? normalizeKey(scrapedSku) : null;
-
-  // Alamin kung relo ba ang pino-process natin base sa Database Category
-  const dbCat = (dbProduct.category?.name || '').toLowerCase();
-  const isWatchCategory = dbCat.includes('watch') || dbCat.includes('timepiece');
-
-  // 🔥 1. EXACT SKU / REF CHECK 🔥
-  if (dbRef && scrapedRef) {
-    if (dbRef === scrapedRef) return true;
-    
-    // 👉 STRICT WATCH RULE: Kung relo ito at parehong may SKU pero magkaiba, FAIL AGAD!
-    // Ii-skip na natin ang name check para hindi mapagkamalang pareho.
-    if (isWatchCategory) return false;
+  if (dbProduct.ref_no && scrapedSku) {
+    const dbRef = normalizeKey(dbProduct.ref_no);
+    const scrapedRef = normalizeKey(scrapedSku);
+    if (dbRef && scrapedRef && dbRef === scrapedRef) return true;
   }
 
-  // 2. NAME MATCHING FALLBACK (Kapag walang SKU yung isa, o kung hindi relo)
   const cleanDbName = decodeHtmlEntities(dbProduct.name);
   const cleanScrapedName = decodeHtmlEntities(scrapedProduct.name);
 
-  const dbNameStr = normalizeNameKey(cleanDbName) || "";
-  const listNameStr = normalizeNameKey(cleanScrapedName) || "";
+  const dbName = normalizeNameKey(cleanDbName) || "";
+  const listName = normalizeNameKey(cleanScrapedName) || "";
+  if (!dbName || !listName) return false;
 
-  // CROSS-REFERENCE CHECK: Hinahanap yung SKU sa loob ng Title
-  if (dbRef && dbRef.length > 4 && listNameStr.includes(dbRef)) return true;
-  if (scrapedRef && scrapedRef.length > 4 && dbNameStr.includes(scrapedRef)) return true;
-
-  if (dbNameStr && listNameStr) {
-    if (dbNameStr === listNameStr) return true;
-    
-    if (dbNameStr.includes(listNameStr) || listNameStr.includes(dbNameStr)) {
-      if (dbNameStr.length < 15 || listNameStr.length < 15) {
-        const lenDiff = Math.abs(dbNameStr.length - listNameStr.length);
-        if (lenDiff <= 5) return true;
-        return false;
-      }
-      return true; 
-    }
-  }
-
-  return false;
+  return dbName === listName;
 }
 
-const jewelryTypeKeywords = [
-  'ring', 'bracelet', 'cufflink', 'bridal', 'necklace', 
-  'earring', 'earrings', 'bangle', 'pendant', 'brooch', 
-  'anklet', 'chain', 'choker',
-];
-
-const watchTypeKeywords = [
-  'watch', 'watches', 'timepiece', 'timepieces', 'chronograph',
-];
+const jewelryTypeKeywords = ['ring', 'bracelet', 'cufflink', 'bridal', 'necklace', 'earring', 'earrings', 'bangle', 'pendant', 'brooch', 'anklet', 'chain', 'choker'];
+const watchTypeKeywords = ['watch', 'watches', 'timepiece', 'timepieces', 'chronograph'];
 
 const isJewelryTypeCategory = (value: string) => {
   const normalized = normalizeKey(value);
@@ -151,8 +142,12 @@ export async function POST(request: NextRequest) {
 
     console.log(`🚀 Starting SMART COMPARISON Scraper for: ${categoryToScrape.toUpperCase()}`);
 
+    const { data: brandRows, error: brandError } = await supabaseAdmin.from('brand').select('name');
+    if (brandError) throw new Error(`Brand fetch error: ${brandError.message}`);
+    const brandIndex = buildBrandIndex((brandRows || []).map((row) => row.name));
+
     // ==========================================
-    // 🗄️ 3. FETCH EXISTING DB PRODUCTS
+    // 🗄️ 2. FETCH EXISTING DB PRODUCTS (SAFE PAGINATION)
     // ==========================================
     console.log(`🔍 Fetching existing local database products...`);
     
@@ -161,6 +156,7 @@ export async function POST(request: NextRequest) {
     let step = 1000;
     let hasMoreDb = true;
 
+    // 🔥 FIX 1: PAGINATION (Para basahin niya yung libo-libong watches mo!)
     while (hasMoreDb) {
       const { data, error } = await supabaseAdmin
         .from('product')
@@ -176,37 +172,61 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 🔥 FIX 2: HIWALAY NA QUERY (Para iwas "Could not embed" Relationship Error)
     const { data: rawCategories } = await supabaseAdmin.from('category').select('id, name');
     const { data: rawBrands } = await supabaseAdmin.from('brand').select('id, name');
 
     const dbProducts = allDbProductsRaw.map(p => ({
       ...p,
-      category: {
-        name: rawCategories?.find(c => c.id === p.category_id)?.name || 'Unknown'
-      },
-      brand: {
-        name: rawBrands?.find(b => b.id === p.brand_id)?.name || 'Unknown'
-      }
+      category: { name: rawCategories?.find(c => c.id === p.category_id)?.name || 'Unknown' },
+      brand: { name: rawBrands?.find(b => b.id === p.brand_id)?.name || 'Unknown' }
     }));
+
+    // 🔥 FIX 3: DECODE DB NAMES BAGO GAWAN NG TOKENS 🔥
+    const dbIndex = dbProducts.map((product) => {
+      const decodedDbName = decodeHtmlEntities(product.name);
+      return {
+        product,
+        refKey: product.ref_no ? normalizeKey(product.ref_no) : null,
+        nameKey: normalizeNameKey(decodedDbName),
+        brandKey: product.brand?.name ? normalizeKey(product.brand.name) : '',
+        refTokens: extractRefTokens(`${product.ref_no || ''} ${decodedDbName}`),
+        nameTokens: tokenizeName(decodedDbName),
+      };
+    });
+
+    const refMap = new Map<string, typeof dbIndex[number]>();
+    const nameMap = new Map<string, typeof dbIndex[number][]>();
+    const refTokenMap = new Map<string, typeof dbIndex[number][]>();
+
+    for (const indexed of dbIndex) {
+      if (indexed.refKey && !refMap.has(indexed.refKey)) {
+        refMap.set(indexed.refKey, indexed);
+      }
+      if (indexed.nameKey) {
+        const list = nameMap.get(indexed.nameKey) || [];
+        list.push(indexed);
+        nameMap.set(indexed.nameKey, list);
+      }
+      for (const token of indexed.refTokens) {
+        const list = refTokenMap.get(token) || [];
+        list.push(indexed);
+        refTokenMap.set(token, list);
+      }
+    }
 
     const relevantDbProducts = categoryToScrape === 'all'
       ? dbProducts
       : dbProducts.filter(p => {
           const catName = p.category?.name?.toLowerCase() || '';
-          if (categoryToScrape === 'jewelry') {
-            return catName.includes('jewel') || jewelryTypeKeywords.some((keyword) => catName.includes(keyword));
-          }
-          if (categoryToScrape === 'watches') {
-            return catName.includes('watch') || catName.includes('timepiece');
-          }
-          if (categoryToScrape === 'bags') {
-            return catName.includes('bag') || catName.includes('handbag') || catName.includes('purse') || catName.includes('clutch');
-          }
+          if (categoryToScrape === 'jewelry') return catName.includes('jewel') || jewelryTypeKeywords.some((keyword) => catName.includes(keyword));
+          if (categoryToScrape === 'watches') return catName.includes('watch') || catName.includes('timepiece');
+          if (categoryToScrape === 'bags') return catName.includes('bag') || catName.includes('handbag') || catName.includes('purse') || catName.includes('clutch');
           return catName.includes(categoryToScrape);
         });
 
     // ==========================================
-    // 🌐 4. FETCH FROM REFERENCE SITE
+    // 🌐 3. FETCH FROM REFERENCE SITE
     // ==========================================
     let categoryIdQuery = '';
     if (categoryToScrape !== 'all') {
@@ -245,35 +265,33 @@ export async function POST(request: NextRequest) {
     }
 
     // ==========================================
-    // ⚖️ 5. THE COMPARISON & EXTRACTION LOGIC
+    // ⚖️ 4. THE COMPARISON & EXTRACTION LOGIC
     // ==========================================
     const stagingPayload: any[] = [];
     let newCount = 0, updateCount = 0, orphanCount = 0;
 
     for (const scraped of allScrapedProducts) {
-      
-      scraped.name = decodeHtmlEntities(scraped.name);
-      
-      const matchingDb = relevantDbProducts.find(dbP => isSameProduct(dbP, scraped));
       const finalPrice = parseFloat(scraped.prices?.price || '0');
 
       let catName = categoryToScrape === 'all' ? 'Unknown' : categoryToScrape;
       
-      const categoryNames = scraped.categories?.map((c: any) => c.name).join(' ') || '';
-      const attributeNames =
-        scraped.attributes
-          ?.map((a: any) => `${a.name} ${(a.terms || []).map((t: any) => t.name).join(' ')}`)
-          .join(' ') || '';
-          
-      const searchSpace = `${scraped.name} ${categoryNames} ${attributeNames}`.toLowerCase();
+      const categoryNames = scraped.categories?.map((c: any) => decodeHtmlEntities(c.name || '')).join(' ') || '';
+      const attributeNames = scraped.attributes?.map((a: any) => {
+            const name = decodeHtmlEntities(a.name || '');
+            const terms = (a.terms || []).map((t: any) => decodeHtmlEntities(t.name || '')).join(' ');
+            return `${name} ${terms}`.trim();
+          }).join(' ') || '';
 
-      if (searchSpace.includes('watch') || searchSpace.includes('timepiece') || searchSpace.includes('chronograph')) catName = 'watches';
-      else if (searchSpace.includes('bag') || searchSpace.includes('tote') || searchSpace.includes('clutch') || searchSpace.includes('handbag') || searchSpace.includes('purse')) catName = 'bags';
-      else if (searchSpace.includes('ring')) catName = 'RING';
+      const decodedName = decodeHtmlEntities(scraped.name || '');
+      const searchSpace = `${decodedName} ${categoryNames} ${attributeNames}`.toLowerCase();
+      
+      if (searchSpace.includes('ring')) catName = 'RING';
       else if (searchSpace.includes('bracelet')) catName = 'BRACELET';
       else if (searchSpace.includes('cufflink')) catName = 'CUFFLINK';
       else if (searchSpace.includes('bridal') || searchSpace.includes('necklace')) catName = 'BRIDAL';
       else if (searchSpace.includes('earring') || searchSpace.includes('earrings')) catName = 'EARRINGS';
+      else if (searchSpace.includes('watch') || searchSpace.includes('timepiece')) catName = 'watches';
+      else if (searchSpace.includes('bag') || searchSpace.includes('tote') || searchSpace.includes('clutch') || searchSpace.includes('handbag')) catName = 'bags';
 
       const rawDescription = scraped.short_description || scraped.description || null;
       const description = rawDescription ? normalizeTextValue(stripHtml(rawDescription)) : null;
@@ -283,58 +301,95 @@ export async function POST(request: NextRequest) {
         const categoryLabels = scraped.categories?.map((c: any) => `${c?.name || ''}`.toLowerCase()) || [];
         const hasMen = categoryLabels.some((label) => label.includes('men'));
         const hasWomen = categoryLabels.some((label) => label.includes('women') || label.includes('ladies'));
-        if (hasMen && hasWomen) {
-          gender = 'Unisex';
-        } else if (hasMen) {
-          gender = 'Male';
-        } else if (hasWomen) {
-          gender = 'Female';
-        }
+        gender = (hasMen && hasWomen) ? 'Unisex' : (hasMen ? 'Male' : (hasWomen ? 'Female' : null));
       }
 
       let brandName = 'Unbranded';
-      const attrBrand = scraped.attributes?.find((a: any) => a.name.toLowerCase() === 'brand')?.terms?.[0]?.name;
+      const attrBrandRaw = scraped.attributes?.find((a: any) => a.name.toLowerCase() === 'brand')?.terms?.[0]?.name;
+      const attrBrand = attrBrandRaw ? decodeHtmlEntities(attrBrandRaw) : null;
       
       if (attrBrand) {
-        brandName = decodeHtmlEntities(attrBrand); 
+        brandName = attrBrand;
       } else {
-        const genericCats = new Set([
-          'bags', 'watches', 'jewelry', 'jewellery', 'accessories',
-          'men', 'women', 'mens', 'womens', 'ladies', 'uncategorized',
-          'paylater', 'pay-later', 'pay later'
-        ]);
+        const genericCats = new Set(['bags', 'watches', 'jewelry', 'jewellery', 'accessories', 'men', 'women', 'mens', 'womens', 'ladies', 'uncategorized']);
         const normalizedCatName = normalizeKey(catName);
-        const isJewelryProduct =
-          normalizedCatName === 'jewelry' ||
-          normalizedCatName === 'jewellery' ||
-          jewelryTypeKeywords.includes(normalizedCatName);
+        const isJewelryProduct = normalizedCatName === 'jewelry' || normalizedCatName === 'jewellery' || jewelryTypeKeywords.includes(normalizedCatName);
 
         const brandCategory = scraped.categories?.find((c: any) => {
-          const name = c?.name || '';
+          const name = decodeHtmlEntities(c?.name || '');
           const normalized = normalizeKey(name);
-          if (!normalized) return false;
-          if (genericCats.has(normalized)) return false;
-          if (normalized.includes('paylater')) return false; 
-          if (normalizedCatName && normalized === normalizedCatName) return false;
+          if (!normalized || genericCats.has(normalized) || normalized.includes('paylater') || (normalizedCatName && normalized === normalizedCatName)) return false;
           if (isJewelryProduct && isJewelryTypeCategory(name)) return false;
           if (isWatchTypeCategory(name)) return false;
           return true;
         });
-        
-        if (brandCategory) {
-          brandName = decodeHtmlEntities(brandCategory.name);
-        } else {
-          brandName = scraped.name.split(' ')[0];
+        brandName = brandCategory ? decodeHtmlEntities(brandCategory.name || '') : scraped.name.split(' ')[0];
+      }
+
+      const matchedBrand = matchBrandFromCandidates(brandIndex, [attrBrand, brandName, decodedName, categoryNames, attributeNames]);
+      if (matchedBrand) brandName = matchedBrand;
+      if (normalizeKey(brandName).includes('paylater')) brandName = matchedBrand || 'Unbranded';
+
+      let scrapedSku = scraped.sku;
+      if (!scrapedSku) {
+        scrapedSku = getAttributeValue(scraped.attributes, ['ref. no', 'ref no', 'reference', 'sku']);
+      }
+      
+      const scrapedBrandKey = normalizeKey(brandName);
+      const scrapedRefKey = scrapedSku ? normalizeKey(scrapedSku) : null;
+      const scrapedNameKey = normalizeNameKey(decodedName);
+      const scrapedRefTokens = extractRefTokens(`${scrapedSku || ''} ${decodedName}`);
+      const scrapedNameTokens = tokenizeName(decodedName);
+
+      let matchingDb: typeof dbIndex[number] | null = null;
+      let matchConfidence: 'ref' | 'ref_token' | 'name_exact' | 'name_loose' | null = null;
+
+      if (scrapedRefKey && refMap.has(scrapedRefKey)) {
+        matchingDb = refMap.get(scrapedRefKey) || null;
+        matchConfidence = matchingDb ? 'ref' : null;
+      }
+
+      if (!matchingDb) {
+        for (const token of scrapedRefTokens) {
+          const candidates = refTokenMap.get(token);
+          if (!candidates || candidates.length === 0) continue;
+          const preferred = candidates.find((candidate) => isBrandCompatible(candidate.product.brand?.name, scrapedBrandKey));
+          matchingDb = preferred || candidates[0];
+          matchConfidence = matchingDb ? 'ref_token' : null;
+          if (matchingDb) break;
         }
       }
 
-      if (normalizeKey(brandName).includes('paylater')) {
-         brandName = scraped.name.split(' ')[0];
+      if (!matchingDb && scrapedNameKey) {
+        const candidates = nameMap.get(scrapedNameKey) || [];
+        if (candidates.length > 0) {
+          const preferred = candidates.find((candidate) => isBrandCompatible(candidate.product.brand?.name, scrapedBrandKey));
+          matchingDb = preferred || candidates[0];
+          matchConfidence = matchingDb ? 'name_exact' : null;
+        }
+      }
+
+      if (!matchingDb) {
+        const brandCandidates = scrapedBrandKey ? dbIndex.filter((candidate) => isBrandCompatible(candidate.product.brand?.name, scrapedBrandKey)) : dbIndex;
+        const loose = brandCandidates.find((candidate) => isLooseNameMatch(scrapedNameTokens, candidate.nameTokens));
+        if (loose) {
+          matchingDb = loose;
+          matchConfidence = 'name_loose';
+        }
+      }
+
+      // 🔥 FIX 4: STRICT WATCH CHECKER 🔥
+      // Kapag sinabing match pero relo 'to, tapos MAY SKU yung DB mo at Scraped item pero MAGKAIBA Sila = CANCEL MATCH! (Para iwas overwrite)
+      if (matchingDb && catName === 'watches') {
+        const dbRefKey = matchingDb.product.ref_no ? normalizeKey(matchingDb.product.ref_no) : null;
+        if (dbRefKey && scrapedRefKey && dbRefKey !== scrapedRefKey) {
+          matchingDb = null;
+        }
       }
 
       const baseStagingData = {
-        scraped_ref_no: scraped.sku || `ORPHAN-${scraped.id}`, 
-        scraped_name: scraped.name,
+        scraped_ref_no: scrapedSku || `ORPHAN-${scraped.id}`, 
+        scraped_name: decodedName,
         scraped_price: finalPrice,
         raw_brand_name: brandName,    
         raw_category_name: catName,   
@@ -350,25 +405,28 @@ export async function POST(request: NextRequest) {
         stagingPayload.push({ ...baseStagingData, sync_status: 'pending' });
         newCount++;
       } else {
-        const dbPrice = matchingDb.sale_price !== null ? matchingDb.sale_price : matchingDb.price;
+        const dbProduct = matchingDb.product;
+        const dbPrice = dbProduct.sale_price !== null ? dbProduct.sale_price : dbProduct.price;
         if (Math.abs(dbPrice - finalPrice) > 0.01) {
           stagingPayload.push({
             ...baseStagingData,
-            scraped_ref_no: matchingDb.ref_no || baseStagingData.scraped_ref_no, 
-            sync_status: 'pending'
+            scraped_ref_no: dbProduct.ref_no || baseStagingData.scraped_ref_no,
+            sync_status: 'pending',
+            error_message: matchConfidence === 'name_loose' ? 'Possible match (name similarity)' : null
           });
           updateCount++;
         }
       }
     }
 
+    // B. Check for Orphans
     for (const dbProduct of relevantDbProducts) {
-      const isStillInReference = allScrapedProducts.some(scraped => isSameProduct(dbProduct, scraped));
+      const isStillInReference = allScrapedProducts.some(scraped => isSameProductStrict(dbProduct, scraped));
       
       if (!isStillInReference) {
         stagingPayload.push({
           scraped_ref_no: dbProduct.ref_no || `DB-ORPHAN-${dbProduct.id}`,
-          scraped_name: decodeHtmlEntities(dbProduct.name), 
+          scraped_name: decodeHtmlEntities(dbProduct.name),
           scraped_price: null, 
           raw_brand_name: dbProduct.brand?.name || 'Unknown',
           raw_category_name: dbProduct.category?.name || 'Unknown',
@@ -382,7 +440,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ==========================================
-    // 💾 6. SAVE TO STAGING TABLE
+    // 💾 5. SAVE TO STAGING TABLE
     // ==========================================
     if (stagingPayload.length > 0) {
       const uniquePayloadMap = new Map();

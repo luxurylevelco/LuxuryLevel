@@ -1,1 +1,232 @@
-[]
+[
+  {
+    "ref_no": "04705-WG",
+    "name": "Messika Move Uno 04705-WG White Gold Diamond Ring",
+    "db_price": 5500,
+    "reference_price": 5500,
+    "product_url": "https://luxurysouq.com/messika-move-uno-04705-wg/",
+    "category_name": "RING",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "03998-WG",
+    "name": "Messika Move Classic 03998-WG White Gold Diamond Ring",
+    "db_price": 8300,
+    "reference_price": 8300,
+    "product_url": "https://luxurysouq.com/messika-move-classic-03998-wg/",
+    "category_name": "RING",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "03998-PG",
+    "name": "Messika Move Classic 03998-PG-55 Pink Gold Diamond Ring",
+    "db_price": 8900,
+    "reference_price": 8900,
+    "product_url": "https://luxurysouq.com/messika-move-classic-03998-pg-55/",
+    "category_name": "RING",
+    "price_match": true,
+    "match_source": "name"
+  },
+  {
+    "ref_no": "06516-YG-55",
+    "name": "Messika Move Romane 06516-YG-55 18Karat Yellow Gold Diamond Ring",
+    "db_price": 11000,
+    "reference_price": 11000,
+    "product_url": "https://luxurysouq.com/messika-move-romane-06516-yg-55/",
+    "category_name": "RING",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "10102-YG",
+    "name": "Messika Move Noa Pave 10102-YG Yellow Gold Diamond Ring",
+    "db_price": 16000,
+    "reference_price": 16000,
+    "product_url": "https://luxurysouq.com/messika-move-noa-pave-10102-yg/",
+    "category_name": "RING",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "06516-PG",
+    "name": "Messika Move Romane 06516-PG Pink Gold Diamond Ring",
+    "db_price": 11500,
+    "reference_price": 11500,
+    "product_url": "https://luxurysouq.com/messika-move-romane-06516-pg/",
+    "category_name": "RING",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "10102-PG-52",
+    "name": "Messika Move Noa Gm 10102-PG-52 Pave Pink Gold Diamond Ring",
+    "db_price": 17300,
+    "reference_price": 17300,
+    "product_url": "https://luxurysouq.com/messika-move-noa-gm-10102-pg-52/",
+    "category_name": "RING",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "BM0645.BAO.US.N024",
+    "name": "Audemars Piguet Royal Oak 18K Yellow Gold Octagonal Cufflinks",
+    "db_price": 9248,
+    "reference_price": 9248,
+    "product_url": "https://luxurysouq.com/audemars-piguet-cufflinks-royal-oak-bm0645baousn024/",
+    "category_name": "CUFFLINK",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "BM0678.ORU.US.N000",
+    "name": "Audemars Piguet Millenary Onyx Oval Rose Gold Cufflinks",
+    "db_price": 14643,
+    "reference_price": 14643,
+    "product_url": "https://luxurysouq.com/audemars-piguet-cufflinks-millenary-bm0678oruusn000/",
+    "category_name": "CUFFLINK",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "BM0678.BCU.US.N015",
+    "name": "Audemars Piguet Millenary 18 Karat White Gold Onyx Oval Cufflinks",
+    "db_price": 15414,
+    "reference_price": 15414,
+    "product_url": "https://luxurysouq.com/audemars-piguet-cufflinks-millenary-bm0678bcuusn015/",
+    "category_name": "CUFFLINK",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "BM0733.BCU.US.Z015",
+    "name": "Audemars Piguet White Gold Cufflinks With Diamonds And Black Onyx",
+    "db_price": 37918,
+    "reference_price": 37918,
+    "product_url": "https://luxurysouq.com/audemars-piguet-cufflinks-royal-oak-bm0733bcuusz015/",
+    "category_name": "CUFFLINK",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "BM0724.OKU.05.N029",
+    "name": "Audemars Piguet Cufflinks Royal Oak Offshore Mens",
+    "db_price": 16647,
+    "reference_price": 16647,
+    "product_url": "https://luxurysouq.com/audemars-piguet-cufflinks-royal-oak-bm0724oku05n029/",
+    "category_name": "CUFFLINK",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "07535-RG",
+    "name": "Messika My First Diamond Pavé 07535-RG Rose Gold Diamond Bracelet",
+    "db_price": 8700,
+    "reference_price": 8700,
+    "product_url": "https://luxurysouq.com/messika-my-first-diamond-pave-07535-rg/",
+    "category_name": "BRACELET",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "07513-PG",
+    "name": "Messika Pink Gold Diamond Bracelet My First Diamond",
+    "db_price": 5500,
+    "reference_price": 5500,
+    "product_url": "https://luxurysouq.com/messika-pink-gold-diamond-bracelet-my-first-diamond/",
+    "category_name": "BRACELET",
+    "price_match": true,
+    "match_source": "name"
+  },
+  {
+    "ref_no": "04068-RG",
+    "name": "Messika Move Thin 04068-RG Rose Gold Diamond Bracelet",
+    "db_price": 15000,
+    "reference_price": 15000,
+    "product_url": "https://luxurysouq.com/messika-move-thin-04068-rg/",
+    "category_name": "BRACELET",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "04068-WG",
+    "name": "Messika Move Thin 04068-WG White Gold Diamond Bracelet",
+    "db_price": 15000,
+    "reference_price": 15000,
+    "product_url": "https://luxurysouq.com/messika-move-thin-04068-wg/",
+    "category_name": "BRACELET",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "04068-YG",
+    "name": "Messika Move Thin 04068-YG Yellow Gold Diamond Bracelet",
+    "db_price": 15000,
+    "reference_price": 15000,
+    "product_url": "https://luxurysouq.com/messika-move-thin-04068-yg/",
+    "category_name": "BRACELET",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "05032-PG",
+    "name": "Messika Move Pave Thin 05032-PG Rose Gold Diamond Bracelet",
+    "db_price": 17000,
+    "reference_price": 17000,
+    "product_url": "https://luxurysouq.com/messika-move-pave-thin-05032-pg/",
+    "category_name": "BRACELET",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "10092-WG",
+    "name": "Messika Move Noa Bangle 10092-WG White Gold Diamond Bracelet",
+    "db_price": 18000,
+    "reference_price": 18000,
+    "product_url": "https://luxurysouq.com/messika-move-noa-bangle-10092-wg/",
+    "category_name": "BRACELET",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "06371-YG",
+    "name": "Messika Move Noa Pave 06371-YG Yellow Gold Diamond Bracelet",
+    "db_price": 42000,
+    "reference_price": 42000,
+    "product_url": "https://luxurysouq.com/messika-move-noa-pave-06371-yg/",
+    "category_name": "BRACELET",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "06747-WG",
+    "name": "Messika Move Romane 06747-Wg White Gold And Diamond Bracelet",
+    "db_price": 63000,
+    "reference_price": 63000,
+    "product_url": "https://luxurysouq.com/messika-move-romane-06747-wg/",
+    "category_name": "BRACELET",
+    "price_match": true,
+    "match_source": "ref"
+  },
+  {
+    "ref_no": "06368-PG-M",
+    "name": "Messika Move Noa 06368-PG-M Pink Gold Bracelet",
+    "db_price": 24000,
+    "reference_price": 24000,
+    "product_url": "https://luxurysouq.com/messika-move-noa-06368-pg-m/",
+    "category_name": "BRACELET",
+    "price_match": true,
+    "match_source": "name"
+  },
+  {
+    "ref_no": "356189",
+    "name": "Bulgari bracelet 356189 18kt Rose Gold With Onyx And Pave Diamonds",
+    "db_price": 8500,
+    "reference_price": 8500,
+    "product_url": "https://luxurysouq.com/bvlgari-bracelet-356189/",
+    "category_name": "BRACELET",
+    "price_match": true,
+    "match_source": "ref"
+  }
+]

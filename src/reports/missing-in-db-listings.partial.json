@@ -1,10 +1,498 @@
 [
   {
-    "product_url": "https://luxurysouq.com/hermes-birkin-30-black-shiny-porosus/",
-    "scraped_name": "Hermes Birkin 30 Black Shiny Porosus",
-    "normalized_ref_no": "BIRKIN30BLACKSHINY",
-    "raw_category_name": "bags",
-    "scraped_price": null,
-    "currency": null
+    "product_url": "https://luxurysouq.com/rainbow-sapphire-princess-ring-4-89-cts-hrd-g-h-si/",
+    "scraped_name": "Rainbow Sapphire Princess Ring 4 89 Cts Hrd G H Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 16700,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/50-ptr-ring-1-13-cts-hrd-f-g-si/",
+    "scraped_name": "50 Ptr Ring 1 13 Cts Hrd F G Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 11745,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/30-ptr-rd-ring-hrd-e-g-vvs-si/",
+    "scraped_name": "30 Ptr Rd Ring Hrd E G Vvs Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 7340,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/queen-of-vines-diamond-ring-1-48-cts-hrd-f-g-si/",
+    "scraped_name": "Queen Of Vines Diamond Ring 1 48 Cts Hrd F G Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 12110,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/rainbow-sapphire-octagonal-ring-3-09-cts-hrd-g-h-si/",
+    "scraped_name": "Rainbow Sapphire Octagonal Ring 3 09 Cts Hrd G H Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 9540,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/ring-0-93-cts-hrd-e-f-vs-si/",
+    "scraped_name": "Ring 0 93 Cts Hrd E F Vs Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 6600,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/rd-eternity-band-30-pointer-4-91-cts-hrd-e-f-vvs-vs91930rtotal-wt-5-52gm/",
+    "scraped_name": "Rd Eternity Band 30 Pointer 4 91 Cts Hrd E F Vvs Vs91930rtotal Wt 5 52gm",
+    "normalized_ref_no": "VS91930RTOTALWT",
+    "raw_category_name": "jewellery",
+    "scraped_price": 25690,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/rd-eternity-band-24-pointer-4-09cts-hrd-e-f-vvs-vs/",
+    "scraped_name": "Rd Eternity Band 24 Pointer 4 09cts Hrd E F Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 23855,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/rd-eternity-band-15-pointer-2-85cts-hrd-f-g-vvs-vs/",
+    "scraped_name": "Rd Eternity Band 15 Pointer 2 85cts Hrd F G Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 15780,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/rd-eternity-band-10-pointer-2-20cts-hrd-f-g-vvs-vs/",
+    "scraped_name": "Rd Eternity Band 10 Pointer 2 20cts Hrd F G Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 12110,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/rd-eternity-band-20-pointer-3-62cts-hrd-f-g-vvs-vs/",
+    "scraped_name": "Rd Eternity Band 20 Pointer 3 62cts Hrd F G Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 20185,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/emerald-eternity-band-14-pointer-3-68cts-hrd-e-gvvs50514rtotal-wt-4-62gm/",
+    "scraped_name": "Emerald Eternity Band 14 Pointer 3 68cts Hrd E Gvvs50514rtotal Wt 4 62gm",
+    "normalized_ref_no": "GVVS50514RTOTALWT",
+    "raw_category_name": "jewellery",
+    "scraped_price": 18350,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/pear-eternity-band-32-pointer-3-50-cts-hrd-i-j-vvs-vs/",
+    "scraped_name": "Pear Eternity Band 32 Pointer 3 50 Cts Hrd I J Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 19450,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/2-ct-ring-2-20-cts-gia-g-si2-r20r/",
+    "scraped_name": "2 Ct Ring 2 20 Cts Gia G Si2 R20r",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 54315,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/1-ct-ring-1-08-cts-hrd-f-g-si-10001r/",
+    "scraped_name": "1 Ct Ring 1 08 Cts Hrd F G Si 10001r",
+    "normalized_ref_no": "10001R",
+    "raw_category_name": "jewellery",
+    "scraped_price": 19450,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-marquise-ring-hrd-f-g-vs/",
+    "scraped_name": "Round Marquise Ring Hrd F G Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 11010,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/pear-round-ring-1-00-cts1048rhrd-f-g-vs-si/",
+    "scraped_name": "Pear Round Ring 1 00 Cts1048rhrd F G Vs Si",
+    "normalized_ref_no": "CTS1048RHRD",
+    "raw_category_name": "jewellery",
+    "scraped_price": 9910,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/ring-1-11-cts-hrd-f-g-vs/",
+    "scraped_name": "Ring 1 11 Cts Hrd F G Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 10645,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/1-51-ct-heart-ring-1-73-ctsr24rtotal-wt-2-67gm/",
+    "scraped_name": "1 51 Ct Heart Ring 1 73 Ctsr24rtotal Wt 2 67gm",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 38170,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/pear-round-ring-hrd-e-f-vs/",
+    "scraped_name": "Pear Round Ring Hrd E F Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 8450,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-ring-hrd-e-f-vvs-vs/",
+    "scraped_name": "Round Ring Hrd E F Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 16880,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-ring-hrd-f-g-vvs-vs/",
+    "scraped_name": "Round Ring Hrd F G Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 13945,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-marquise-pear-ring-f-g-vvs-vs/",
+    "scraped_name": "Round Marquise Pear Ring F G Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 9910,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-pear-ring-hrd-f-g-vvs-vs/",
+    "scraped_name": "Round Pear Ring Hrd F G Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 14680,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/ring-0-86cts-hrd-e-f-si/",
+    "scraped_name": "Ring 0 86cts Hrd E F Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 9175,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/ring-3-pointer-0-7cts-hrd-e-f-si/",
+    "scraped_name": "Ring 3 Pointer 0 7cts Hrd E F Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 8075,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/ring-0-49cts-hrd-e-f-si/",
+    "scraped_name": "Ring 0 49cts Hrd E F Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 7340,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/ring-0-48cts-hrd-e-f-vs-si/",
+    "scraped_name": "Ring 0 48cts Hrd E F Vs Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 7340,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/ring-4-pointer-0-41cts-hrd-e-f-vs-si/",
+    "scraped_name": "Ring 4 Pointer 0 41cts Hrd E F Vs Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 6240,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/ring-1-05cts-hrd-e-f-vvs-vs/",
+    "scraped_name": "Ring 1 05cts Hrd E F Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 13580,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/cocktail-illusion-diamond-ring-none-0-73cts-hrd-e-f-vvs-vs/",
+    "scraped_name": "Cocktail Illusion Diamond Ring None 0 73cts Hrd E F Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 11380,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/embrace-emerald-diamond-ring-hrd-f-g-vs-si737r/",
+    "scraped_name": "Embrace Emerald Diamond Ring Hrd F G Vs Si737r",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 33400,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/cushion-flora-ring-4-81cts-hrd-e-j-vvs-si/",
+    "scraped_name": "Cushion Flora Ring 4 81cts Hrd E J Vvs Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 33765,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/serenity-ring-2-34cts-hrd-d-f-vvs-vs/",
+    "scraped_name": "Serenity Ring 2 34cts Hrd D F Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 16880,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-ring-hrd-e-f-vs-0-62/",
+    "scraped_name": "Round Ring Hrd E F Vs 0 62",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 6975,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-marquise-ring-hrd-f-g-vvs-vs/",
+    "scraped_name": "Round Marquise Ring Hrd F G Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 12480,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-ring-hrd-e-f-vs/",
+    "scraped_name": "Round Ring Hrd E F Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 13210,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-pear-cs-ring-2-10-cts/",
+    "scraped_name": "Round Pear Cs Ring 2 10 Cts",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 9540,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-oval-ring-hrd-e-f-vs-2/",
+    "scraped_name": "Round Oval Ring Hrd E F Vs 2",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 11380,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-pear-cs-ring-2-37-ctshrd-g-h-vs-si/",
+    "scraped_name": "Round Pear Cs Ring 2 37 Ctshrd G H Vs Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 12845,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-ring-hrd-e-f-vs-0-65-cts/",
+    "scraped_name": "Round Ring Hrd E F Vs 0 65 Cts",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 9910,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/mq-ring-3-18-cts-hrd-e-f-vvs-vs/",
+    "scraped_name": "Mq Ring 3 18 Cts Hrd E F Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 21285,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/pear-round-ring-1-65-cts/",
+    "scraped_name": "Pear Round Ring 1 65 Cts",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 9540,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-marquise-ring-hrd-e-f-vs/",
+    "scraped_name": "Round Marquise Ring Hrd E F Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 12110,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-oval-marquise-ring-hrd-f-g-vs/",
+    "scraped_name": "Round Oval Marquise Ring Hrd F G Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 16880,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-pear-ring-hrd-e-f-vvs-vs/",
+    "scraped_name": "Round Pear Ring Hrd E F Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 13580,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/pear-ring-hrd-e-f-vvs-1-72-cts/",
+    "scraped_name": "Pear Ring Hrd E F Vvs 1 72 Cts",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 12845,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-oval-ring-hrd-e-f-vs/",
+    "scraped_name": "Round Oval Ring Hrd E F Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 12845,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/pink-tourmaline-octagonal-ring-f-g-vs/",
+    "scraped_name": "Pink Tourmaline Octagonal Ring F G Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 13580,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/ring-1-16-cts-hrd-f-g-vs/",
+    "scraped_name": "Ring 1 16 Cts Hrd F G Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 12480,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-ring-hrd-e-f-vs-si/",
+    "scraped_name": "Round Ring Hrd E F Vs Si",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 7340,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/ring-0-60-cts-hrd-f-g-vvs-vs/",
+    "scraped_name": "Ring 0 60 Cts Hrd F G Vvs Vs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 8440,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/3-ct-pear-ring-3-51-cts/",
+    "scraped_name": "3 Ct Pear Ring 3 51 Cts",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 59455,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/pear-marquise-round-ring-2-43/",
+    "scraped_name": "Pear Marquise Round Ring 2 43",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 17250,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/ring-0-89-cts-hrd-e-f-vsa06rs/",
+    "scraped_name": "Ring 0 89 Cts Hrd E F Vsa06rs",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 8440,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/round-pear-cs-ring-2-16-cts/",
+    "scraped_name": "Round Pear Cs Ring 2 16 Cts",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 14315,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/bvlgari-double-faced-353056-br858008/",
+    "scraped_name": "Bvlgari Double Faced 353056 Br858008",
+    "normalized_ref_no": "BR858008",
+    "raw_category_name": "jewellery",
+    "scraped_price": 6000,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/bvlgari-serpenti-viper-356554-cl858712/",
+    "scraped_name": "Bvlgari Serpenti Viper 356554 Cl858712",
+    "normalized_ref_no": "CL858712",
+    "raw_category_name": "jewellery",
+    "scraped_price": 11970,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/bvlgari-divas-dream-necklace-in-18kt-yellow-gold-with-diamond-and-mother-of-pearl-element/",
+    "scraped_name": "Bvlgari Divas Dream Necklace In 18kt Yellow Gold With Diamond And Mother Of Pearl Element",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 5999,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/bvlgari-divas-dream-earrings-in-18kt-rose-gold-set-with-mother-of-pearl-and-pave-diamonds/",
+    "scraped_name": "Bvlgari Divas Dream Earrings In 18kt Rose Gold Set With Mother Of Pearl And Pave Diamonds",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 6999,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/bvlgari-divas-dream-earrings-in-18kt-yellow-gold-set-with-malachite-and-round-brilliant-cut-diamonds/",
+    "scraped_name": "Bvlgari Divas Dream Earrings In 18kt Yellow Gold Set With Malachite And Round Brilliant Cut Diamonds",
+    "normalized_ref_no": null,
+    "raw_category_name": "jewellery",
+    "scraped_price": 8999,
+    "currency": "AED"
+  },
+  {
+    "product_url": "https://luxurysouq.com/bvlgari-bvlgari-gelati-an858657/",
+    "scraped_name": "Bvlgari Bvlgari Gelati An858657",
+    "normalized_ref_no": "AN858657",
+    "raw_category_name": "jewellery",
+    "scraped_price": 6260,
+    "currency": "AED"
   }
 ]

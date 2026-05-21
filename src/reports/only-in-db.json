@@ -1,11 +1,112 @@
 [
   {
-    "ref_no": "test",
-    "normalized_ref_no": "TEST",
-    "name": "Test Product",
-    "category_name": "bags",
+    "ref_no": "04705-YG",
+    "normalized_ref_no": "04705YG",
+    "name": "Messika Move Uno 04705-YG Yellow Gold Diamond Ring",
+    "category_name": "RING",
+    "brand_name": "MESSIKA",
     "product_url": null,
-    "price": 150,
+    "price": 5500,
+    "sale_price": null
+  },
+  {
+    "ref_no": "10102-WG-53",
+    "normalized_ref_no": "10102WG53",
+    "name": "Messika Paris Move Noa Pave 10102-WG-53 18Ct White Gold Diamond Ring",
+    "category_name": "RING",
+    "brand_name": "MESSIKA",
+    "product_url": null,
+    "price": 16000,
+    "sale_price": null
+  },
+  {
+    "ref_no": "356445",
+    "normalized_ref_no": "356445",
+    "name": "Bulgari Divas Dream 356445 AN858645 18K RG & Pave Diamonds Ring",
+    "category_name": "RING",
+    "brand_name": "BULGARI",
+    "product_url": null,
+    "price": 6400,
+    "sale_price": null
+  },
+  {
+    "ref_no": "356754",
+    "normalized_ref_no": "356754",
+    "name": "Bulgari Serpenti 356754 AN858752 18K Pave Diamonds Ring",
+    "category_name": "RING",
+    "brand_name": "BULGARI",
+    "product_url": null,
+    "price": 9999,
+    "sale_price": null
+  },
+  {
+    "ref_no": "356630",
+    "normalized_ref_no": "356630",
+    "name": "Bulgari Serpenti Viper 356630 AN858711 18k Rose Gold Onyx Diamond Pave",
+    "category_name": "RING",
+    "brand_name": "BULGARI",
+    "product_url": null,
+    "price": 12640,
+    "sale_price": null
+  },
+  {
+    "ref_no": "356550",
+    "normalized_ref_no": "356550",
+    "name": "Bulgari Serpenti Viper 356550 AN858710 18k Onyx And Pave Diamonds Ring",
+    "category_name": "RING",
+    "brand_name": "BULGARI",
+    "product_url": null,
+    "price": 9550,
+    "sale_price": null
+  },
+  {
+    "ref_no": "BM0737.ORO.US.N000",
+    "normalized_ref_no": "BM0737OROUSN000",
+    "name": "Audemars Piguet Rose Gold Cufflinks With Blue Tapisserie Pattern",
+    "category_name": "CUFFLINK",
+    "brand_name": "AUDEMARS PIGUET",
+    "product_url": null,
+    "price": 16031,
+    "sale_price": null
+  },
+  {
+    "ref_no": "356521",
+    "normalized_ref_no": "356521",
+    "name": "Bulgari Serpenti Viper 356521 BR858709 18k Malachite Inserts Bracelet",
+    "category_name": "BRACELET",
+    "brand_name": "BULGARI",
+    "product_url": null,
+    "price": 15540,
+    "sale_price": null
+  },
+  {
+    "ref_no": "352606",
+    "normalized_ref_no": "352606",
+    "name": "Bulgari Dream 352606 MOP And Malachite Green Bracelet",
+    "category_name": "BRACELET",
+    "brand_name": "BULGARI",
+    "product_url": null,
+    "price": 13920,
+    "sale_price": null
+  },
+  {
+    "ref_no": "355274",
+    "normalized_ref_no": "355274",
+    "name": "Bulgari Flip 355274 Mop Onyx And Malachite",
+    "category_name": "BRACELET",
+    "brand_name": "BULGARI",
+    "product_url": null,
+    "price": 14999,
+    "sale_price": null
+  },
+  {
+    "ref_no": "354734",
+    "normalized_ref_no": "354734",
+    "name": "Bulgari Flip 354734 Carnelian And Mop",
+    "category_name": "BRACELET",
+    "brand_name": "BULGARI",
+    "product_url": null,
+    "price": 14999,
     "sale_price": null
   }
 ]
