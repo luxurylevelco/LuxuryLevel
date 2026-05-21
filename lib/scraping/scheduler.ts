@@ -8,9 +8,8 @@ import { createClient } from '@supabase/supabase-js';
 import { CronJob } from 'cron';
 import { scraper } from './scraper';
 import { compareProducts } from './compare-products';
-import { Database } from '@/lib/types';
 
-const supabase = createClient<Database>(
+const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );

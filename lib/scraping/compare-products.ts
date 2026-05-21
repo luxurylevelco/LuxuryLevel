@@ -5,9 +5,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { ReferenceProductData, ProductCategory, SyncRunStats } from './types';
-import { Database } from '@/lib/types';
 
-const supabase = createClient<Database>(
+
+const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
@@ -85,7 +85,7 @@ export async function compareProducts(
     const localProductsByBrand = new Map<string, LocalProduct[]>();
 
     // Index local products by normalized name
-    localProducts?.forEach((product: LocalProduct) => {
+    localProducts?.forEach((product: any) => {
       const normalizedName = normalizeProductName(product.name);
       localProductsMap.set(normalizedName, product);
 

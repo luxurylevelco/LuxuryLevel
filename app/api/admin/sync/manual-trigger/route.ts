@@ -26,7 +26,8 @@ export async function POST(request: NextRequest) {
     console.log(`[API] Manual sync triggered by admin: ${adminId}`);
 
     // Execute sync process
-    const syncRunId = await executeSyncProcess(adminId);
+    // Bagong code:
+const syncRunId = await executeSyncProcess((adminId as any).id || (adminId as unknown as string));
 
     return NextResponse.json(
       {

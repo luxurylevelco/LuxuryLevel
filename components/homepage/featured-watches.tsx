@@ -25,7 +25,7 @@ export default function FeaturedWatches({
                 href={`/products/${prod.id}`}
                 productName={prod.name}
                 price={prod.price} // Tanggap na nito ang formatted USD string ($)
-                salePrice={prod.salePrice || prod.sale_price} // Ipasa ang sale price kung mayroon
+                //salePrice={prod.salePrice || prod.sale_price} // Ipasa ang sale price kung mayroon
               />
             ))}
           </div>

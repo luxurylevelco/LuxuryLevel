@@ -14,7 +14,7 @@ export interface AdminToken {
 export async function verifyAdminToken(token: string): Promise<AdminToken | null> {
   try {
     const verified = await jwtVerify(token, JWT_SECRET);
-    return verified.payload as AdminToken;
+    return verified.payload as unknown as AdminToken;
   } catch (error) {
     console.error("Token verification failed:", error);
     return null;

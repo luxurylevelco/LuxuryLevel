@@ -203,7 +203,7 @@ export async function GET(
           { status: 400 }
         );
       }
-      brandInfo = brandData;
+      brandInfo = brandData as any;
       featuredBrandIds = [brandData.id];
     } else {
       const { data: brandData, error: brandIdsError } = await supabase
