@@ -9,8 +9,12 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Await the params object to satisfy Next.js 15 constraints
+    const resolvedParams = await params;
+    const brandId = resolvedParams.id;
+
     const token = request.headers.get('authorization')?.split(' ')[1];
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -43,11 +47,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     const logoUrl = await uploadFileToR2(buffer, fileName, file.type);
 
-    // Update brand with logo URL
+    // Update brand with logo URL using the resolved brandId
     const { data: brand, error: updateError } = await supabase
       .from('brand')
       .update({ logo_url: logoUrl })
-      .eq('id', params.id)
+      .eq('id', brandId)
       .select()
       .single();
 
@@ -55,7 +59,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
-    console.log(`[API] Brand logo uploaded: ${params.id}`);
+    console.log(`[API] Brand logo uploaded: ${brandId}`);
 
     return NextResponse.json(
       {
