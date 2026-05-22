@@ -189,9 +189,15 @@ export default function ProductInfo({
                 <span className="tracking-wide">Send an Email</span>
               </Link>
               
-              <div className="mt-2 flex justify-center">
-                <CompareButton product={productInfo} />
-              </div>
+                <div className="mt-2 flex justify-center">
+                  {/* BAGO: Kung walang brand sa productInfo, gagamitin niya yung brandInfo ng page! */}
+                  <CompareButton 
+                    product={{ 
+                      ...productInfo, 
+                      brand: productInfo.brand || brandInfo 
+                    }} 
+                  />
+                </div>
             </div>
 
           </div>

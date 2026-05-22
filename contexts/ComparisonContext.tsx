@@ -15,21 +15,14 @@ interface ComparisonContextType {
 const ComparisonContext = createContext<ComparisonContextType | undefined>(undefined);
 
 // Helper to serialize products safely (only essential fields)
+// Helper to serialize products safely (Sina-save na natin nang buo para walang maiwang data)
 const serializeProducts = (products: Product[]) => {
-  return JSON.stringify(
-    products.map(p => ({
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      image_1: p.image_1,
-      ref_no: p.ref_no,
-      color: p.color,
-      gender: p.gender,
-      description: p.description,
-      category: p.category ? { id: p.category.id, name: p.category.name } : null,
-      brand: p.brand ? { id: p.brand.id, name: p.brand.name } : null,
-    }))
-  );
+  try {
+    return JSON.stringify(products);
+  } catch (error) {
+    console.error('Failed to serialize products:', error);
+    return '[]';
+  }
 };
 
 // Helper to deserialize products

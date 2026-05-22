@@ -11,6 +11,20 @@ interface ComparisonTableProps {
   products: Product[];
 }
 
+// 🔥 BULLETPROOF BRAND CHECKER 🔥
+const getBrandName = (product: any) => {
+  if (!product.brand) return 'Unbranded';
+  if (typeof product.brand === 'string') return product.brand;
+  return product.brand.name || 'Unbranded';
+};
+
+// 🔥 BULLETPROOF CATEGORY CHECKER 🔥
+const getCategoryName = (product: any) => {
+  if (!product.category) return 'N/A';
+  if (typeof product.category === 'string') return product.category;
+  return product.category.name || 'N/A';
+};
+
 export default function ComparisonTable({ products }: ComparisonTableProps) {
   const { removeFromComparison } = useComparison();
 
@@ -42,46 +56,41 @@ export default function ComparisonTable({ products }: ComparisonTableProps) {
     return null;
   }
 
-  // Calculate width percentage dynamically based on product count
-  // 15% for the labels, and the rest divided by product count
-  const columnWidth = `${85 / Math.max(products.length, 1)}%`;
-
   return (
     <div className="w-full animate-fade-in font-sans">
       
-      <div className="bg-white rounded-[1.5rem] shadow-[0_8px_40px_rgb(0,0,0,0.03)] border border-slate-200 overflow-hidden w-full">
+      <div className="bg-white rounded-[1.5rem] shadow-[0_8px_40px_rgb(0,0,0,0.03)] border border-slate-200 overflow-hidden w-full relative">
         
-        {/* TANGGAL ANG OVERFLOW-X-AUTO DITO */}
-        <div className="w-full">
-          {/* GINAMIT ANG TABLE-FIXED PARA PUMANTAY ANG MGA COLUMNS */}
-          <table className="w-full text-left border-collapse table-fixed">
+        {/* MOBILE SCROLL CONTAINER */}
+        <div className="w-full overflow-x-auto pb-4 hide-scrollbar">
+          
+          <table className="w-full text-left border-collapse min-w-[800px] lg:min-w-full">
             <thead>
               <tr className="bg-white">
                 
-                {/* Specs Header - Smaller padding and text */}
-                <th className="px-4 py-6 text-left w-[15%] align-bottom border-b border-r border-slate-200 bg-slate-50">
+                {/* STICKY COLUMN: SPECIFICATIONS HEADER */}
+                <th className="sticky left-0 z-30 bg-slate-50 px-4 py-6 text-left w-32 md:w-[15%] align-bottom border-b border-r border-slate-200 shadow-[4px_0_10px_-5px_rgba(0,0,0,0.1)]">
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">
                     Specifications
                   </span>
                 </th>
 
-                {/* Product Columns - Adjusted for smaller content */}
+                {/* Product Columns */}
                 {products.map((product) => (
                   <th
                     key={product.id}
-                    style={{ width: columnWidth }}
-                    className="px-3 py-6 text-center border-b border-slate-100 relative group align-top bg-white"
+                    className="px-3 py-6 text-center border-b border-slate-100 relative group align-top bg-white min-w-[220px]"
                   >
-                    {/* Smaller Remove Button */}
+                    {/* Remove Button */}
                     <button
                       onClick={() => removeFromComparison(product.id)}
-                      className="absolute top-3 right-3 p-1.5 bg-white/90 backdrop-blur-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 border border-slate-100"
+                      className="absolute top-3 right-3 p-1.5 bg-white/90 backdrop-blur-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full shadow-sm md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 z-10 border border-slate-100"
                       title="Remove from comparison"
                     >
                       <X size={14} strokeWidth={2.5} />
                     </button>
 
-                    {/* Smaller Image (w-28 h-28 instead of 40) */}
+                    {/* Image */}
                     <Link href={`/products/${product.id}`} className="block relative group/image">
                       <div className="relative aspect-square w-28 h-28 mx-auto mb-4 bg-white rounded-xl overflow-hidden shadow-sm border border-slate-100 flex items-center justify-center">
                         {product.image_1 ? (
@@ -103,7 +112,6 @@ export default function ComparisonTable({ products }: ComparisonTableProps) {
                         )}
                       </div>
                       
-                      {/* Smaller Text */}
                       <h3 className="font-bold text-slate-900 text-xs hover:text-slate-600 transition-colors line-clamp-2 px-1 leading-snug h-8">
                         {product.name}
                       </h3>
@@ -130,21 +138,21 @@ export default function ComparisonTable({ products }: ComparisonTableProps) {
 
             <tbody className="divide-y divide-slate-100">
               
-              {/* Brand */}
+              {/* Brand Row */}
               <tr className="group hover:bg-slate-50/50 transition-colors">
-                <td className="px-4 py-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest bg-slate-50 border-r border-slate-200">
+                <td className="sticky left-0 z-20 bg-slate-50 px-4 py-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest border-r border-slate-200 shadow-[4px_0_10px_-5px_rgba(0,0,0,0.1)]">
                   Brand
                 </td>
                 {products.map((product) => (
                   <td key={product.id} className="px-3 py-4 text-center bg-white group-hover:bg-slate-50/50">
-                    <span className="font-medium text-slate-900 text-xs truncate block">{product.brand?.name || 'Unbranded'}</span>
+                    <span className="font-medium text-slate-900 text-xs truncate block">{getBrandName(product)}</span>
                   </td>
                 ))}
               </tr>
 
-              {/* Color */}
+              {/* Color Row */}
               <tr className="group hover:bg-slate-50/50 transition-colors">
-                <td className="px-4 py-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest bg-slate-50 border-r border-slate-200">
+                <td className="sticky left-0 z-20 bg-slate-50 px-4 py-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest border-r border-slate-200 shadow-[4px_0_10px_-5px_rgba(0,0,0,0.1)]">
                   Color
                 </td>
                 {products.map((product) => (
@@ -160,9 +168,9 @@ export default function ComparisonTable({ products }: ComparisonTableProps) {
                 ))}
               </tr>
 
-              {/* Gender */}
+              {/* Gender Row */}
               <tr className="group hover:bg-slate-50/50 transition-colors">
-                <td className="px-4 py-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest bg-slate-50 border-r border-slate-200">
+                <td className="sticky left-0 z-20 bg-slate-50 px-4 py-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest border-r border-slate-200 shadow-[4px_0_10px_-5px_rgba(0,0,0,0.1)]">
                   Gender
                 </td>
                 {products.map((product) => (
@@ -172,14 +180,15 @@ export default function ComparisonTable({ products }: ComparisonTableProps) {
                 ))}
               </tr>
 
-              {/* Category */}
+              {/* Category Row */}
               <tr className="group hover:bg-slate-50/50 transition-colors">
-                <td className="px-4 py-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest bg-slate-50 border-r border-slate-200">
+                <td className="sticky left-0 z-20 bg-slate-50 px-4 py-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest border-r border-slate-200 shadow-[4px_0_10px_-5px_rgba(0,0,0,0.1)]">
                   Category
                 </td>
                 {products.map((product) => (
                   <td key={product.id} className="px-3 py-4 text-center bg-white group-hover:bg-slate-50/50">
-                    <span className="font-medium text-slate-900 text-xs truncate block">{product.category?.name || 'N/A'}</span>
+                    {/* 🔥 GINAMIT ANG GET CATEGORY NAME CHECKER 🔥 */}
+                    <span className="font-medium text-slate-900 text-xs truncate block">{getCategoryName(product)}</span>
                   </td>
                 ))}
               </tr>
@@ -187,7 +196,7 @@ export default function ComparisonTable({ products }: ComparisonTableProps) {
               {/* Dynamic Specifications */}
               {allSpecKeys.map((specKey) => (
                 <tr key={specKey} className="group hover:bg-slate-50/50 transition-colors">
-                  <td className="px-4 py-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest bg-slate-50 border-r border-slate-200">
+                  <td className="sticky left-0 z-20 bg-slate-50 px-4 py-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest border-r border-slate-200 shadow-[4px_0_10px_-5px_rgba(0,0,0,0.1)]">
                     {specKey}
                   </td>
                   {products.map((product) => {
