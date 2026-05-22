@@ -162,7 +162,7 @@ export default function StagingApprovalDashboard() {
     }
   }, [message]);
 
-  const fetchStagingProducts = async () => {
+const fetchStagingProducts = async () => {
     setLoading(true);
     try {
       const supabase = getSupabaseClient();
@@ -170,11 +170,13 @@ export default function StagingApprovalDashboard() {
       const { data: realBrands } = await supabase.from('brand').select('id, name').order('name', { ascending: true });
       setDbBrands(realBrands || []);
 
+      // 🔥 FIX 1: ADDED .limit(10000) PARA MAKUHA LAHAT NG STAGING ITEMS 🔥
       const { data: stagingData, error: stagingError } = await supabase
         .from('staging_products')
         .select('*')
         .in('sync_status', ['pending', 'missing'])
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(10000); 
 
       if (stagingError) throw new Error(stagingError.message);
       if (!stagingData || stagingData.length === 0) {
@@ -188,12 +190,14 @@ export default function StagingApprovalDashboard() {
       }
 
       const stagingRows = (stagingData || []) as StagingProduct[];
-
       const refNos = stagingRows.map(p => p.scraped_ref_no).filter(Boolean);
+
+      // 🔥 FIX 2: KUNIN NA LAHAT NG LIVE PRODUCTS (LIMIT 10000) PARA IWAS "URI TOO LONG" CRASH 🔥
+      // Tinanggal natin yung .in('ref_no', refNos) dahil sasabog 'yun kapag 3,000+ ang laman.
       const { data: localProducts } = await supabase
         .from('product')
         .select('id, ref_no, price')
-        .in('ref_no', refNos);
+        .limit(10000); 
 
       const localProductRows = (localProducts || []) as LocalProductRef[];
 
@@ -225,7 +229,7 @@ export default function StagingApprovalDashboard() {
               return normalizeBrandKey(brand) !== 'unknown';
             })
         )
-      ).sort((a, b) => a.localeCompare(b)); // Ito ang nagpapa-alphabetical sa listahan
+      ).sort((a, b) => a.localeCompare(b)); 
 
       const cats = Array.from(new Set(stagingData.map((s: any) => s.raw_category_name).filter(Boolean)));
 
