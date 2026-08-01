@@ -55,10 +55,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .from('staging_products')
       .select('*')
       .eq('id', stagingId)
-      .single();
+      .limit(1)       // ✅ PREVENTS CRASH IF THERE ARE DUPLICATE IDs
+      .maybeSingle(); // ✅ PREVENTS CRASH IF THE ID WAS DELETED
 
     if (fetchError) throw new Error(`DB Fetch Error: ${fetchError.message}`);
-    if (!stagingData) throw new Error('Product not found in database');
+    if (!stagingData) throw new Error('Product not found in database (it may have been deleted)');
 
     const refNo = stagingData.scraped_ref_no || `prod_${stagingId}`;
     
