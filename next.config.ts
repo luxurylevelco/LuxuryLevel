@@ -17,7 +17,7 @@ const nextConfig: import("next").NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "cdn-jnbkl.nitrocdn.com",
+        hostname: "cdn-jnbk1.nitrocdn.com",
         port: "",
         pathname: "/**",
       },
